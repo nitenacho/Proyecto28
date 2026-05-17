@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Proyecto28 — Laboratorio 3D interactivo" />
+  <meta property="og:title" content="PROYECTO28" />
+  <meta property="og:description" content="Laboratorio 3D interactivo estilo Akira" />
+  <title>PROYECTO28</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #000;
+      overflow: hidden;
+      font-family: 'Courier New', Courier, monospace;
+      color: #ccc;
+    }
+
+    canvas { display: block; }
+
+    /* ── Loading Screen ── */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.8s ease;
+    }
+
+    #loading.fade-out { opacity: 0; pointer-events: none; }
+
+    .loading-title {
+      font-size: clamp(1.4rem, 4vw, 2.8rem);
+      letter-spacing: 0.35em;
+      color: #00ffff;
+      text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff88;
+      margin-bottom: 2.5rem;
+    }
+
+    .loading-bar-wrap {
+      width: min(480px, 80vw);
+      height: 3px;
+      background: #111;
+      position: relative;
+      margin-bottom: 1rem;
+    }
+
+    .loading-bar-fill {
+      height: 100%;
+      background: #00ffff;
+      box-shadow: 0 0 8px #00ffff;
+      width: 0%;
+      transition: width 0.15s linear;
+    }
+
+    .loading-pct {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: #00ffff99;
+    }
+
+    #start-btn {
+      display: none;
+      margin-top: 2.5rem;
+      background: transparent;
+      border: 1px solid #00ffff;
+      color: #00ffff;
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      letter-spacing: 0.4em;
+      padding: 0.9rem 2.5rem;
+      cursor: pointer;
+      text-shadow: 0 0 10px #00ffff;
+      box-shadow: 0 0 16px #00ffff44, inset 0 0 16px #00ffff11;
+      transition: all 0.25s;
+    }
+
+    #start-btn:hover {
+      background: #00ffff18;
+      box-shadow: 0 0 28px #00ffff88, inset 0 0 20px #00ffff22;
+    }
+
+    /* ── Info Panel ── */
+    #info-panel {
+      position: fixed;
+      top: 50%;
+      right: 2rem;
+      transform: translateY(-50%);
+      width: min(340px, 90vw);
+      background: #00000099;
+      border: 1px solid #00ffff44;
+      box-shadow: 0 0 30px #00ffff22;
+      padding: 1.5rem;
+      backdrop-filter: blur(12px);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateY(-50%) translateX(10px);
+    }
+
+    #info-panel.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(-50%) translateX(0);
+    }
+
+    .panel-tag {
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: #00ffff88;
+      margin-bottom: 0.5rem;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff88;
+      margin-bottom: 0.75rem;
+    }
+
+    .panel-desc {
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: #aaaacc;
+      margin-bottom: 1rem;
+    }
+
+    .panel-tech {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .tech-tag {
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid #ff00ff55;
+      color: #ff00ffbb;
+    }
+
+    .panel-link {
+      display: inline-block;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: #00ffff;
+      text-decoration: none;
+      border-bottom: 1px solid #00ffff44;
+      padding-bottom: 2px;
+      transition: color 0.2s;
+    }
+
+    .panel-link:hover { color: #fff; border-color: #fff; }
+
+    #panel-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: none;
+      border: none;
+      color: #00ffff88;
+      font-family: monospace;
+      font-size: 1rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    #panel-close:hover { color: #fff; }
+
+    /* ── Crosshair hint ── */
+    #hint {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      color: #ffffff33;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1s;
+    }
+
+    #hint.visible { opacity: 1; }
+  </style>
+</head>
+<body>
+  <!-- Loading overlay -->
+  <div id="loading">
+    <div class="loading-title">PROYECTO28</div>
+    <div class="loading-bar-wrap">
+      <div class="loading-bar-fill" id="bar-fill"></div>
+    </div>
+    <div class="loading-pct" id="load-pct">INICIALIZANDO...</div>
+    <button id="start-btn">[ ACCEDER ]</button>
+  </div>
+
+  <!-- Info panel -->
+  <div id="info-panel">
+    <button id="panel-close">✕</button>
+    <div class="panel-tag">// PROYECTO</div>
+    <div class="panel-title" id="panel-title">—</div>
+    <div class="panel-desc" id="panel-desc">—</div>
+    <div class="panel-tech" id="panel-tech"></div>
+    <a class="panel-link" id="panel-link" href="#" target="_blank" rel="noopener">VER PROYECTO →</a>
+  </div>
+
+  <!-- Navigation hint -->
+  <div id="hint">ARRASTRAR PARA ROTAR · SCROLL PARA ZOOM · CLIC EN CONSOLAS</div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
