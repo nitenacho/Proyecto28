@@ -1,7 +1,8 @@
 /* =========================================================
    Fallback static data — used when Strapi is unreachable
    or the env var VITE_CMS_URL isn't configured.
-   Mirrors the schema of /api/projects + /api/site-setting.
+   Mirrors the schema of /api/projects + /api/site-setting (v2).
+   Shape documented in cms.js (JSDoc typedefs Project + SiteContent).
    ========================================================= */
 
 export const FALLBACK_SITE = {
@@ -12,7 +13,7 @@ export const FALLBACK_SITE = {
   ],
   defaults: {
     logo: 'PROYECTO 28',
-    popupPlacement: 'cursor',  // matches the user's screenshot
+    popupPlacement: 'cursor',
     tileStyle: 'cyan-copper',
     tilt: 58,
     yaw: 0,
@@ -21,6 +22,34 @@ export const FALLBACK_SITE = {
     showScanlines: false,
     showViewfinder: true,
   },
+
+  // v2 (Etapa 2/3) — match SiteSetting schema defaults
+  game: {
+    lightSpeed: 8.0,
+    jumpHeight: 3.0,
+    jumpCount: 4,
+    gravity: 20.0,
+    velocityCurve: 'kirby',
+    mouseFollowDelay: 1.0,
+    fallDuration: 1.0,
+  },
+  admin: {
+    buttonVisible: false,
+  },
+  streaming: {
+    enabled: false,
+    mode: 'shared',
+  },
+};
+
+const V2_PROJECT_DEFAULTS = {
+  unrealStreamURL: null,
+  unrealLevelName: null,
+  unrealEnabled: false,
+  popupImageURL: null,
+  popupBody: '',
+  popupCTALabel: 'Explorar proyecto',
+  videoLoopURL: null,
 };
 
 export const FALLBACK_PROJECTS = [
@@ -33,6 +62,7 @@ export const FALLBACK_PROJECTS = [
     imageURL: null,
     modelURL: null,
     modelShape: 'icosa',
+    ...V2_PROJECT_DEFAULTS,
   },
   {
     slot: 'Rectangle 8',
@@ -43,6 +73,7 @@ export const FALLBACK_PROJECTS = [
     imageURL: null,
     modelURL: null,
     modelShape: 'torus',
+    ...V2_PROJECT_DEFAULTS,
   },
   {
     slot: 'Rectangle 7',
@@ -53,6 +84,7 @@ export const FALLBACK_PROJECTS = [
     imageURL: null,
     modelURL: null,
     modelShape: 'octa',
+    ...V2_PROJECT_DEFAULTS,
   },
   {
     slot: 'Rectangle 6',
@@ -63,6 +95,7 @@ export const FALLBACK_PROJECTS = [
     imageURL: null,
     modelURL: null,
     modelShape: 'dodeca',
+    ...V2_PROJECT_DEFAULTS,
   },
   {
     slot: 'Rectangle 5',
@@ -73,6 +106,7 @@ export const FALLBACK_PROJECTS = [
     imageURL: null,
     modelURL: null,
     modelShape: 'tetra',
+    ...V2_PROJECT_DEFAULTS,
   },
   {
     slot: 'Rectangle 4',
@@ -83,6 +117,7 @@ export const FALLBACK_PROJECTS = [
     imageURL: null,
     modelURL: null,
     modelShape: 'torusKnot',
+    ...V2_PROJECT_DEFAULTS,
   },
 ];
 
