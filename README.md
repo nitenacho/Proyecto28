@@ -84,7 +84,7 @@ al repo, lo tiene el owner).
 | Handoff v1 | ✅ Cerrado | `v0.1.0` |
 | 1 — Fundación versionado | ✅ Cerrado | `v0.2.0` |
 | 2 — Strapi schema extendido | ✅ Cerrado | `v0.3.0` |
-| 3 — Frontend data layer | ⏳ Pendiente | — |
+| 3 — Frontend data layer | ✅ Cerrado | `v0.4.0` |
 | 4 — Luz controlable | ⏳ Pendiente | — |
 | 5 — Físicas Kirby | ⏳ Pendiente | — |
 | 6 — Cubos + respawn + contador | ⏳ Pendiente | — |

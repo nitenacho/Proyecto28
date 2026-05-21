@@ -10,6 +10,33 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-05-21 — Etapa 3: Data layer frontend (schema v2)
+
+### Added
+- `src/data/cms.js`:
+  - JSDoc typedefs `Project` y `SiteContent` documentando la shape v2.
+  - `normalizeProject` mapea los 7 campos nuevos (`unrealStreamURL`,
+    `unrealLevelName`, `unrealEnabled`, `popupImageURL`, `popupBody`,
+    `popupCTALabel`, `videoLoopURL`).
+  - `normalizeSite` agrupa los 10 campos nuevos en `site.game` /
+    `site.admin` / `site.streaming` (en vez de aplanarlos sobre
+    `site.defaults`).
+  - Helper `num()` para conversión segura a number con fallback.
+- `src/data/fallback.js`:
+  - `FALLBACK_SITE.game/admin/streaming` con defaults idénticos al schema
+    de Strapi.
+  - `V2_PROJECT_DEFAULTS` aplicado a los 6 proyectos del fallback.
+- `src/main.js`: console.log temporal `[p28:v2]` para verificar que los
+  campos llegan. Marcado con TODO para remover en Etapa 4.
+
+### Changed
+- Bundle: 618 KB (+2 KB vs baseline 616 KB) — overhead aceptable del data
+  layer. Code-splitting pendiente Etapa 15.
+
+### Notes
+- Sin cambios visibles para el usuario final. Esta etapa es preparatoria.
+- Etapa 4 (luz controlable) consumirá `site.game.lightSpeed` y los demás.
+
 ## [0.3.0] — 2026-05-21 — Etapa 2: Strapi schema v2
 
 ### Added
@@ -75,7 +102,8 @@ o a un fix puntual entre etapas.
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/nitenacho/Proyecto28/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/nitenacho/Proyecto28/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/nitenacho/Proyecto28/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/nitenacho/Proyecto28/releases/tag/v0.1.0
