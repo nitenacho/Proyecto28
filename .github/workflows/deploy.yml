@@ -7,6 +7,11 @@ on:
       - 'cms/**'
       - 'README.md'
       - 'DEPLOY.md'
+      - 'CHANGELOG.md'
+      - 'VERSIONING.md'
+      - 'HANDOFF-LATEST.md'
+      - 'PLAN-PROYECTO28-V2.md'
+      - 'scripts/**'
   workflow_dispatch:
 
 permissions:
@@ -61,3 +66,13 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  sync-claude-design:
+    # Placeholder hasta Etapa 13. Cuando se resuelva como esta integrado
+    # Claude Design (paquete npm / repo separado / tokens locales), este
+    # job se activa para mantenerlo en sync con cambios en src/styles/.
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: ${{ false }}
+    steps:
+      - run: echo "Sync Claude Design se activa en Etapa 13 (ver PLAN-PROYECTO28-V2.md §1.4)"

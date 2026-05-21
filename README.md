@@ -51,3 +51,50 @@ desde `/admin`:
 El usuario final puede sobreescribir todos los ajustes en tiempo real desde
 el panel "Tweaks" que aparece en la esquina inferior derecha — esos cambios
 viven sólo en su sesión.
+
+## Cómo contribuir
+
+Este repo sigue un protocolo estricto de versionado documentado en
+[VERSIONING.md](VERSIONING.md). Lectura obligatoria antes de tocar código.
+
+Resumen del flujo:
+
+```
+1. git checkout -b etapa-N-slug      (nunca trabajar en main)
+2. commits atómicos con Conventional Commits
+3. push de la rama
+4. verificar manualmente la feature
+5. merge a main
+6. tag v0.N.0 (scripts/release.ps1 o .sh lo automatiza)
+7. CHANGELOG.md actualizado
+8. HANDOFF-LATEST.md regenerado
+9. respaldar handoff en Google Doc
+```
+
+GitHub Actions se encarga del deploy automático a GH Pages. Strapi Cloud
+hace rebuild automático de `cms/**`. **No hay deploy manual.**
+
+El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md` (no commiteado
+al repo, lo tiene el owner).
+
+### Estado de etapas
+
+| Etapa | Estado | Tag |
+|---|---|---|
+| Handoff v1 | ✅ Cerrado | `v0.1.0` |
+| 1 — Fundación versionado | ✅ Cerrado | `v0.2.0` |
+| 2 — Strapi schema extendido | ⏳ Pendiente | — |
+| 3 — Frontend data layer | ⏳ Pendiente | — |
+| 4 — Luz controlable | ⏳ Pendiente | — |
+| 5 — Físicas Kirby | ⏳ Pendiente | — |
+| 6 — Cubos + respawn + contador | ⏳ Pendiente | — |
+| 7 — Tweaks ocultos | ⏳ Pendiente | — |
+| 8 — Botón admin secreto | ⏳ Pendiente | — |
+| 9 — Google OAuth | ⏳ Pendiente | — |
+| 10 — Popup mejorado + mobile | ⏳ Pendiente | — |
+| 11 — Pixel Streaming Unreal | ⏳ Pendiente | — |
+| 12 — Pipeline Publicar | ⏳ Pendiente | — |
+| 13 — Sync Claude Design | ⏳ Pendiente | — |
+| 14 — GSAP polish | ⏳ Pendiente | — |
+| 15 — Performance + a11y | ⏳ Pendiente | — |
+| 16 — Documentación final | ⏳ Pendiente | — |
