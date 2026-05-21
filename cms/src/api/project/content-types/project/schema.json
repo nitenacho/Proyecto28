@@ -96,6 +96,47 @@
       "type": "integer",
       "default": 0,
       "description": "Orden (no afecta posición del grid — sólo lista admin)."
+    },
+    "unrealStreamURL": {
+      "type": "string",
+      "required": false,
+      "description": "URL del signaling server de Pixel Streaming para este cubo (ej. https://stream.proyecto28.com/cube-1). Vacío = no streaming."
+    },
+    "unrealLevelName": {
+      "type": "string",
+      "required": false,
+      "description": "Nombre del Level/SubLevel en Unreal Engine cuando se usa instancia compartida (modo 'shared' en SiteSetting)."
+    },
+    "unrealEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si está activo y el master switch global lo permite, muestra stream Unreal sobre este cubo cuando la luz lo pisa."
+    },
+    "popupImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"],
+      "description": "Imagen del popup mejorado (Etapa 10). Separada de 'image' que sigue siendo la imagen general del cubo."
+    },
+    "popupBody": {
+      "type": "richtext",
+      "required": false,
+      "description": "Cuerpo del popup en markdown. Etapa 10 renderiza imagen + este texto."
+    },
+    "popupCTALabel": {
+      "type": "string",
+      "required": false,
+      "default": "Explorar proyecto",
+      "description": "Texto del botón / área tappable del popup que lleva a redirectURL.",
+      "maxLength": 48
+    },
+    "videoLoop": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["videos"],
+      "description": "Video corto en loop sobre el cubo (alternativa a stream Unreal cuando este está apagado)."
     }
   }
 }

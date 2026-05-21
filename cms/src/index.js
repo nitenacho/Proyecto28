@@ -4,12 +4,15 @@
  * Strapi lifecycle hooks.
  *
  * On first boot:
- *  1. Grant Public role read access to /api/projects + /api/site-setting + the
- *     uploaded media so the static site can fetch content without an API token.
- *  2. Seed the singleton "Site Setting" + 6 sample projects so the admin panel
- *     is never empty.
+ *  1. Grant Public role read access to /api/projects + /api/site-setting + media
+ *     so the static site can fetch content without an API token.
+ *     AdminWhitelist se MANTIENE privado (no se expone públicamente).
+ *  2. Seed the singleton "Site Setting" + 6 sample projects + admin whitelist
+ *     si la tabla está vacía.
+ *  3. Backfill: si SiteSetting ya existía pero le faltan campos nuevos del
+ *     schema v2 (Etapa 2), aplicar defaults sin sobrescribir lo que ya hay.
  *
- * Re-running boot won't duplicate data: we check existence first.
+ * Re-running boot no duplica datos: chequea existencia antes de crear.
  */
 
 const SAMPLE_PROJECTS = [
@@ -63,6 +66,35 @@ const SAMPLE_PROJECTS = [
   },
 ];
 
+const ADMIN_WHITELIST_SEED = [
+  { email: 'inconcha@gmail.com', role: 'owner', note: 'Dueño del proyecto.' },
+  { email: 'yk8arts@gmail.com', role: 'editor', note: 'Editor autorizado.' },
+];
+
+const SITE_SETTING_DEFAULTS = {
+  // v1 (existentes)
+  defaultLogo: 'PROYECTO 28',
+  defaultPopupPlacement: 'cursor',
+  defaultTileStyle: 'cyan-copper',
+  cameraTilt: 58,
+  cameraYaw: 0,
+  cameraDrift: true,
+  showGrid: true,
+  showScanlines: false,
+  showViewfinder: true,
+  // v2 (Etapa 2)
+  gameLightSpeed: 8.0,
+  gameLightJumpHeight: 3.0,
+  gameLightJumpCount: 4,
+  gameLightGravity: 20.0,
+  gameLightVelocityCurve: 'kirby',
+  gameMouseFollowDelay: 1.0,
+  gameFallDuration: 1.0,
+  adminButtonVisible: false,
+  pixelStreamingEnabled: false,
+  pixelStreamingMode: 'shared',
+};
+
 async function grantPublicReadAccess(strapi) {
   const publicRole = await strapi
     .query('plugin::users-permissions.role')
@@ -93,10 +125,33 @@ async function grantPublicReadAccess(strapi) {
         .create({ data: { action, enabled: true, role: publicRole.id } });
     }
   }
-  strapi.log.info('[bootstrap] public read permissions ensured.');
+
+  // AdminWhitelist: explicit DENY for public. Si el endpoint existe pero el
+  // permiso público está deshabilitado o ausente, las llamadas no autenticadas
+  // devuelven 403. Aquí solo nos aseguramos de NO crearlo enabled.
+  const denyActions = [
+    'api::admin-whitelist.admin-whitelist.find',
+    'api::admin-whitelist.admin-whitelist.findOne',
+    'api::admin-whitelist.admin-whitelist.create',
+    'api::admin-whitelist.admin-whitelist.update',
+    'api::admin-whitelist.admin-whitelist.delete',
+  ];
+  for (const action of denyActions) {
+    const existing = await strapi
+      .query('plugin::users-permissions.permission')
+      .findOne({ where: { action, role: publicRole.id } });
+    if (existing && existing.enabled) {
+      await strapi
+        .query('plugin::users-permissions.permission')
+        .update({ where: { id: existing.id }, data: { enabled: false } });
+    }
+  }
+
+  strapi.log.info('[bootstrap] permissions ensured (public read + admin-whitelist private).');
 }
 
 async function seedIfEmpty(strapi) {
+  // 1. Projects (collection)
   const projectCount = await strapi.db.query('api::project.project').count();
   if (projectCount === 0) {
     strapi.log.info('[bootstrap] seeding 6 sample projects...');
@@ -106,22 +161,40 @@ async function seedIfEmpty(strapi) {
       });
     }
   }
+
+  // 2. SiteSetting (singleton): si no existe → crear con defaults v1+v2.
+  //    Si existe → backfill solo los campos v2 que estén null/undefined.
   const site = await strapi.db.query('api::site-setting.site-setting').findOne({});
   if (!site) {
-    strapi.log.info('[bootstrap] seeding site-setting singleton...');
+    strapi.log.info('[bootstrap] seeding site-setting singleton with v1+v2 defaults...');
     await strapi.entityService.create('api::site-setting.site-setting', {
-      data: {
-        defaultLogo: 'PROYECTO 28',
-        defaultPopupPlacement: 'cursor',
-        defaultTileStyle: 'cyan-copper',
-        cameraTilt: 58,
-        cameraYaw: 0,
-        cameraDrift: true,
-        showGrid: true,
-        showScanlines: false,
-        showViewfinder: true,
-      },
+      data: SITE_SETTING_DEFAULTS,
     });
+  } else {
+    // Backfill: solo escribe campos que estén faltantes (null/undefined).
+    const patch = {};
+    for (const [key, value] of Object.entries(SITE_SETTING_DEFAULTS)) {
+      if (site[key] === null || site[key] === undefined) {
+        patch[key] = value;
+      }
+    }
+    if (Object.keys(patch).length > 0) {
+      strapi.log.info(
+        `[bootstrap] backfilling site-setting fields: ${Object.keys(patch).join(', ')}`
+      );
+      await strapi.entityService.update('api::site-setting.site-setting', site.id, {
+        data: patch,
+      });
+    }
+  }
+
+  // 3. AdminWhitelist (collection): seed inicial.
+  const whitelistCount = await strapi.db.query('api::admin-whitelist.admin-whitelist').count();
+  if (whitelistCount === 0) {
+    strapi.log.info('[bootstrap] seeding admin whitelist...');
+    for (const data of ADMIN_WHITELIST_SEED) {
+      await strapi.entityService.create('api::admin-whitelist.admin-whitelist', { data });
+    }
   }
 }
 

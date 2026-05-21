@@ -54,6 +54,70 @@
     "showViewfinder": {
       "type": "boolean",
       "default": true
+    },
+    "gameLightSpeed": {
+      "type": "decimal",
+      "default": 8.0,
+      "min": 1,
+      "max": 30,
+      "description": "Velocidad horizontal de la luz controlable (unidades/segundo)."
+    },
+    "gameLightJumpHeight": {
+      "type": "decimal",
+      "default": 3.0,
+      "min": 0.5,
+      "max": 10,
+      "description": "Altura base del salto en unidades."
+    },
+    "gameLightJumpCount": {
+      "type": "integer",
+      "default": 4,
+      "min": 1,
+      "max": 8,
+      "description": "Saltos consecutivos antes de tener que tocar piso (estilo Kirby)."
+    },
+    "gameLightGravity": {
+      "type": "decimal",
+      "default": 20.0,
+      "min": 5,
+      "max": 60,
+      "description": "Aceleración gravitatoria aplicada a la luz."
+    },
+    "gameLightVelocityCurve": {
+      "type": "enumeration",
+      "default": "kirby",
+      "enum": ["linear", "easeOut", "easeInOut", "kirby"],
+      "description": "Curva de ramp-up de velocidad al presionar WASD."
+    },
+    "gameMouseFollowDelay": {
+      "type": "decimal",
+      "default": 1.0,
+      "min": 0,
+      "max": 5,
+      "description": "Segundos sin input WASD antes de que la luz vuelva a seguir el mouse."
+    },
+    "gameFallDuration": {
+      "type": "decimal",
+      "default": 1.0,
+      "min": 0.2,
+      "max": 3,
+      "description": "Segundos de caída al vacío antes de respawnear en el cubo central."
+    },
+    "adminButtonVisible": {
+      "type": "boolean",
+      "default": false,
+      "description": "Toggle del botón secreto bajo el logo. Solo se cambia desde Tweaks por admin autenticado."
+    },
+    "pixelStreamingEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Master switch global para Pixel Streaming. Si está OFF, ningún cubo monta stream."
+    },
+    "pixelStreamingMode": {
+      "type": "enumeration",
+      "default": "shared",
+      "enum": ["shared", "per-cube"],
+      "description": "Una instancia Unreal compartida con switch de Level vs. una instancia por cubo (más costoso)."
     }
   }
 }

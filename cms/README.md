@@ -10,8 +10,27 @@ Headless CMS that owns the content shown in the frontend:
   - `model3D` — `.glb` / `.gltf` floating above the cube on hover
   - `modelShape` — procedural fallback if no model3D is uploaded
   - `redirectURL` — link the "Explorar proyecto" button + cube click follow
+  - **v2 (Etapa 2) fields:**
+    - `unrealStreamURL` — Pixel Streaming signaling URL per cube
+    - `unrealLevelName` — UE Level/SubLevel when using shared instance
+    - `unrealEnabled` — toggle streaming for this cube
+    - `popupImage` — separate image for the enhanced popup (Etapa 10)
+    - `popupBody` — richtext markdown shown in the popup
+    - `popupCTALabel` — text of the redirect button/area
+    - `videoLoop` — optional looping video as alternative to UE stream
 - **Site Setting** (singleton) — defaults for the Tweaks panel
   - logo, popup placement, tile style, camera tilt/yaw/drift, HUD toggles
+  - **v2 (Etapa 2) fields:**
+    - `gameLightSpeed`, `gameLightJumpHeight`, `gameLightJumpCount`,
+      `gameLightGravity`, `gameLightVelocityCurve`, `gameMouseFollowDelay`,
+      `gameFallDuration` — tweaks del juego de plataformas (Etapas 4–6)
+    - `adminButtonVisible` — toggle del botón secreto bajo el logo
+    - `pixelStreamingEnabled` — master switch global de streaming
+    - `pixelStreamingMode` — `shared` (1 instancia) vs. `per-cube`
+- **Admin Whitelist** (collection, **privado**) — emails autorizados a usar
+  el modo admin (Google OAuth + publicar tweaks). Seed: `inconcha@gmail.com`
+  (owner) + `yk8arts@gmail.com` (editor). El bootstrap explícitamente DENIEGA
+  permisos públicos sobre este content type.
 
 The frontend talks to the public REST endpoints without an API token:
 

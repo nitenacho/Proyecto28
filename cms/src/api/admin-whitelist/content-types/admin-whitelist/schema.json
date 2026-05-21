@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "admin_whitelists",
+  "info": {
+    "singularName": "admin-whitelist",
+    "pluralName": "admin-whitelists",
+    "displayName": "Admin whitelist",
+    "description": "Emails autorizados a usar el modo admin (Google OAuth + publicar tweaks)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
+  "attributes": {
+    "email": {
+      "type": "email",
+      "required": true,
+      "unique": true,
+      "description": "Email Google del usuario autorizado. Match exacto contra el campo email del JWT id_token."
+    },
+    "role": {
+      "type": "enumeration",
+      "default": "editor",
+      "required": true,
+      "enum": ["owner", "editor"],
+      "description": "Owner = todo. Editor = puede publicar tweaks pero no editar whitelist."
+    },
+    "note": {
+      "type": "string",
+      "required": false,
+      "maxLength": 120,
+      "description": "Nota interna (opcional)."
+    }
+  }
+}
