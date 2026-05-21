@@ -10,6 +10,33 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-05-21 — Etapa 2: Strapi schema v2
+
+### Added
+- **Project**: 7 campos nuevos (`unrealStreamURL`, `unrealLevelName`,
+  `unrealEnabled`, `popupImage`, `popupBody`, `popupCTALabel`, `videoLoop`).
+- **SiteSetting**: 10 campos nuevos (`gameLightSpeed`, `gameLightJumpHeight`,
+  `gameLightJumpCount`, `gameLightGravity`, `gameLightVelocityCurve`,
+  `gameMouseFollowDelay`, `gameFallDuration`, `adminButtonVisible`,
+  `pixelStreamingEnabled`, `pixelStreamingMode`).
+- **AdminWhitelist** (nuevo content type, collection privada): `email` (unique),
+  `role` (owner/editor), `note`. Seed inicial con 2 emails autorizados.
+- Bootstrap actualizado:
+  - Backfill no destructivo de SiteSetting (solo escribe campos faltantes).
+  - Seed de AdminWhitelist solo si la tabla está vacía.
+  - Permisos públicos explícitamente denegados sobre `admin-whitelist` endpoints.
+
+### Verified post-deploy
+- `GET /api/projects?populate=*` devuelve 6 entries con los 7 nuevos campos.
+- `GET /api/site-setting` devuelve los 10 nuevos campos con valores default.
+- `GET /api/admin-whitelists` responde HTTP 403 sin auth.
+- Strapi Cloud rebuild OK en ~4.5 min después del push.
+
+### Notes
+- Los campos `media` (`popupImage`, `videoLoop`) están null hasta que el owner
+  los suba desde el admin de Strapi por cada proyecto.
+- Etapa 3 (data layer frontend) consume estos nuevos campos.
+
 ## [0.2.0] — 2026-05-21 — Etapa 1: Fundación de versionado
 
 ### Added
@@ -48,6 +75,7 @@ o a un fix puntual entre etapas.
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/nitenacho/Proyecto28/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/nitenacho/Proyecto28/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/nitenacho/Proyecto28/releases/tag/v0.1.0
