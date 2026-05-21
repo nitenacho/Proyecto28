@@ -10,6 +10,30 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.4.1] — 2026-05-21 — Patch documental: prep para nuevo agente IA
+
+### Added
+- `PLAN-PROYECTO28-V2.md` ahora vive **dentro del repo** (antes en
+  directorio padre del owner, no versionado). Esto garantiza que cualquier
+  agente IA que clone el repo encuentra el plan completo.
+- `HANDOFF-LATEST.md` reescrito como documento **autosuficiente** con:
+  - §1 "Cómo arrancar como nuevo agente IA" (paso a paso explícito)
+  - §3 Detalle expandido de Etapa 4 con criterios de éxito visibles
+  - §10 Estructura del repo
+  - §13 Quirks documentados del backup en Google Doc (clipboard, type
+    grande con timeout, autocorrect)
+  - §15 "Cómo continuar" para el próximo agente
+
+### Changed
+- `PLAN-PROYECTO28-V2.md`: encabezado actualizado con tabla de estado
+  (etapas 1-3 cerradas con tags y commits), decisiones tomadas (§1.1
+  resuelto), ajustes al flujo aprendidos durante la ejecución.
+
+### Notes
+- Sin cambios al código del frontend ni al CMS.
+- Tag patch `v0.4.1` permite rollback puntual a este estado documental
+  si algo se rompiera en Etapa 4 sin afectar `v0.4.0`.
+
 ## [0.4.0] — 2026-05-21 — Etapa 3: Data layer frontend (schema v2)
 
 ### Added
@@ -102,7 +126,8 @@ o a un fix puntual entre etapas.
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/nitenacho/Proyecto28/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/nitenacho/Proyecto28/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/nitenacho/Proyecto28/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/nitenacho/Proyecto28/compare/v0.1.0...v0.2.0
