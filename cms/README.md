@@ -2,8 +2,8 @@
 
 Headless CMS that owns the content shown in the frontend:
 
-- **Project** (collection) — 6 entries, one per cube with popup
-  - `slot` — fixed position in the grid (Rectangle 4–9)
+- **Project** (collection) — one entry per cube with popup
+  - `slot` — fixed grid position (Rectangle 4–9)
   - `projectId`, `title`, `status`, `color` (cyan/copper)
   - `description`, `tags[]`
   - `image` — image shown inside the popup
@@ -16,7 +16,7 @@ Headless CMS that owns the content shown in the frontend:
 The frontend talks to the public REST endpoints without an API token:
 
 ```
-GET /api/site-setting?populate=*
+GET /api/site-setting
 GET /api/projects?populate=*
 ```
 
@@ -28,44 +28,96 @@ GET /api/projects?populate=*
 
 ```bash
 cd cms
-cp .env.example .env        # then fill in random secrets
+cp .env.example .env             # then fill in random secrets
 npm install
-npm run develop             # admin at http://localhost:1337/admin
+npm run develop                  # admin at http://localhost:1337/admin
 ```
 
-First boot creates the admin user, seeds 6 sample projects, and seeds the
-Site Setting singleton. SQLite file lives at `cms/.tmp/data.db` (gitignored).
+First boot:
+
+- creates the admin user (you set the password through the web UI),
+- seeds 6 sample projects + the Site Setting singleton (idempotent),
+- grants Public read permissions for `/api/projects` and `/api/site-setting`.
+
+SQLite file lives at `cms/.tmp/data.db` (gitignored).
+
+### Heads-up: OneDrive on Windows
+
+If `cms/` lives inside a OneDrive folder, run this once after cloning:
+
+```powershell
+pwsh -File scripts/unwrap-onedrive.ps1
+```
+
+OneDrive's "Files On-Demand" marks cloud-only files as reparse points, and
+Strapi's loader skips files whose `Dirent.isFile()` returns false. The script
+reads each file and writes the bytes back, forcing OneDrive to materialize
+them locally so Strapi can read them as normal files.
 
 ---
 
 ## Deploy to Strapi Cloud
 
-1. Push this repo to GitHub (the frontend + `cms/` live in the same repo;
-   Strapi Cloud lets you point at a subdirectory).
-2. In the Strapi Cloud dashboard, create a new project pointing at:
-   - Repo: `nitenacho/Proyecto28`
-   - Branch: `main`
-   - Base directory: `cms`
-3. Set these env vars on the Strapi Cloud project (rotate the secrets):
-   - `APP_KEYS` (comma-separated, 4 random hex strings)
-   - `API_TOKEN_SALT`, `ADMIN_JWT_SECRET`, `TRANSFER_TOKEN_SALT`, `JWT_SECRET`,
-     `ENCRYPTION_KEY` — each a random hex string
-   - `DATABASE_URL` is injected by Strapi Cloud — no need to set
-4. Deploy. After first boot, the admin URL is shown in the dashboard.
-5. Copy the project's public URL (e.g. `https://abc.strapiapp.com`) and set
-   it as `VITE_CMS_URL` on the frontend (Vite env or GitHub Actions secret).
+### 1 · Create the project
 
-Generate random secrets quickly:
-```bash
-node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
+1. Sign in at https://cloud.strapi.io (GitHub OAuth — same account that owns
+   `nitenacho/Proyecto28`).
+2. **Create project** → connect repo `nitenacho/Proyecto28`.
+3. Configure:
+   - Branch: `main`
+   - **Base directory: `cms`** ← important, the Strapi app lives in a sub-dir
+   - Plan: Developer is enough to start (free trial available)
+4. Click "Create" — Strapi Cloud provisions a Postgres DB and injects
+   `DATABASE_URL` automatically.
+
+### 2 · Set env vars on the Cloud project
+
+In your Strapi Cloud project → **Settings → Variables**, paste these (these
+secrets were generated for this project; rotate them anytime via
+`node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`):
+
 ```
+APP_KEYS=CW3dCIkJ+NjWfysg9TdloQ==,+9itFc1KM8vZDXb+izc2BA==,w3Fdbl8kuIsNhs68edcscQ==,kVHiBc3GYJWR13V2lVPE4Q==
+API_TOKEN_SALT=2KptZ9WFjwgpRmGl9y/OwpFT2nlp2bDJcxb0oygFva4=
+ADMIN_JWT_SECRET=QELHf3xxDCvfNIYksgv5mEUQRgMdjELtx7WXIqGoObw=
+TRANSFER_TOKEN_SALT=zAebIbGR08uKKnDEXm+NLN8jagrLZp6xf8mdRO48kmk=
+JWT_SECRET=t9511VPwn+F1M4I767vtONAdUFc/HQP0/u9v3wN6yRw=
+ENCRYPTION_KEY=VNLhQfBsDBaBtIO0clRbrvmSe4NIeZph2XbOtFFrPG4=
+```
+
+`DATABASE_URL` is set by Strapi Cloud — do **not** set it manually.
+
+### 3 · First boot
+
+After deploy finishes (~2 min) Strapi Cloud shows:
+
+- **Admin URL** — open it, create your administrator (email + password).
+- **Public URL** — e.g. `https://something.strapiapp.com`. Copy it.
+
+### 4 · Wire the frontend
+
+In the GitHub repo:
+
+`Settings → Secrets and variables → Actions → New repository secret`
+
+- **Name:** `VITE_CMS_URL`
+- **Value:** the Strapi Cloud public URL (no trailing slash)
+
+Trigger the deploy workflow:
+
+```bash
+gh workflow run "Build and deploy frontend to GitHub Pages"
+```
+
+Once the next deploy lands, the live site fetches projects and site settings
+from Strapi instead of the static fallback.
 
 ---
 
 ## Editing content
 
-Once deployed, all texts / images / 3D models / popup defaults are editable
-from the admin panel (`/admin`):
+Once Strapi Cloud is up, all texts / images / 3D models / popup defaults are
+editable from the admin panel (`/admin`):
 
 - **Projects** → edit description / tags / `redirectURL` / upload images and
   `.glb` models per cube.

@@ -7,6 +7,9 @@ license.txt
 exports
 .tmp
 *.cache
+.strapi
+.strapi-updater.json
+types/
 
 # node
 node_modules
