@@ -1,0 +1,277 @@
+/* =========================================================
+   PROYECTO 28 — Design Tokens
+   Color, type, spacing, radius, shadow, motion.
+   Dark-only. Sci-fi / HUD / cinematic.
+   ========================================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap");
+
+:root {
+  /* -----------------------------------------------------
+     COLOR — PROFUNDIDAD (backgrounds)
+     ----------------------------------------------------- */
+  --bg-0: #000000;            /* deep black, page base */
+  --bg-1: #050810;            /* near black w/ hint of navy */
+  --bg-2: #0A1220;            /* navy panel base */
+  --bg-3: #111B2E;            /* lifted panel */
+  --bg-4: #18253D;            /* hover / interactive panel */
+  --bg-overlay: rgba(5, 8, 16, 0.78);
+
+  /* -----------------------------------------------------
+     COLOR — INK (text)
+     ----------------------------------------------------- */
+  --ink-1: #EAF3FF;           /* primary text */
+  --ink-2: #9AB1CC;           /* secondary text */
+  --ink-3: #5A7290;           /* tertiary / muted */
+  --ink-4: #2E4159;           /* placeholders, disabled */
+  --ink-inverse: #050810;     /* text on light fills */
+
+  /* -----------------------------------------------------
+     COLOR — SEÑAL FRÍA (cyan / electric)
+     ----------------------------------------------------- */
+  --cyan: #7FD3CB;            /* signature turquoise, logo */
+  --cyan-bright: #5EE5D6;     /* glow / pulse */
+  --cyan-dim: #4A8C87;        /* low-emphasis */
+  --blue: #3DA0FF;            /* electric blue, links/data */
+  --blue-deep: #1D5DBF;       /* deep info */
+
+  /* alpha presets */
+  --cyan-a08: rgba(127, 211, 203, 0.08);
+  --cyan-a12: rgba(127, 211, 203, 0.12);
+  --cyan-a18: rgba(127, 211, 203, 0.18);
+  --cyan-a28: rgba(127, 211, 203, 0.28);
+  --cyan-a40: rgba(127, 211, 203, 0.40);
+  --cyan-a70: rgba(127, 211, 203, 0.70);
+
+  /* -----------------------------------------------------
+     COLOR — SEÑAL CÁLIDA (copper / orange)
+     Reservado: CTAs, destacados, alertas.
+     ----------------------------------------------------- */
+  --copper: #D87340;          /* signature copper, logo */
+  --copper-bright: #FF8A4D;   /* glow */
+  --copper-dim: #8A4926;
+  --copper-a18: rgba(216, 115, 64, 0.18);
+  --copper-a40: rgba(216, 115, 64, 0.40);
+
+  /* -----------------------------------------------------
+     COLOR — SEMÁNTICOS
+     ----------------------------------------------------- */
+  --success: #5EE5A0;
+  --warning: #FFC857;
+  --danger:  #FF5C7A;
+  --info:    var(--cyan);
+
+  /* -----------------------------------------------------
+     TYPOGRAPHY — families
+     ----------------------------------------------------- */
+  --font-display: "Chakra Petch", "Space Grotesk", system-ui, sans-serif;
+  --font-body:    "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* -----------------------------------------------------
+     TYPOGRAPHY — scale (px-based on 1rem = 16px)
+     ----------------------------------------------------- */
+  --fs-12: 0.75rem;
+  --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-18: 1.125rem;
+  --fs-20: 1.25rem;
+  --fs-24: 1.5rem;
+  --fs-32: 2rem;
+  --fs-40: 2.5rem;
+  --fs-56: 3.5rem;
+  --fs-72: 4.5rem;
+
+  /* line heights */
+  --lh-tight: 1.05;
+  --lh-snug:  1.2;
+  --lh-norm:  1.5;
+  --lh-loose: 1.7;
+
+  /* tracking */
+  --tr-tight: -0.02em;
+  --tr-norm:  0;
+  --tr-wide:  0.08em;
+  --tr-xwide: 0.18em;
+
+  /* -----------------------------------------------------
+     SPACING (8px grid)
+     ----------------------------------------------------- */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+  --sp-24: 96px;
+
+  /* -----------------------------------------------------
+     RADII
+     ----------------------------------------------------- */
+  --r-0:    0px;
+  --r-sm:   4px;
+  --r-md:   8px;       /* default */
+  --r-lg:   14px;
+  --r-xl:   20px;
+  --r-pill: 999px;
+
+  /* -----------------------------------------------------
+     BORDERS
+     ----------------------------------------------------- */
+  --bd-hair:    1px solid var(--cyan-a18);
+  --bd-soft:    1px solid var(--cyan-a12);
+  --bd-strong:  1px solid var(--cyan-a40);
+  --bd-active:  1px solid var(--cyan-a70);
+  --bd-copper:  1px solid var(--copper-a40);
+
+  /* -----------------------------------------------------
+     SHADOWS — outer / inner / glow
+     ----------------------------------------------------- */
+  --sh-panel:   0 12px 32px rgba(0, 0, 0, 0.6);
+  --sh-floating:0 24px 64px rgba(0, 0, 0, 0.7);
+  --sh-deep:    0 40px 96px rgba(0, 0, 0, 0.8);
+
+  --sh-inner-glow: inset 0 0 0 1px var(--cyan-a12), inset 0 1px 0 var(--cyan-a08);
+
+  --glow-cyan-sm: 0 0 12px rgba(127, 211, 203, 0.25);
+  --glow-cyan-md: 0 0 24px rgba(127, 211, 203, 0.32);
+  --glow-cyan-lg: 0 0 48px rgba(127, 211, 203, 0.45);
+
+  --glow-copper-sm: 0 0 12px rgba(216, 115, 64, 0.32);
+  --glow-copper-md: 0 0 28px rgba(216, 115, 64, 0.50);
+
+  /* -----------------------------------------------------
+     MOTION
+     ----------------------------------------------------- */
+  --ease-out:    cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out-l:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --dur-micro: 120ms;
+  --dur-fast:  200ms;
+  --dur-base:  240ms;
+  --dur-slow:  480ms;
+
+  /* -----------------------------------------------------
+     SIGNATURE BACKGROUNDS (use as backdrop)
+     ----------------------------------------------------- */
+  --bg-grid: linear-gradient(rgba(127,211,203,0.06) 1px, transparent 1px),
+             linear-gradient(90deg, rgba(127,211,203,0.06) 1px, transparent 1px);
+  --bg-grid-size: 32px 32px;
+
+  --bg-radial-cyan: radial-gradient(ellipse 80% 60% at 50% 100%,
+    rgba(94, 229, 214, 0.12), transparent 70%);
+  --bg-radial-copper: radial-gradient(ellipse 60% 40% at 20% 10%,
+    rgba(216, 115, 64, 0.10), transparent 70%);
+}
+
+/* =========================================================
+   SEMANTIC TYPE — drop-in classes
+   ========================================================= */
+
+.p28-h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-56);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tr-tight);
+  color: var(--ink-1);
+}
+
+.p28-h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-40);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tr-tight);
+  color: var(--ink-1);
+}
+
+.p28-h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--fs-24);
+  line-height: var(--lh-snug);
+  color: var(--ink-1);
+}
+
+.p28-h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--fs-18);
+  line-height: var(--lh-snug);
+  color: var(--ink-1);
+}
+
+.p28-body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--fs-16);
+  line-height: var(--lh-norm);
+  color: var(--ink-2);
+}
+
+.p28-body-sm {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--fs-14);
+  line-height: var(--lh-norm);
+  color: var(--ink-2);
+}
+
+.p28-eyebrow,
+.p28-label {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--fs-12);
+  letter-spacing: var(--tr-xwide);
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.p28-mono {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: var(--fs-12);
+  letter-spacing: var(--tr-wide);
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-feature-settings: "tnum";
+}
+
+.p28-data {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-32);
+  font-feature-settings: "tnum";
+  color: var(--ink-1);
+}
+
+.p28-link {
+  color: var(--cyan);
+  text-decoration: none;
+  border-bottom: 1px solid var(--cyan-a40);
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.p28-link:hover {
+  color: var(--cyan-bright);
+  border-bottom-color: var(--cyan-a70);
+}
+
+/* =========================================================
+   BASE RESETS (opt-in via .p28-root)
+   ========================================================= */
+.p28-root {
+  background: var(--bg-0);
+  color: var(--ink-1);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "cv11";
+}

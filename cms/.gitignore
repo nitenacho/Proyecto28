@@ -1,0 +1,20 @@
+# strapi
+.cache
+build
+dist
+.env
+license.txt
+exports
+.tmp
+*.cache
+
+# node
+node_modules
+npm-debug.log
+.pnp.*
+.yarn/
+
+# IDE
+.idea
+.vscode
+.DS_Store

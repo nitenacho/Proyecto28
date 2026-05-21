@@ -1,0 +1,59 @@
+{
+  "kind": "singleType",
+  "collectionName": "site_settings",
+  "info": {
+    "singularName": "site-setting",
+    "pluralName": "site-settings",
+    "displayName": "Ajustes del sitio",
+    "description": "Valores por defecto del Tweaks panel (logo, popup, cámara, HUD)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "defaultLogo": {
+      "type": "enumeration",
+      "default": "PROYECTO 28",
+      "enum": ["PROYECTO 28", "NEIT.", "ESTUDIO 028"]
+    },
+    "defaultPopupPlacement": {
+      "type": "enumeration",
+      "default": "cursor",
+      "enum": ["side", "cursor", "corner"]
+    },
+    "defaultTileStyle": {
+      "type": "enumeration",
+      "default": "cyan-copper",
+      "enum": ["cyan-copper", "cyan-only", "copper-only", "mono"]
+    },
+    "cameraTilt": {
+      "type": "integer",
+      "default": 58,
+      "min": 30,
+      "max": 75
+    },
+    "cameraYaw": {
+      "type": "integer",
+      "default": 0,
+      "min": -60,
+      "max": 60
+    },
+    "cameraDrift": {
+      "type": "boolean",
+      "default": true
+    },
+    "showGrid": {
+      "type": "boolean",
+      "default": true
+    },
+    "showScanlines": {
+      "type": "boolean",
+      "default": false
+    },
+    "showViewfinder": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

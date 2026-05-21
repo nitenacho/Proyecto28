@@ -1,0 +1,101 @@
+{
+  "kind": "collectionType",
+  "collectionName": "projects",
+  "info": {
+    "singularName": "project",
+    "pluralName": "projects",
+    "displayName": "Proyecto",
+    "description": "Un cubo de proyecto en el grid 3D — textos, imagen, modelo 3D y URL de redirección."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "slot": {
+      "type": "enumeration",
+      "required": true,
+      "unique": true,
+      "description": "Posición fija en el grid 3D. Mapea a un Rectangle del diseño.",
+      "enum": [
+        "Rectangle 9",
+        "Rectangle 8",
+        "Rectangle 7",
+        "Rectangle 6",
+        "Rectangle 5",
+        "Rectangle 4"
+      ]
+    },
+    "projectId": {
+      "type": "string",
+      "required": true,
+      "description": "Id corto mostrado en el HUD y el popup (ej. 028.A).",
+      "maxLength": 16
+    },
+    "title": {
+      "type": "string",
+      "required": true,
+      "description": "Título grande del popup.",
+      "maxLength": 80
+    },
+    "status": {
+      "type": "enumeration",
+      "default": "EN PRODUCCIÓN",
+      "enum": [
+        "EN PRODUCCIÓN",
+        "BETA",
+        "PROTOTIPO",
+        "ARCHIVADO",
+        "EN PAUSA"
+      ]
+    },
+    "color": {
+      "type": "enumeration",
+      "required": true,
+      "default": "cyan",
+      "description": "Determina el color del cubo en el grid y el accent del popup.",
+      "enum": ["cyan", "copper"]
+    },
+    "description": {
+      "type": "text",
+      "required": true,
+      "description": "Párrafo corto del popup (~3 líneas)."
+    },
+    "tags": {
+      "type": "json",
+      "default": [],
+      "description": "Array de strings — tecnologías / tags mostrados en el popup."
+    },
+    "redirectURL": {
+      "type": "string",
+      "required": true,
+      "default": "#",
+      "description": "URL a la que va el botón \"Explorar proyecto\" y el click sobre el cubo."
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"],
+      "description": "Imagen minimalista mostrada dentro del popup (16:9 idealmente)."
+    },
+    "model3D": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["files"],
+      "description": "Modelo 3D (.glb / .gltf). Si está vacío, se usa un modelo procedural."
+    },
+    "modelShape": {
+      "type": "enumeration",
+      "default": "icosa",
+      "description": "Fallback procedural usado si no hay model3D subido.",
+      "enum": ["icosa", "octa", "tetra", "dodeca", "torus", "torusKnot"]
+    },
+    "order": {
+      "type": "integer",
+      "default": 0,
+      "description": "Orden (no afecta posición del grid — sólo lista admin)."
+    }
+  }
+}

@@ -1,0 +1,125 @@
+/* =========================================================
+   PROYECTO 28 — Three.js host page overrides
+   Targets the WebGL canvas + popup/anchor behaviour that
+   only applies to the live three-scene (not the design's
+   CSS3D prototype).
+   ========================================================= */
+
+html, body, #root { background: #000; }
+body { overflow: hidden; }
+
+#c {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  z-index: 0;
+}
+
+.scene-bg-grid,
+.scene-bg-vignette,
+.scene-bg-scanlines,
+.chrome { z-index: 10; }
+
+.scene-bg-grid {
+  opacity: 0.10;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, black 10%, transparent 70%);
+}
+
+.scene-bg-vignette {
+  background: radial-gradient(ellipse 90% 90% at 50% 50%, transparent 40%, rgba(0,0,0,0.85) 100%);
+}
+
+.engine-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--cyan-a28);
+  border-radius: var(--r-pill);
+  background: rgba(127, 211, 203, 0.06);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--cyan);
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+}
+.engine-pill::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan-bright);
+  box-shadow: 0 0 8px var(--cyan-bright);
+}
+
+.status-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.side-caption {
+  letter-spacing: 0.28em;
+}
+
+#popup {
+  right: auto;
+  bottom: auto;
+  transform: translate(0, 0);
+  transition:
+    opacity 320ms var(--ease-out),
+    left 320ms var(--ease-out-l),
+    top 320ms var(--ease-out-l);
+}
+#popup.visible { transform: translate(0, 0); }
+#popup:not(.visible) { pointer-events: none; }
+
+.popup-image-wrap {
+  width: 100%;
+  margin: 0 0 18px;
+  border: 1px solid var(--cyan-a18);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #050810;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.popup-image-wrap[hidden] { display: none; }
+.popup-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 24px rgba(127, 211, 203, 0.18));
+}
+
+#boot {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: #000;
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  transition: opacity 600ms var(--ease-out);
+}
+#boot.gone { opacity: 0; pointer-events: none; }
+#boot .ring {
+  width: 36px; height: 36px;
+  border: 1px solid var(--cyan-a28);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
