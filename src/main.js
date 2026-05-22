@@ -58,6 +58,7 @@ async function boot() {
   const tweaks = mountTweaks({
     host: document.getElementById('tweaks-root'),
     defaults: tweakDefaults,
+    initiallyVisible: false,           // v0.10.0: panel oculto por default
     onChange(state) {
       // Brand
       brandNameEl.textContent = state.logo;
@@ -137,6 +138,19 @@ async function boot() {
         ],
       },
     ],
+  });
+
+  // v0.10.0: gate del panel por window.adminMode. Por default = false → panel
+  // oculto. Asignar window.adminMode = true desde DevTools console lo muestra.
+  // (Mecanismo temporal de QA hasta Etapa 8: botón admin secreto + Etapa 9: OAuth.)
+  let _adminMode = false;
+  Object.defineProperty(window, 'adminMode', {
+    configurable: true,
+    get() { return _adminMode; },
+    set(v) {
+      _adminMode = !!v;
+      if (_adminMode) tweaks.show(); else tweaks.hide();
+    },
   });
 
   // Raycaster — hover/click on tiles

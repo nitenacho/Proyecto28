@@ -98,12 +98,15 @@ function el(tag, props = {}, children = []) {
  * Mount the tweaks panel into `host` and call `onChange(state)` on every update.
  * `defaults` provides initial values + key set.
  * `controls` is an array describing the form layout — see usage in main.js.
+ * `initiallyVisible` (default false): cuando false, ni panel ni FAB se muestran;
+ * el panel solo aparece tras llamar show() o setear window.adminMode=true.
  */
-export function mountTweaks({ host, defaults, controls, onChange, title = 'Tweaks' }) {
+export function mountTweaks({ host, defaults, controls, onChange, title = 'Tweaks', initiallyVisible = false }) {
   injectStyle();
   const state = { ...defaults };
   let panel = null;
-  let open = true;
+  let open = !!initiallyVisible;
+  let visible = !!initiallyVisible;     // controla si el panel/FAB están permitidos
 
   function emit() {
     onChange({ ...state });
@@ -216,7 +219,11 @@ export function mountTweaks({ host, defaults, controls, onChange, title = 'Tweak
   }
 
   function render() {
-    if (panel) panel.remove();
+    if (panel) { panel.remove(); panel = null; }
+    if (!visible) {
+      if (fab) fab.style.display = 'none';
+      return;
+    }
     if (!open) {
       ensureFab();
       if (fab) fab.style.display = '';
@@ -263,5 +270,8 @@ export function mountTweaks({ host, defaults, controls, onChange, title = 'Tweak
       emit();
     },
     getState() { return { ...state }; },
+    show() { visible = true; open = true; render(); },
+    hide() { visible = false; render(); },
+    isVisible() { return visible; },
   };
 }
