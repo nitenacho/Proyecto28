@@ -1,13 +1,13 @@
 # HANDOFF — Proyecto 28
 
-> **Última actualización:** 2026-05-21 20:55 UTC (preparado para próximo agente IA)
-> **Tag activo:** `v0.4.1` (patch documental sobre cierre Etapa 3 `v0.4.0`)
+> **Última actualización:** 2026-05-22 00:10 UTC (cierre Etapa 4 + docs `v0.5.1`)
+> **Tag activo:** `v0.5.1` (patch documental sobre cierre Etapa 4 `v0.5.0`)
 > **Branch de trabajo:** `main` (sin etapa abierta)
 > **Owner:** @nitenacho — cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 
 Este documento es **autosuficiente**: contiene todo lo necesario para que un
-agente IA nuevo continúe desde Etapa 4 sin necesidad de contexto extra.
+agente IA nuevo continúe desde Etapa 5 sin necesidad de contexto extra.
 Pega este documento entero al inicio de la sesión.
 
 ---
@@ -17,8 +17,9 @@ Pega este documento entero al inicio de la sesión.
 - Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite).
 - CMS Strapi Cloud headless para contenido editable.
 - Plan completo de evolución en [`PLAN-PROYECTO28-V2.md`](PLAN-PROYECTO28-V2.md) (16 etapas).
-- Etapas 1-3 cerradas: versionado, schema v2 Strapi, data layer frontend.
-- Próximo paso: **Etapa 4 — Luz controlable** (mini-juego empieza aquí).
+- Etapas 1-4 cerradas: versionado, schema v2 Strapi, data layer frontend,
+  luz controlable (mouse-follow + WASD, sin físicas todavía).
+- Próximo paso: **Etapa 5 — Físicas estilo Kirby** (gravedad + saltos múltiples).
 
 ---
 
@@ -31,7 +32,7 @@ cd "C:/Users/incon/OneDrive/Desktop/Proyectos_Claude/Claude_P28/Proyecto28"
 
 # Verificar estado
 git status                              # esperado: clean en main
-git describe --tags --abbrev=0          # esperado: v0.4.1
+git describe --tags --abbrev=0          # esperado: v0.5.1
 git log --oneline -5
 ```
 
@@ -51,8 +52,6 @@ Si no estás en ese path, pregunta al owner. El repo remoto es
 # Strapi alive con schema v2
 curl -s 'https://honest-candy-800d1e4a92.strapiapp.com/api/projects?populate=*' | python -c "import json,sys; d=json.load(sys.stdin); p=d.get('data',[])[0] if d.get('data') else {}; print('projects:', len(d.get('data',[])), '| has unrealEnabled:', 'unrealEnabled' in p)"
 
-curl -s 'https://honest-candy-800d1e4a92.strapiapp.com/api/site-setting' | python -c "import json,sys; d=json.load(sys.stdin); s=d.get('data',{}); print('siteSetting has site.game proxy fields:', 'gameLightSpeed' in s and 'pixelStreamingMode' in s)"
-
 # AdminWhitelist privado (debe ser 403)
 curl -s -o /dev/null -w "admin-whitelist HTTP: %{http_code}\n" 'https://honest-candy-800d1e4a92.strapiapp.com/api/admin-whitelists'
 
@@ -63,101 +62,111 @@ curl -I https://proyecto28.com | head -3
 gh run list --limit 3 -R nitenacho/Proyecto28
 ```
 
-### Paso 4 — Empezar Etapa 4
+### Paso 4 — Empezar Etapa 5
 ```bash
 git checkout main && git pull
-git checkout -b etapa-4-luz-controlable
+git checkout -b etapa-5-fisicas-kirby
 ```
 
 Ver §3 para el detalle de la etapa.
 
 ### Paso 5 — Al cerrar la etapa
-1. Verificar criterios de éxito (ver `PLAN-PROYECTO28-V2.md §4 Etapa 4`).
+1. Verificar criterios de éxito (ver `PLAN-PROYECTO28-V2.md §4 Etapa 5`).
 2. Build local OK (`npm run build` desde la raíz del repo).
-3. Commit en formato Conventional Commits con scope `game` o `scene`.
-4. `git push -u origin etapa-4-luz-controlable`.
-5. `git checkout main && git merge --ff-only etapa-4-luz-controlable && git push origin main`.
-6. Tag: `git tag -a v0.5.0 -m "Etapa 4: ..." && git push origin v0.5.0`.
+3. Commit en formato Conventional Commits con scope `game`.
+4. `git push -u origin etapa-5-fisicas-kirby`.
+5. `git checkout main && git merge --ff-only etapa-5-fisicas-kirby && git push origin main`.
+6. Tag: `git tag -a v0.6.0 -m "Etapa 5: ..." && git push origin v0.6.0`.
 7. Esperar GH Actions verde (`gh run watch <ID>`).
-8. Smoke test `proyecto28.com` con DevTools abierto — la luz debe seguir
-   al mouse cuando este se mueve y reaccionar a WASD.
+8. Smoke test `proyecto28.com` — la luz debe caer por gravedad, saltar con
+   espacio hasta 4 veces, snap al cubo cuando aterriza.
 9. Actualizar `CHANGELOG.md`, `README.md` (tabla etapas), `HANDOFF-LATEST.md`.
-10. Commit docs directo a main, push, tag `v0.5.1` si aplica.
+10. Commit docs directo a main, push, tag `v0.6.1` si aplica.
 11. Respaldar handoff en Google Doc (ver §13 quirks).
 
 ---
 
 ## 2. Última etapa cerrada
 
-**Etapa 3 — Data layer frontend (schema v2)** (`v0.4.0`, 2026-05-21, commit `00968cc`)
+**Etapa 4 — Luz controlable** (`v0.5.0`, 2026-05-22, commit `e7390e2`)
 
 Entregables:
-- `src/data/cms.js`:
-  - JSDoc typedefs `Project` y `SiteContent` documentando la shape v2.
-  - `normalizeProject` mapea los 7 campos nuevos del Project.
-  - `normalizeSite` agrupa los 10 campos nuevos en `site.game`, `site.admin`,
-    `site.streaming` (en vez de aplanar sobre `site.defaults`).
-  - Helper `num()` para conversión segura a number.
-- `src/data/fallback.js`: defaults v2 alineados con el schema de Strapi.
-- `src/main.js`: console.log `[p28:v2]` temporal para QA. **TODO Etapa 4:
-  REMOVER estos logs cuando empiece el consumo real de `site.game.*`.**
+- `src/game/light.js` (nuevo módulo): `createControllableLight({ scene, config })`.
+  - `THREE.PointLight` cyan + esfera emissiva a `y=1` sobre el grid.
+  - Modo WASD: velocidad normalizada × `site.game.lightSpeed`.
+  - Modo mouse-follow: raycast a plano horizontal `y=1`, lerp exponencial
+    frame-rate independiente (rate=6).
+  - Switch: cualquier WASD presionado o `now - lastWASDInput < mouseFollowDelay*1000`
+    → WASD; en otro caso → mouse-follow. Sin snap-back al soltar.
+- `src/main.js`:
+  - Import + instanciación tras `createScene`.
+  - Listeners `keydown` / `keyup` para W/A/S/D (espacio reservado Etapa 5).
+  - `controlLight.update(dt, now, raycaster)` después de
+    `raycaster.setFromCamera` en el loop.
+  - **Removidos** los 4 `console.log('[p28:v2]', ...)` de QA Etapa 3.
 
-Verificado: build local 618 KB (+2 KB), GH Pages deploy verde, smoke test
-`proyecto28.com` 200 OK.
+Verificado: build local 620 KB (+2 KB), GH Actions deploy verde en 11s,
+`proyecto28.com` sirviendo bundle nuevo, smoke test visual OK.
 
-**Patch posterior `v0.4.1`** (este commit): mueve `PLAN-PROYECTO28-V2.md` al
-repo + actualiza handoff para continuidad con nuevo agente.
+**Patch posterior `v0.5.1`** (este commit): actualiza docs (CHANGELOG, README,
+HANDOFF) para cierre Etapa 4 + handoff a Etapa 5.
 
-## 3. Próximo paso exacto — Etapa 4
+## 3. Próximo paso exacto — Etapa 5
 
-**Etapa 4 — Luz controlable (sin físicas todavía).**
+**Etapa 5 — Físicas estilo Kirby** (gravedad + hasta 4 saltos en aire).
 
-Tareas (detalle en `PLAN-PROYECTO28-V2.md §4 Etapa 4`):
+Tareas (detalle en `PLAN-PROYECTO28-V2.md §4 Etapa 5`):
 
-1. Crear `src/game/light.js` (nuevo módulo) con:
-   - `THREE.PointLight` + `THREE.Mesh` (esfera emissiva pequeña, color cyan).
-   - State: `position` (Vector3), `velocity` (Vector3),
-     `lastWASDInput` (timestamp ms), `keysActive` (Set).
-   - Mouse follow: raycast del cursor a un plano horizontal en `y = grid surface`,
-     lerp suave hacia ese punto.
-   - WASD update: cada frame mueve `position.x` y `position.z` por la
-     velocidad calculada desde `site.game.lightSpeed`.
-   - Priority: si `now - lastWASDInput < site.game.mouseFollowDelay * 1000`
-     → ignorar mouse follow.
-2. Integrar en `src/scene/scene.js` y `src/main.js`:
-   - Inicializar la luz en `(0, 1, 0)` — sobre el cubo central del grid.
-   - Llamar `lightUpdate(dt)` en el render loop.
-3. Listeners de teclado en `src/main.js`: keydown/keyup para W/A/S/D
-   (espacio queda para Etapa 5).
-4. Reutilizar el listener `pointermove` ya existente para el raycast.
-5. Consumir `site.game.lightSpeed` y `site.game.mouseFollowDelay` desde el
-   contexto cargado.
-6. **REMOVER los `console.log('[p28:v2]', ...)` de `src/main.js`** —
-   están en el bloque marcado con TODO Etapa 4.
-7. Build local + smoke test en `localhost:5173`.
-8. Cierre: tag `v0.5.0`.
+1. Extender `src/game/light.js` con state nuevo:
+   - `vy` (velocidad vertical), `grounded` (boolean), `jumpsUsed` (int, max 4).
+   - Consumir desde `site.game`: `gravity`, `jumpHeight`, `jumpCount`,
+     `velocityCurve`.
+2. Update loop por frame:
+   - `vy -= gravity * dt`
+   - `y += vy * dt`
+   - Detectar grounded: raycast hacia abajo desde la luz. Si hit en superficie
+     de un cubo → snap a la y del top del cubo, `vy = 0`, `grounded = true`,
+     `jumpsUsed = 0`.
+   - Si no hay hit abajo → seguir cayendo. El respawn al caer al vacío va en
+     Etapa 6, así que por ahora la luz puede caer indefinidamente.
+3. Listener `keydown` para espacio (` `):
+   - Si `jumpsUsed < jumpCount` → `vy = sqrt(2 * gravity * jumpHeight) * mult`,
+     `jumpsUsed++`, `grounded = false`.
+   - "Kirby feel": cada salto en aire es más débil. Multipliers:
+     `[1.0, 0.85, 0.7, 0.55]` indexado por `jumpsUsed`.
+4. `velocityCurve` aplicada al input WASD: por ahora `linear` (sin curva).
+   Las otras opciones (`easeOut`, `easeInOut`, `kirby`) implementan curva
+   sobre el ramp-up de velocidad al presionar/soltar las teclas — diseño a
+   confirmar visualmente.
+5. Build local + smoke test en `localhost:5173`.
+6. Cierre: tag `v0.6.0`.
 
 **Criterio de éxito visible:**
-- Al cargar `proyecto28.com` se ve una esfera luminosa en el centro del grid.
-- Mover el mouse sin tocar WASD → la luz lo sigue suavemente.
-- Presionar WASD → la luz se mueve en X/Z.
-- Soltar WASD por 1 segundo → vuelve a seguir el mouse.
-- Sin gravedad ni saltos todavía (eso es Etapa 5).
+- La luz cae por gravedad y aterriza encima del cubo central.
+- Espacio hace saltar — hasta 4 saltos en aire, cada uno más bajo.
+- Al pisar un cubo, contador de saltos se resetea.
+- Caminar fuera del grid → la luz cae al vacío (sin respawn aún, eso es Etapa 6).
+- WASD sigue funcionando como Etapa 4 (movimiento horizontal).
 
-**Aún no hay**: gravedad, saltos, respawn, contador, cubos encendidos. Eso
-es Etapas 5-6.
+**Aún no hay** (Etapa 6): respawn al caer, cubos que se "encienden" cuando los
+pisas por primera vez, contador HUD.
+
+**Riesgo:** Bajo-medio. El raycast hacia abajo puede dar falsos negativos si
+la luz pasa muy cerca del borde — ajustar offset si pasa.
 
 ## 4. Estado de git
 
 ```
 Repo:    https://github.com/nitenacho/Proyecto28
 Branch:  main (working tree clean)
-HEAD:    (commit del v0.4.1 con este handoff y plan en repo)
+HEAD:    (commit del v0.5.1 con docs Etapa 4)
 Tags:    v0.1.0 (f7a3a30 — estado handoff v1)
          v0.2.0 (0da2c23 — cierre Etapa 1: versionado)
          v0.3.0 (d61fec6 — cierre Etapa 2: Strapi schema v2)
          v0.4.0 (00968cc — cierre Etapa 3: data layer frontend)
-         v0.4.1 (HEAD     — docs prep para nuevo agente)
+         v0.4.1 (7944030 — docs prep para nuevo agente)
+         v0.5.0 (e7390e2 — cierre Etapa 4: luz controlable)
+         v0.5.1 (HEAD     — docs Etapa 4 + handoff a Etapa 5)
 Remote:  origin sincronizado
 ```
 
@@ -182,6 +191,7 @@ Remote:  origin sincronizado
 | `proyecto28.cl` | ⏳ verificar propagación NIC y redirect a `.com` |
 | Cloudflare zone `.cl` | ⏳ esperar `status: active` |
 | GH Actions workflow | ✅ `Build and deploy frontend to GitHub Pages` activo |
+| Node.js 20 actions | ⚠️ deprecated, fecha forzado **2026-06-02** — bumpear en patch o Etapa 15 |
 
 ## 7. Bloqueantes / decisiones pendientes
 
@@ -194,12 +204,15 @@ Remote:  origin sincronizado
 | §1.5 | Detalles del juego | ✅ defaults en `site.game` | — |
 | §1.6 | Admin Strapi creado | ❌ pendiente | Edición visual en Strapi |
 | §1.6 | `.cl` propagación | ⏳ verificar | — |
+| CI | Node 20 actions deprecated | ⚠️ fecha límite 2026-06-02 | Workflow GH Actions |
 
-**Ninguno bloquea Etapa 4.**
+**Ninguno bloquea Etapa 5.** El Node 20 de CI sigue funcionando hasta el
+2026-06-02; bumpear a actions con Node 24 es trabajo de ~10 min, hacer
+como patch (`v0.5.2` por ejemplo) o agrupar con Etapa 15.
 
 ## 8. Stack actual
 
-- **Frontend:** Vite 6 + Three.js 0.176 + vanilla JS modules. Bundle 618 KB
+- **Frontend:** Vite 6 + Three.js 0.176 + vanilla JS modules. Bundle 620 KB
   (warning >500KB — pendiente code-splitting en Etapa 15).
 - **CMS:** Strapi 5.13.1 en Strapi Cloud (Postgres managed, plan Free).
   Schema v2 desplegado.
@@ -209,14 +222,15 @@ Remote:  origin sincronizado
 - **Pixel Streaming:** Aún no implementado (Etapa 11), modo decidido =
   `shared` (1 instancia Unreal Engine compartida).
 - **GSAP:** Aún no instalado (Etapa 14).
-- **Mini-juego:** Aún no implementado. Empieza en Etapa 4.
+- **Mini-juego:** Etapa 4 cerrada — esfera de luz controlable con mouse +
+  WASD. Etapa 5 agrega gravedad + saltos. Etapa 6 cubos encendidos + respawn.
 
 ## 9. Comandos de verificación rápida
 
 ```bash
 # Repo limpio en main, tag esperado
 git -C "<path>/Proyecto28" status
-git -C "<path>/Proyecto28" describe --tags --abbrev=0   # esperado: v0.4.1
+git -C "<path>/Proyecto28" describe --tags --abbrev=0   # esperado: v0.5.1
 
 # Strapi v2 alive con todos los endpoints
 curl -s 'https://honest-candy-800d1e4a92.strapiapp.com/api/projects?populate=*' | python -c "import json,sys; d=json.load(sys.stdin); print('projects:', len(d.get('data',[])))"
@@ -227,8 +241,7 @@ gh run list -R nitenacho/Proyecto28 --limit 3
 
 # Sitio en vivo + DevTools console esperado:
 #   [p28] content source: cms
-#   [p28:v2] site.game: {lightSpeed: 8, jumpHeight: 3, ...}
-#   [p28:v2] first project v2 fields: {...}
+#   (NO debe haber logs [p28:v2] — fueron removidos en v0.5.0)
 curl -I https://proyecto28.com
 ```
 
@@ -253,6 +266,8 @@ Proyecto28/
 │   ├── main.js                        Bootstrap + raycaster + render loop
 │   ├── scene/scene.js                 Three.js scene + tiles
 │   ├── scene/hoverModel.js            Modelo procedural al hover
+│   ├── game/
+│   │   └── light.js                   NEW Etapa 4: luz controlable
 │   ├── ui/popup.js                    Popup HUD
 │   ├── ui/tweaks.js                   Panel de tweaks (vanilla port)
 │   ├── data/
@@ -358,10 +373,10 @@ De `VERSIONING.md`:
 
 1. Pegar este documento entero al inicio de la sesión.
 2. Validar §1 paso 3 (sistema vivo) — debe pasar.
-3. Crear branch `etapa-4-luz-controlable` (§1 paso 4).
+3. Crear branch `etapa-5-fisicas-kirby` (§1 paso 4).
 4. Ejecutar tareas §3 una por una. Marcar tasks completed conforme avances.
 5. Al cierre, seguir §1 paso 5 al pie de la letra.
-6. Regenerar este archivo. Bumpear tag a `v0.5.0`.
+6. Regenerar este archivo. Bumpear tag a `v0.6.0`.
 7. Crear nueva subpestaña en el Google Doc (§13).
 
 **Si algo del sistema (Strapi, GH Actions, DNS) no responde como espera el
@@ -369,4 +384,4 @@ De `VERSIONING.md`:
 
 ---
 
-**Fin del handoff. Listo para Etapa 4.**
+**Fin del handoff. Listo para Etapa 5.**

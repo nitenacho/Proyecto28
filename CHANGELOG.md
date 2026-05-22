@@ -10,6 +10,43 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-05-22 — Etapa 4: Luz controlable
+
+### Added
+- `src/game/light.js` (nuevo módulo): `createControllableLight({ scene, config })`.
+  - `THREE.PointLight` cyan + `THREE.Mesh` esfera emissiva a y=1 sobre el grid.
+  - Modo WASD: input normalizado × `site.game.lightSpeed`, integración por
+    frame `position += velocity * dt`.
+  - Modo mouse-follow: raycast a plano horizontal `y=1`, lerp exponencial
+    frame-rate independiente (rate=6).
+  - Switch de modo: si hay tecla WASD presionada **o** el último input fue
+    hace menos de `site.game.mouseFollowDelay` segundos → WASD; en otro
+    caso → mouse-follow. Esto evita snap-back al soltar las teclas.
+- `src/main.js`:
+  - Import + instanciación de `createControllableLight` tras `createScene`.
+  - Listeners `keydown` / `keyup` para W/A/S/D (espacio reservado para Etapa 5).
+  - Llamada `controlLight.update(dt, now, raycaster)` dentro del render loop
+    después de `raycaster.setFromCamera`.
+
+### Removed
+- Los 4 `console.log('[p28:v2]', …)` de QA Etapa 3 que estaban marcados con
+  `TODO(Etapa 4)`. La verificación que hacían ahora la cubre el comportamiento
+  visible de la luz (que consume `site.game.lightSpeed` y `mouseFollowDelay`).
+
+### Verified
+- Build local: `620.24 KB` (+2 KB vs `0.4.x`). Warning Vite >500 KB persiste
+  (se aborda en Etapa 15).
+- GH Actions deploy verde en 11s, `proyecto28.com` sirviendo el bundle nuevo.
+- Smoke test: esfera visible, sigue mouse, responde a WASD, vuelve a seguir
+  mouse después de 1s sin teclado.
+
+### Notes
+- Sin gravedad, salto, ni respawn todavía — eso es Etapa 5.
+- Tech debt menor detectado en CI: actions Node.js 20 deprecated. Fecha de
+  cambio forzado: 2026-06-02 (12 días). Bumpear `actions/checkout@v4` +
+  `actions/setup-node@v4` + `actions/configure-pages@v5` +
+  `actions/upload-artifact@v4` en Etapa 15 o como patch puntual antes.
+
 ## [0.4.1] — 2026-05-21 — Patch documental: prep para nuevo agente IA
 
 ### Added
@@ -126,7 +163,8 @@ o a un fix puntual entre etapas.
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/nitenacho/Proyecto28/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/nitenacho/Proyecto28/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/nitenacho/Proyecto28/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/nitenacho/Proyecto28/compare/v0.2.0...v0.3.0
