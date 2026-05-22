@@ -15,25 +15,25 @@ export const FALLBACK_SITE = {
     logo: 'PROYECTO 28',
     popupPlacement: 'cursor',
     tileStyle: 'cyan-copper',
-    tilt: 58,
-    yaw: 0,
+    tilt: 49,                 // v0.9.2: ajuste fino del owner
+    yaw: -40,                 // v0.9.2: ajuste fino del owner
     cameraDrift: true,
     showGrid: true,
     showScanlines: false,
     showViewfinder: true,
-    gravityEnabled: false,    // Etapa 5: opt-in para activar físicas al usar WASD
+    gravityEnabled: true,     // v0.9.2: físicas activas por default (antes opt-in)
   },
 
   // v2 (Etapa 2/3) — match SiteSetting schema defaults
   game: {
-    lightSpeed: 5.0,           // Etapa 6 polish: bajado de 8.0 para feel más suave
-    jumpHeight: 2.5,           // Etapa 6 polish: bajado de 3.0
+    lightSpeed: 5.0,
+    jumpHeight: 1.5,           // v0.9.2: ajuste fino del owner (antes 2.5)
     jumpCount: 4,
-    gravity: 16.0,             // Etapa 6 polish: bajado de 20.0 para arco más suave
+    gravity: 30.0,             // v0.9.2: ajuste fino del owner (antes 16.0)
     velocityCurve: 'kirby',
     mouseFollowDelay: 1.0,
     fallDuration: 1.0,
-    shadowSize: 0.45,          // v0.9.0: radio base de la sombra-anillo
+    shadowSize: 0.3,           // v0.9.2: ajuste fino del owner (antes 0.45)
   },
   admin: {
     buttonVisible: false,
