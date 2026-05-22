@@ -45,14 +45,21 @@ async function boot() {
   const popup = createPopup();
 
   // Defaults para el panel: empieza con site.defaults y agrega los campos
-  // de site.game que el usuario puede ajustar en vivo (Etapa 6 polish).
+  // de site.game / site.streaming / site.admin que el usuario puede ajustar
+  // en vivo (Etapa 6 polish + Etapa 7 cierre).
   const tweakDefaults = {
     ...defaults,
     gameLightSpeed: site.game.lightSpeed,
     gameJumpHeight: site.game.jumpHeight,
+    gameJumpCount: site.game.jumpCount,
     gameGravity: site.game.gravity,
+    gameVelocityCurve: site.game.velocityCurve,
     gameMouseFollowDelay: site.game.mouseFollowDelay,
+    gameFallDuration: site.game.fallDuration,
     gameShadowSize: site.game.shadowSize ?? 0.45,
+    streamingEnabled: site.streaming.enabled,
+    streamingMode: site.streaming.mode,
+    adminButtonVisible: site.admin.buttonVisible,
   };
 
   const tweaks = mountTweaks({
@@ -77,9 +84,17 @@ async function boot() {
       controlLight.setGravityEnabled(!!state.gravityEnabled);
       site.game.lightSpeed       = state.gameLightSpeed;
       site.game.jumpHeight       = state.gameJumpHeight;
+      site.game.jumpCount        = state.gameJumpCount;
       site.game.gravity          = state.gameGravity;
+      site.game.velocityCurve    = state.gameVelocityCurve;
       site.game.mouseFollowDelay = state.gameMouseFollowDelay;
+      site.game.fallDuration     = state.gameFallDuration;
       site.game.shadowSize       = state.gameShadowSize;
+      // Streaming + Admin — sólo se persiste el estado; los efectos visuales
+      // se agregan en Etapas 8 (botón admin) y 11 (pixel streaming).
+      site.streaming.enabled     = !!state.streamingEnabled;
+      site.streaming.mode        = state.streamingMode;
+      site.admin.buttonVisible   = !!state.adminButtonVisible;
     },
     controls: [
       {
@@ -132,9 +147,38 @@ async function boot() {
           { type: 'toggle', key: 'gravityEnabled', label: 'Gravedad + saltos (WASD/↑↓←→/Pad)' },
           { type: 'slider', key: 'gameLightSpeed',       label: 'Velocidad',         min: 1,   max: 12,  step: 0.5 },
           { type: 'slider', key: 'gameJumpHeight',       label: 'Altura salto',      min: 0.5, max: 6,   step: 0.25 },
+          { type: 'slider', key: 'gameJumpCount',        label: 'Saltos máximos',    min: 1,   max: 6,   step: 1 },
           { type: 'slider', key: 'gameGravity',          label: 'Gravedad',          min: 5,   max: 40,  step: 0.5 },
+          {
+            type: 'select', key: 'gameVelocityCurve', label: 'Curva de salto',
+            options: [
+              { value: 'kirby',    label: 'Kirby (decreciente)' },
+              { value: 'linear',   label: 'Lineal' },
+              { value: 'constant', label: 'Constante' },
+            ],
+          },
           { type: 'slider', key: 'gameMouseFollowDelay', label: 'Delay mouse-follow', min: 0,   max: 3,   step: 0.1, unit: 's' },
+          { type: 'slider', key: 'gameFallDuration',    label: 'Duración caída',     min: 0.2, max: 3,   step: 0.1, unit: 's' },
           { type: 'slider', key: 'gameShadowSize',       label: 'Tamaño sombra',     min: 0.15, max: 1.2, step: 0.05 },
+        ],
+      },
+      {
+        label: 'Streaming',
+        items: [
+          { type: 'toggle', key: 'streamingEnabled', label: 'Pixel Streaming activo' },
+          {
+            type: 'select', key: 'streamingMode', label: 'Modo',
+            options: [
+              { value: 'shared',    label: 'Compartido' },
+              { value: 'dedicated', label: 'Dedicado' },
+            ],
+          },
+        ],
+      },
+      {
+        label: 'Admin',
+        items: [
+          { type: 'toggle', key: 'adminButtonVisible', label: 'Botón admin visible' },
         ],
       },
     ],

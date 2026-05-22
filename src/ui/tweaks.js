@@ -100,16 +100,41 @@ function el(tag, props = {}, children = []) {
  * `controls` is an array describing the form layout — see usage in main.js.
  * `initiallyVisible` (default false): cuando false, ni panel ni FAB se muestran;
  * el panel solo aparece tras llamar show() o setear window.adminMode=true.
+ * `storageKey` (default 'p28-tweaks'): si está seteado, los valores se hidratan
+ * desde localStorage al montar y se escriben en cada cambio. Solo se restauran
+ * claves presentes en `defaults` (ignora schema legacy).
  */
-export function mountTweaks({ host, defaults, controls, onChange, title = 'Tweaks', initiallyVisible = false }) {
+export function mountTweaks({ host, defaults, controls, onChange, title = 'Tweaks', initiallyVisible = false, storageKey = 'p28-tweaks' }) {
   injectStyle();
+
+  // Hidratar desde localStorage: defaults primero, luego override con valores
+  // guardados, filtrando claves ajenas al schema actual (defensivo ante upgrades).
   const state = { ...defaults };
+  if (storageKey) {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        for (const k of Object.keys(defaults)) {
+          if (Object.prototype.hasOwnProperty.call(saved, k)) state[k] = saved[k];
+        }
+      }
+    } catch { /* localStorage no disponible o JSON inválido: usar defaults */ }
+  }
+
   let panel = null;
   let open = !!initiallyVisible;
   let visible = !!initiallyVisible;     // controla si el panel/FAB están permitidos
 
+  function persist() {
+    if (!storageKey) return;
+    try { localStorage.setItem(storageKey, JSON.stringify(state)); }
+    catch { /* quota o modo privado: silenciar */ }
+  }
+
   function emit() {
     onChange({ ...state });
+    persist();
     render();
   }
 
