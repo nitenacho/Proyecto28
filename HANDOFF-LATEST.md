@@ -1,7 +1,7 @@
 # HANDOFF — Proyecto 28
 
-> **Última actualización:** 2026-05-22 15:30 UTC (Etapa 6 polish `v0.8.0` + docs `v0.8.1`)
-> **Tag activo:** `v0.8.0` (polish Etapa 6: CCD + spawn + sombra + tweaks juego) · `v0.8.1` (docs)
+> **Última actualización:** 2026-05-22 16:45 UTC (polish 2 `v0.9.0` + docs `v0.9.1`)
+> **Tag activo:** `v0.9.0` (sombra anillo + tweak tamaño + flechas + gamepad) · `v0.9.1` (docs)
 > **Branch de trabajo:** `main` (sin etapa abierta)
 > **Owner:** @nitenacho — cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
@@ -25,8 +25,12 @@ Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite).
   la luz, **activeTile** = visual de hover (sube + brilla), **defaults
   más suaves** y **sliders de juego** en vivo (velocidad / altura salto /
   gravedad / mouse-follow delay).
+- Polish 2 (`v0.9.0`): **sombra ahora es anillo** (RingGeometry, centro
+  transparente), nuevo tweak **"Tamaño sombra"** (mantiene el efecto
+  altura), **flechas del teclado** mapeadas a WASD, **gamepad** (stick
+  izq + Face Button Bottom para saltar).
 - Próximo paso: **Etapa 7 — Tweaks panel oculto por default + sliders restantes**
-  (streaming, admin). Parte de los sliders de juego ya está hecha en `v0.8.0`.
+  (streaming, admin). Parte de los sliders de juego ya está hecha.
 
 ---
 
@@ -38,7 +42,7 @@ Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite).
 cd "C:/Users/incon/OneDrive/Desktop/Proyectos_Claude/Claude_P28/Proyecto28"
 
 git status                              # esperado: clean en main
-git describe --tags --abbrev=0          # esperado: v0.8.1 (o v0.8.0 si no hay patch docs aún)
+git describe --tags --abbrev=0          # esperado: v0.9.1 (o v0.9.0 si no hay patch docs aún)
 git log --oneline -5
 ```
 
@@ -93,9 +97,30 @@ Ver §3 para el detalle de la etapa.
 
 ## 2. Última etapa cerrada
 
-**Etapa 6 polish — CCD + spawn dinámico + sombra + tweaks juego** (`v0.8.0`, 2026-05-22)
+**Polish 2 — sombra anillo + tweak tamaño + flechas + gamepad** (`v0.9.0`, 2026-05-22)
 
 Commits:
+- `135e59f` feat(game): sombra anillo + arrow keys + gamepad (stick izq + face bottom)
+- `cbb27da` feat(ui): slider 'Tamaño sombra' + actualiza label gravedad con inputs
+
+Cambios:
+- **Sombra anillo**: `CircleGeometry` → `RingGeometry(0.78, 1.0, 48)`.
+  Argolla cyan con centro transparente. Geometry unitaria; tamaño final
+  vía `mesh.scale = config.shadowSize * (1 + heightAbove*0.18)`.
+- **Tweak `shadowSize`** (slider 0.15-1.2, step 0.05, default 0.45)
+  multiplica el scale base sin afectar el efecto de altura.
+- **Flechas ↑↓←→** mapeadas a `w/s/a/d` via `arrowToWASD(key)` en
+  `onKeyDown/Up`. `preventDefault()` evita scroll. Comparten `keysActive`
+  con WASD.
+- **Gamepad** (Web Gamepad API, standard mapping):
+  - `readGamepad()` polling cada frame en `update()`.
+  - Stick izq (`axes[0]`, `axes[1]`) con deadzone 0.18, mezclado con
+    teclado por `getMoveVector()` (normalizado si magnitud > 1).
+  - Botón 0 (Face Button Bottom: A / X / B) con edge detection para
+    `tryJump()`.
+  - Gamepad input + `gravityFlag` activa physics igual que WASD.
+
+Cierre anterior (`v0.8.0`):
 - `fda4246` fix(game): continuous collision + spawn sobre tile[0] + shadow decal + defaults más suaves
 - `3ffef61` feat(ui): activeTile se eleva como hover + sliders de juego en vivo
 
@@ -209,7 +234,9 @@ Tags:    v0.1.0 (f7a3a30 — estado handoff v1)
          v0.7.0 (99bce02 — cierre Etapa 6: cubos + respawn + HUD)
          v0.7.1 (56d79ea — docs Etapa 6 + handoff a Etapa 7)
          v0.8.0 (3ffef61 — polish Etapa 6: CCD + spawn + sombra + tweaks juego)
-         v0.8.1 (HEAD     — docs v0.8.0 + handoff actualizado)
+         v0.8.1 (e747a27 — docs v0.8.0 + handoff actualizado)
+         v0.9.0 (cbb27da — polish 2: sombra anillo + tamaño + flechas + gamepad)
+         v0.9.1 (HEAD     — docs v0.9.0 + handoff actualizado)
 Remote:  origin sincronizado
 ```
 

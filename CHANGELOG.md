@@ -10,6 +10,53 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-05-22 — Polish: sombra anillo + tweak tamaño + flechas + gamepad
+
+### Changed
+- **Sombra anillo** (`src/game/light.js`): `CircleGeometry` → `RingGeometry(0.78, 1.0, 48)`.
+  Argolla cyan en vez de círculo relleno — el centro queda transparente
+  para no tapar el tile bajo la luz. Geometry unitaria; el tamaño final
+  se aplica vía `mesh.scale` para preservar el efecto de altura.
+- **Toggle "Gravedad + saltos"** ahora documenta los 3 inputs soportados:
+  `WASD / ↑↓←→ / Pad` (label del tweak).
+
+### Added
+- **Tweak `shadowSize`** (`src/data/fallback.js` + `src/main.js`): nuevo
+  slider en panel "Juego" → "Tamaño sombra" (0.15-1.2, step 0.05, default
+  0.45). Multiplica el scale base de la sombra. El efecto de crecer/
+  achicar con la altura se mantiene multiplicativo encima.
+- **Flechas del teclado** mapeadas a WASD (`src/game/light.js`):
+  `arrowToWASD()` traduce `ArrowUp/Down/Left/Right` → `w/s/a/d`. Llama
+  `preventDefault()` para evitar scroll de la página. Comparten el mismo
+  `keysActive` que WASD — el usuario puede mezclar ambos sets.
+- **Gamepad** (Web Gamepad API, standard mapping):
+  - `readGamepad()` cada frame en `update()`. Toma el primer pad
+    conectado y devuelve `{x, z, jumpEdge}`.
+  - Stick izquierdo (`axes[0]`, `axes[1]`) con deadzone `0.18`. Se mezcla
+    con el teclado vía `getMoveVector()`; magnitud > 1 se normaliza para
+    evitar diagonales más rápidas.
+  - Botón `0` = **Face Button Bottom** (A / X / B según vendor) con edge
+    detection (`prevJumpButton`) para `tryJump()` — no dispara saltos
+    repetidos al mantener el botón.
+  - Si hay input de gamepad en `floating` + `gravityFlag`, entra a
+    `physics` automáticamente (paridad con el comportamiento de WASD).
+
+### Notes
+- Web Gamepad API requiere user interaction inicial (botón) para empezar
+  a poblar `navigator.getGamepads()` en algunos browsers. Comportamiento
+  estándar — el polling es no-op hasta que el browser activa el pad.
+- Standard mapping verificado en Xbox / DualShock / DualSense / Pro
+  Controller. Pads sin standard mapping pueden necesitar remapeo manual
+  (no implementado).
+- Build: 627.69 KB (+1.18 KB vs `0.8.x`).
+
+### Verified
+- Build local OK.
+- Smoke test post-deploy esperado: tweak `gravityEnabled` ON; mover con
+  WASD, flechas, o stick izq del gamepad; saltar con espacio o Face
+  Button Bottom; sombra ahora visible como anillo, slider "Tamaño sombra"
+  cambia el radio en vivo manteniendo el efecto de altura.
+
 ## [0.8.0] — 2026-05-22 — Polish Etapa 6: CCD + spawn + sombra + tweaks juego
 
 ### Fixed
@@ -363,7 +410,9 @@ o a un fix puntual entre etapas.
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/nitenacho/Proyecto28/compare/v0.8.1...v0.9.0
+[0.8.1]: https://github.com/nitenacho/Proyecto28/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/nitenacho/Proyecto28/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/nitenacho/Proyecto28/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/nitenacho/Proyecto28/compare/v0.6.2...v0.7.0

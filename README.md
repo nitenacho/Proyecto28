@@ -89,6 +89,7 @@ al repo, lo tiene el owner).
 | 5 — Físicas Kirby (opt-in) | ✅ Cerrado | `v0.6.0` |
 | 6 — Cubos + respawn + contador | ✅ Cerrado | `v0.7.0` |
 | 6 polish — CCD + spawn + sombra + tweaks juego | ✅ Cerrado | `v0.8.0` |
+| 6 polish 2 — sombra anillo + tweak tamaño + flechas + gamepad | ✅ Cerrado | `v0.9.0` |
 | 7 — Tweaks ocultos | ⏳ Pendiente | — |
 | 8 — Botón admin secreto | ⏳ Pendiente | — |
 | 9 — Google OAuth | ⏳ Pendiente | — |
