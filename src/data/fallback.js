@@ -21,6 +21,7 @@ export const FALLBACK_SITE = {
     showGrid: true,
     showScanlines: false,
     showViewfinder: true,
+    gravityEnabled: false,    // Etapa 5: opt-in para activar físicas al usar WASD
   },
 
   // v2 (Etapa 2/3) — match SiteSetting schema defaults

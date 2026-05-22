@@ -126,6 +126,7 @@ function normalizeSite(s) {
       showGrid: a.showGrid ?? fb.defaults.showGrid,
       showScanlines: a.showScanlines ?? fb.defaults.showScanlines,
       showViewfinder: a.showViewfinder ?? fb.defaults.showViewfinder,
+      gravityEnabled: a.defaultGravityEnabled ?? fb.defaults.gravityEnabled,
     },
     game: {
       lightSpeed: num(parseFloat(a.gameLightSpeed), fb.game.lightSpeed),

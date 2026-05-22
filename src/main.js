@@ -30,10 +30,14 @@ async function boot() {
   console.log(`[p28] content source: ${source}`);
 
   const sceneCtx = createScene({ canvas, grid, projects });
-  const controlLight = createControllableLight({ scene: sceneCtx.scene, config: site.game });
-  const popup = createPopup();
-
   const defaults = site.defaults;
+  const controlLight = createControllableLight({
+    scene: sceneCtx.scene,
+    config: site.game,
+    tiles: sceneCtx.tiles,
+    gravityEnabled: defaults.gravityEnabled,
+  });
+  const popup = createPopup();
 
   const tweaks = mountTweaks({
     host: document.getElementById('tweaks-root'),
@@ -51,6 +55,8 @@ async function boot() {
       sceneCtx.camState.drift = !!state.cameraDrift;
       if (!state.cameraDrift) sceneCtx.setCameraFromState(state.tilt, state.yaw);
       sceneCtx.applyTileStyle(state.tileStyle);
+      // Game
+      controlLight.setGravityEnabled(!!state.gravityEnabled);
     },
     controls: [
       {
@@ -97,6 +103,12 @@ async function boot() {
           { type: 'toggle', key: 'showViewfinder', label: 'Viewfinder' },
         ],
       },
+      {
+        label: 'Juego',
+        items: [
+          { type: 'toggle', key: 'gravityEnabled', label: 'Gravedad + saltos (WASD)' },
+        ],
+      },
     ],
   });
 
@@ -115,6 +127,7 @@ async function boot() {
 
   window.addEventListener('pointermove', (e) => {
     setPointerFromEvent(e);
+    controlLight.notifyMouseMoved();
     if (popup.placement === 'cursor') popup.positionAtCursor(e.clientX, e.clientY);
   });
 
