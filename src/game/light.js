@@ -1,21 +1,23 @@
 /* =========================================================
    PROYECTO 28 — luz controlable
      - Etapa 4: floating (mouse-follow + WASD a y=1).
-     - Etapa 5: physics opt-in via tweak gravityEnabled (gravedad + saltos Kirby).
+     - Etapa 5: physics opt-in via tweak gravityEnabled.
      - Etapa 6: activeTile callback + respawn al caer al vacío + HUD counter.
-     - Etapa 6 polish (v0.8.0):
-         · Continuous collision: raycast desde prevY para evitar traspaso
-           cuando vy*dt es grande.
-         · Respawn position dinámica sobre tiles[0] (no centro vacío).
-         · Sombra mesh debajo de la luz (decal cyan) en todo momento.
+     - Polish v0.8.0: continuous collision + respawn dinámico + sombra-decal
+       + tweaks de juego en vivo.
+     - Polish v0.9.0 (este archivo):
+         · Sombra ahora es ring (argolla) en vez de círculo relleno.
+         · Tamaño de sombra controlable vía config.shadowSize.
+         · Input: flechas del teclado mapeadas a WASD.
+         · Input: gamepad (stick izq para mover, button 0 = face bottom para saltar).
    ========================================================= */
 
 import * as THREE from 'three';
 
 const LIGHT_Y = 1.0;
-const RESPAWN_HEIGHT = 4.0;          // metros sobre el tile de respawn
+const RESPAWN_HEIGHT = 4.0;
 const SPHERE_RADIUS = 0.18;
-const TILE_TOP_Y = 0.19;              // TILE_HEIGHT/2 — debe coincidir con scene.js
+const TILE_TOP_Y = 0.19;
 const FOLLOW_SMOOTHING = 6;
 const GROUND_EPSILON = 0.02;
 const LIGHT_COLOR = 0x6BC4BB;
@@ -25,19 +27,31 @@ const FADE_IN_DURATION = 0.3;
 const BASE_LIGHT_INTENSITY = 4.5;
 const BASE_EMISSIVE_INTENSITY = 2.5;
 
-// Sombra (decal) — círculo proyectado en la superficie bajo la luz
-const SHADOW_RADIUS = 0.45;
-const SHADOW_BASE_OPACITY = 0.5;
-const SHADOW_Y_OFFSET = 0.012;         // evita z-fighting con el top del cubo
-const FLOOR_Y = -0.20;                 // debe coincidir con scene.js floor.position.y
+// Sombra (decal) — geometry unitaria (outer=1), tamaño final via scale.
+const SHADOW_INNER = 0.78;            // ratio inner/outer del ring (grosor relativo)
+const SHADOW_BASE_OPACITY = 0.55;
+const SHADOW_DEFAULT_SIZE = 0.45;      // fallback si config.shadowSize no existe
+const SHADOW_Y_OFFSET = 0.012;
+const FLOOR_Y = -0.20;
 
-// Kirby feel: cada salto en aire es más débil que el anterior.
 const KIRBY_MULTIPLIERS = [1.0, 0.85, 0.7, 0.55];
+
+// Gamepad
+const GAMEPAD_DEADZONE = 0.18;
+const GAMEPAD_JUMP_BUTTON = 0;        // standard mapping: Face Button Bottom
+
+function arrowToWASD(key) {
+  if (key === 'ArrowUp')    return 'w';
+  if (key === 'ArrowDown')  return 's';
+  if (key === 'ArrowLeft')  return 'a';
+  if (key === 'ArrowRight') return 'd';
+  return null;
+}
 
 /**
  * @param {Object} opts
  * @param {THREE.Scene} opts.scene
- * @param {{ lightSpeed:number, mouseFollowDelay:number, gravity:number, jumpHeight:number, jumpCount:number, fallDuration:number }} opts.config  site.game (mutable — los tweaks lo modifican in place)
+ * @param {{ lightSpeed:number, mouseFollowDelay:number, gravity:number, jumpHeight:number, jumpCount:number, fallDuration:number, shadowSize?:number }} opts.config
  * @param {THREE.Mesh[]} opts.tiles
  * @param {boolean} [opts.gravityEnabled=false]
  * @param {(tile:THREE.Mesh|null)=>void} [opts.onActiveTileChange]
@@ -66,9 +80,11 @@ export function createControllableLight({
   const light = new THREE.PointLight(LIGHT_COLOR, BASE_LIGHT_INTENSITY, 12, 1.8);
   scene.add(light);
 
-  // Sombra (decal cyan) — siempre debajo de la luz, sobre cubo o floor
+  // Sombra-anillo: RingGeometry unitaria (outer = 1.0). El tamaño final
+  // se ajusta vía mesh.scale en updateShadow combinando config.shadowSize
+  // con el factor de altura.
   const shadow = new THREE.Mesh(
-    new THREE.CircleGeometry(SHADOW_RADIUS, 32),
+    new THREE.RingGeometry(SHADOW_INNER, 1.0, 48),
     new THREE.MeshBasicMaterial({
       color: 0x5ee5d6,
       transparent: true,
@@ -81,7 +97,6 @@ export function createControllableLight({
   shadow.renderOrder = 1;
   scene.add(shadow);
 
-  // Posición de respawn: encima del primer cubo (top-left del grid)
   const RESPAWN_XZ = new THREE.Vector3(0, 0, 0);
   if (tiles && tiles.length > 0) {
     RESPAWN_XZ.set(tiles[0].position.x, 0, tiles[0].position.z);
@@ -96,7 +111,9 @@ export function createControllableLight({
   const target = mesh.position.clone();
   const velocity = new THREE.Vector3();
   const keysActive = new Set();
-  let lastWASDInput = -Infinity;
+  let lastMoveInput = -Infinity;
+  let prevJumpButton = false;
+  let gamepadActiveThisFrame = false;
 
   let vy = 0;
   let grounded = false;
@@ -114,7 +131,6 @@ export function createControllableLight({
   const downOrigin = new THREE.Vector3();
   const downDir = new THREE.Vector3(0, -1, 0);
 
-  // Raycaster auxiliar para la sombra (no comparte estado con el de física)
   const shadowRay = new THREE.Raycaster();
   const shadowOrigin = new THREE.Vector3();
 
@@ -161,6 +177,14 @@ export function createControllableLight({
     grounded = false;
   }
 
+  function handleMoveKey(k) {
+    keysActive.add(k);
+    lastMoveInput = performance.now();
+    if (gravityFlag && mode === 'floating') {
+      enterPhysics();
+    }
+  }
+
   function onKeyDown(e) {
     if (e.code === 'Space') {
       if (mode === 'physics' && respawnPhase === 'none' && !e.repeat) {
@@ -169,21 +193,71 @@ export function createControllableLight({
       }
       return;
     }
+    const arrow = arrowToWASD(e.key);
+    if (arrow) {
+      e.preventDefault();         // evita scroll de la página
+      handleMoveKey(arrow);
+      return;
+    }
     const k = e.key.toLowerCase();
     if (k === 'w' || k === 'a' || k === 's' || k === 'd') {
-      keysActive.add(k);
-      lastWASDInput = performance.now();
-      if (gravityFlag && mode === 'floating') {
-        enterPhysics();
-      }
+      handleMoveKey(k);
     }
   }
 
   function onKeyUp(e) {
+    const arrow = arrowToWASD(e.key);
+    if (arrow) {
+      if (keysActive.delete(arrow)) lastMoveInput = performance.now();
+      return;
+    }
     const k = e.key.toLowerCase();
     if (keysActive.delete(k)) {
-      lastWASDInput = performance.now();
+      lastMoveInput = performance.now();
     }
+  }
+
+  // Lee primer gamepad conectado (standard mapping). Retorna stick izq + edge del botón 0.
+  function readGamepad() {
+    gamepadActiveThisFrame = false;
+    if (!navigator.getGamepads) return { x: 0, z: 0, jumpEdge: false };
+    const pads = navigator.getGamepads();
+    let pad = null;
+    for (const p of pads) {
+      if (p && p.connected) { pad = p; break; }
+    }
+    if (!pad) {
+      prevJumpButton = false;
+      return { x: 0, z: 0, jumpEdge: false };
+    }
+    let ax = pad.axes[0] || 0;
+    let az = pad.axes[1] || 0;
+    if (Math.abs(ax) < GAMEPAD_DEADZONE) ax = 0;
+    if (Math.abs(az) < GAMEPAD_DEADZONE) az = 0;
+
+    const jumpBtn = pad.buttons[GAMEPAD_JUMP_BUTTON];
+    const jumpPressed = !!(jumpBtn && jumpBtn.pressed);
+    const jumpEdge = jumpPressed && !prevJumpButton;
+    prevJumpButton = jumpPressed;
+
+    if (ax !== 0 || az !== 0 || jumpPressed) {
+      gamepadActiveThisFrame = true;
+    }
+    return { x: ax, z: az, jumpEdge };
+  }
+
+  // Combina input de teclado + gamepad en un vector horizontal normalizado.
+  function getMoveVector(padInput) {
+    let mx = 0, mz = 0;
+    if (keysActive.has('w')) mz -= 1;
+    if (keysActive.has('s')) mz += 1;
+    if (keysActive.has('a')) mx -= 1;
+    if (keysActive.has('d')) mx += 1;
+    mx += padInput.x;
+    mz += padInput.z;
+    const mag = Math.hypot(mx, mz);
+    if (mag > 1) { mx /= mag; mz /= mag; }
+    return { x: mx, z: mz };
   }
 
   function setMouseTarget(raycaster) {
@@ -192,20 +266,20 @@ export function createControllableLight({
     }
   }
 
-  function updateFloating(dt, nowMs, raycaster) {
-    const anyHeld = keysActive.size > 0;
-    if (anyHeld) lastWASDInput = nowMs;
+  function updateFloating(dt, nowMs, raycaster, padInput) {
+    const move = getMoveVector(padInput);
+    const anyMove = (move.x !== 0 || move.z !== 0);
+    if (anyMove) lastMoveInput = nowMs;
+    if (gamepadActiveThisFrame && gravityFlag) {
+      enterPhysics();
+      return;
+    }
 
     const delayMs = config.mouseFollowDelay * 1000;
-    const wasdMode = anyHeld || (nowMs - lastWASDInput) < delayMs;
+    const wasdMode = anyMove || (nowMs - lastMoveInput) < delayMs;
 
     if (wasdMode) {
-      velocity.set(0, 0, 0);
-      if (keysActive.has('w')) velocity.z -= 1;
-      if (keysActive.has('s')) velocity.z += 1;
-      if (keysActive.has('a')) velocity.x -= 1;
-      if (keysActive.has('d')) velocity.x += 1;
-      if (velocity.lengthSq() > 0) velocity.normalize().multiplyScalar(config.lightSpeed);
+      velocity.set(move.x, 0, move.z).multiplyScalar(config.lightSpeed);
       mesh.position.x += velocity.x * dt;
       mesh.position.z += velocity.z * dt;
       target.set(mesh.position.x, LIGHT_Y, mesh.position.z);
@@ -219,18 +293,16 @@ export function createControllableLight({
     mesh.position.y += (LIGHT_Y - mesh.position.y) * kY;
   }
 
-  function updatePhysics(dt) {
+  function updatePhysics(dt, padInput) {
     const inputAllowed = respawnPhase === 'none';
 
     if (inputAllowed) {
-      velocity.set(0, 0, 0);
-      if (keysActive.has('w')) velocity.z -= 1;
-      if (keysActive.has('s')) velocity.z += 1;
-      if (keysActive.has('a')) velocity.x -= 1;
-      if (keysActive.has('d')) velocity.x += 1;
-      if (velocity.lengthSq() > 0) velocity.normalize().multiplyScalar(config.lightSpeed);
+      const move = getMoveVector(padInput);
+      velocity.set(move.x, 0, move.z).multiplyScalar(config.lightSpeed);
       mesh.position.x += velocity.x * dt;
       mesh.position.z += velocity.z * dt;
+
+      if (padInput.jumpEdge) tryJump();
     }
 
     if (!grounded) {
@@ -246,9 +318,6 @@ export function createControllableLight({
       return;
     }
 
-    // Continuous collision: si vamos hacia abajo o estamos en reposo,
-    // raycast desde (newX, prevY, newZ) hacia abajo, far = (prevY - newY) + SPHERE_RADIUS + ε.
-    // Si hay hit, la luz cruzó o está apoyada → snap al top del cubo.
     let landed = false;
     let landedTile = null;
     if (vy <= 0) {
@@ -296,11 +365,7 @@ export function createControllableLight({
     if (respawnPhase === 'fadingOut') {
       respawnT += dt / Math.max(config.fallDuration, 0.01);
       if (respawnT >= 1) {
-        mesh.position.set(
-          RESPAWN_XZ.x,
-          RESPAWN_XZ.y + RESPAWN_HEIGHT,
-          RESPAWN_XZ.z,
-        );
+        mesh.position.set(RESPAWN_XZ.x, RESPAWN_XZ.y + RESPAWN_HEIGHT, RESPAWN_XZ.z);
         vy = 0;
         grounded = false;
         jumpsUsed = 0;
@@ -324,9 +389,6 @@ export function createControllableLight({
     }
   }
 
-  // Actualiza la sombra-decal bajo la luz: raycast hacia abajo desde la luz,
-  // mete la mesh en el hit point (top del cubo o piso). Escala/opacidad
-  // varían con la altura para dar feedback de distancia.
   function updateShadow() {
     shadowOrigin.set(mesh.position.x, mesh.position.y, mesh.position.z);
     shadowRay.set(shadowOrigin, downDir);
@@ -339,21 +401,24 @@ export function createControllableLight({
     shadow.position.set(mesh.position.x, surfaceY + SHADOW_Y_OFFSET, mesh.position.z);
 
     const heightAbove = Math.max(0, mesh.position.y - SPHERE_RADIUS - surfaceY);
-    const scale = 1 + heightAbove * 0.18;
-    shadow.scale.setScalar(scale);
+    const baseSize = (typeof config.shadowSize === 'number') ? config.shadowSize : SHADOW_DEFAULT_SIZE;
+    const altitudeFactor = 1 + heightAbove * 0.18;
+    shadow.scale.setScalar(baseSize * altitudeFactor);
+
     const fadeFactor = Math.max(0.15, 1 - heightAbove * 0.10);
-    const respawnFade = mesh.material.opacity;  // si la luz está en fade, sombra también
+    const respawnFade = mesh.material.opacity;
     shadow.material.opacity = SHADOW_BASE_OPACITY * fadeFactor * respawnFade;
-    shadow.visible = mesh.position.y > VOID_Y + 1;  // ocultar mientras cae al vacío
+    shadow.visible = mesh.position.y > VOID_Y + 1;
   }
 
   function update(dt, nowMs, raycaster) {
+    const padInput = readGamepad();
     if (mode === 'physics') {
-      updatePhysics(dt);
+      updatePhysics(dt, padInput);
       maybeStartRespawn();
       updateRespawn(dt);
     } else {
-      updateFloating(dt, nowMs, raycaster);
+      updateFloating(dt, nowMs, raycaster, padInput);
     }
     light.position.copy(mesh.position);
     updateShadow();

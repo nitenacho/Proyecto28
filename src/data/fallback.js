@@ -33,6 +33,7 @@ export const FALLBACK_SITE = {
     velocityCurve: 'kirby',
     mouseFollowDelay: 1.0,
     fallDuration: 1.0,
+    shadowSize: 0.45,          // v0.9.0: radio base de la sombra-anillo
   },
   admin: {
     buttonVisible: false,
