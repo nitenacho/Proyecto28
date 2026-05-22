@@ -10,6 +10,67 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.5.1] — 2026-05-22 — Patch documental: cierre Etapa 4
+
+### Added
+- Sección [0.5.0] de este CHANGELOG con detalle de la luz controlable
+  (Etapa 4) y la nota de tech debt sobre actions Node 20.
+
+### Changed
+- `README.md`: tabla de etapas marca Etapa 4 como cerrada con tag `v0.5.0`.
+- `HANDOFF-LATEST.md`: regenerado apuntando a Etapa 5 (físicas Kirby).
+  Documenta el deprecation de Node 20 en CI con fecha 2026-06-02.
+
+### Notes
+- Sin cambios de código del frontend / CMS.
+
+## [0.6.0] — 2026-05-22 — Etapa 5: Físicas Kirby opt-in
+
+### Added
+- **Tweak `gravityEnabled`** (toggle "Gravedad + saltos (WASD)" en una nueva
+  sección "Juego" del panel). Default `false` → comportamiento Etapa 4 intacto.
+- `src/game/light.js`: state machine `'floating' | 'physics'`.
+  - `floating` (default): Etapa 4 sin cambios — mouse-follow + WASD a `y=1`,
+    `mouseFollowDelay` activo, sin gravedad, sin saltos.
+  - `physics` (opt-in vía tweak): se entra cuando el tweak está ON y el
+    usuario presiona WASD por primera vez; se sale cuando el mouse se mueve
+    o el tweak se apaga. Gravedad `config.gravity`, raycast hacia abajo
+    sobre `sceneCtx.tiles` para detectar grounded y snap a la superficie
+    del cubo. Saltos con espacio (`e.preventDefault`, `e.repeat` ignorado)
+    con multipliers Kirby `[1.0, 0.85, 0.7, 0.55]` indexados por
+    `jumpsUsed` (max `config.jumpCount=4`).
+- `controlLight.setGravityEnabled(bool)` y `controlLight.notifyMouseMoved()`:
+  API para wire desde main.js.
+- `src/data/fallback.js`: `defaults.gravityEnabled = false`.
+- `src/data/cms.js`: mapeo `a.defaultGravityEnabled ?? fb.defaults.gravityEnabled`
+  (campo futuro del schema Strapi — por ahora siempre cae al fallback).
+
+### Changed
+- `src/main.js`:
+  - Pasa `gravityEnabled` inicial al constructor de `createControllableLight`.
+  - Listener `pointermove` ahora llama `controlLight.notifyMouseMoved()`.
+  - `onChange` del panel de tweaks ahora wire-ea
+    `controlLight.setGravityEnabled(state.gravityEnabled)`.
+
+### Notes
+- **Desvío del plan original**: el spec de Etapa 5 en `PLAN-PROYECTO28-V2.md`
+  describe gravedad como comportamiento default. Durante la implementación
+  el owner pidió que el default Etapa 4 quede intacto y la física sea
+  opt-in vía tweak — esta versión refleja esa decisión.
+- En `floating`, la `y` lerpea suave hacia `LIGHT_Y=1` con la misma tasa
+  exponencial del mouse-follow (`rate=6`), evitando teleport visible al
+  salir del modo físicas.
+- En el modo físicas no hay respawn al caer al vacío: si la luz pierde
+  todos los cubos abajo, sigue cayendo. Eso se aborda en Etapa 6.
+- Build: 621.67 KB (+0.77 KB vs `0.5.x`).
+
+### Verified
+- Smoke test localhost + GH Pages deploy verde en 8s.
+- `proyecto28.com` sirviendo `index-Cdkh2u7j.js`.
+- Default visual: idéntico a Etapa 4 (esfera flotando en `(0,1,0)`).
+- Toggle ON + WASD: cae y aterriza. Espacio: hasta 4 saltos.
+- Mover mouse en modo físicas: regresa smooth a `y=1`.
+
 ## [0.5.0] — 2026-05-22 — Etapa 4: Luz controlable
 
 ### Added
@@ -163,7 +224,9 @@ o a un fix puntual entre etapas.
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/nitenacho/Proyecto28/compare/v0.5.1...v0.6.0
+[0.5.1]: https://github.com/nitenacho/Proyecto28/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/nitenacho/Proyecto28/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/nitenacho/Proyecto28/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/nitenacho/Proyecto28/compare/v0.3.0...v0.4.0

@@ -86,7 +86,7 @@ al repo, lo tiene el owner).
 | 2 — Strapi schema extendido | ✅ Cerrado | `v0.3.0` |
 | 3 — Frontend data layer | ✅ Cerrado | `v0.4.0` |
 | 4 — Luz controlable | ✅ Cerrado | `v0.5.0` |
-| 5 — Físicas Kirby | ⏳ Pendiente | — |
+| 5 — Físicas Kirby (opt-in) | ✅ Cerrado | `v0.6.0` |
 | 6 — Cubos + respawn + contador | ⏳ Pendiente | — |
 | 7 — Tweaks ocultos | ⏳ Pendiente | — |
 | 8 — Botón admin secreto | ⏳ Pendiente | — |
