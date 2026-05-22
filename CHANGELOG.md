@@ -10,19 +10,38 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
-## [0.5.1] — 2026-05-22 — Patch documental: cierre Etapa 4
-
-### Added
-- Sección [0.5.0] de este CHANGELOG con detalle de la luz controlable
-  (Etapa 4) y la nota de tech debt sobre actions Node 20.
+## [0.6.2] — 2026-05-22 — Patch CI: opt-in Node 24 para JS actions
 
 ### Changed
-- `README.md`: tabla de etapas marca Etapa 4 como cerrada con tag `v0.5.0`.
-- `HANDOFF-LATEST.md`: regenerado apuntando a Etapa 5 (físicas Kirby).
-  Documenta el deprecation de Node 20 en CI con fecha 2026-06-02.
+- `.github/workflows/deploy.yml`: agrega `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'`
+  a nivel workflow. Silencia el deprecation warning de Node 20 que GitHub
+  forzará el 2026-06-02 sin esperar a bumps formales de cada action.
+
+### Verified
+- Run de CI post-merge verde. Warning de GitHub cambió de "are running on
+  Node.js 20" → "are being forced to run on Node.js 24" — el flag empuja
+  a Node 24 hoy. La anotación residual desaparecerá cuando los vendors
+  actualicen `runs.using` en sus `action.yml` (antes del 2026-06-02).
 
 ### Notes
-- Sin cambios de código del frontend / CMS.
+- Reversible vía `ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true` si algo
+  se rompe.
+- Bump de versiones formales (`actions/checkout@v5`, `setup-node@v5`,
+  etc.) queda para Etapa 15 dentro del hardening general.
+
+## [0.6.1] — 2026-05-22 — Patch documental: cierre Etapa 5
+
+### Added
+- Sección [0.6.0] de este CHANGELOG con detalle de la física Kirby opt-in
+  y la decisión de diseño (default Etapa 4 intacto + opt-in vía tweak).
+- Sección [0.5.1] backfill (faltaba del cierre Etapa 4).
+
+### Changed
+- `README.md`: tabla de etapas marca Etapa 5 como cerrada con tag `v0.6.0`
+  (etiqueta "Físicas Kirby (opt-in)").
+- `HANDOFF-LATEST.md`: regenerado apuntando a Etapa 6 (cubos encendidos
+  + respawn + contador HUD). §3 lista las tareas; §15 incluye hint para
+  el próximo agente sobre cómo aprovechar el raycast existente.
 
 ## [0.6.0] — 2026-05-22 — Etapa 5: Físicas Kirby opt-in
 
@@ -70,6 +89,20 @@ o a un fix puntual entre etapas.
 - Default visual: idéntico a Etapa 4 (esfera flotando en `(0,1,0)`).
 - Toggle ON + WASD: cae y aterriza. Espacio: hasta 4 saltos.
 - Mover mouse en modo físicas: regresa smooth a `y=1`.
+
+## [0.5.1] — 2026-05-22 — Patch documental: cierre Etapa 4
+
+### Added
+- Sección [0.5.0] de este CHANGELOG con detalle de la luz controlable
+  (Etapa 4) y la nota de tech debt sobre actions Node 20.
+
+### Changed
+- `README.md`: tabla de etapas marca Etapa 4 como cerrada con tag `v0.5.0`.
+- `HANDOFF-LATEST.md`: regenerado apuntando a Etapa 5 (físicas Kirby).
+  Documenta el deprecation de Node 20 en CI con fecha 2026-06-02.
+
+### Notes
+- Sin cambios de código del frontend / CMS.
 
 ## [0.5.0] — 2026-05-22 — Etapa 4: Luz controlable
 
@@ -224,7 +257,9 @@ o a un fix puntual entre etapas.
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/nitenacho/Proyecto28/compare/v0.6.1...v0.6.2
+[0.6.1]: https://github.com/nitenacho/Proyecto28/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/nitenacho/Proyecto28/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/nitenacho/Proyecto28/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/nitenacho/Proyecto28/compare/v0.4.1...v0.5.0

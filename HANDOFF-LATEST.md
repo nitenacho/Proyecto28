@@ -1,7 +1,7 @@
 # HANDOFF — Proyecto 28
 
-> **Última actualización:** 2026-05-22 02:10 UTC (cierre Etapa 5 + docs `v0.6.1`)
-> **Tag activo:** `v0.6.1` (patch documental sobre cierre Etapa 5 `v0.6.0`)
+> **Última actualización:** 2026-05-22 03:15 UTC (cierre Etapa 5 + patch CI Node 24 `v0.6.2`)
+> **Tag activo:** `v0.6.2` (patch CI: opt-in Node 24 para JS actions, sobre `v0.6.1` docs y `v0.6.0` Etapa 5)
 > **Branch de trabajo:** `main` (sin etapa abierta)
 > **Owner:** @nitenacho — cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
@@ -30,7 +30,7 @@ Pega este documento entero al inicio de la sesión.
 cd "C:/Users/incon/OneDrive/Desktop/Proyectos_Claude/Claude_P28/Proyecto28"
 
 git status                              # esperado: clean en main
-git describe --tags --abbrev=0          # esperado: v0.6.1
+git describe --tags --abbrev=0          # esperado: v0.6.2
 git log --oneline -5
 ```
 
@@ -185,7 +185,8 @@ Tags:    v0.1.0 (f7a3a30 — estado handoff v1)
          v0.5.0 (e7390e2 — cierre Etapa 4: luz controlable)
          v0.5.1 (4e9d077 — docs cierre Etapa 4)
          v0.6.0 (f75a96e — cierre Etapa 5: físicas Kirby opt-in)
-         v0.6.1 (HEAD     — docs Etapa 5 + handoff a Etapa 6)
+         v0.6.1 (a26bff1 — docs Etapa 5 + handoff a Etapa 6)
+         v0.6.2 (HEAD     — patch CI: opt-in Node 24 para JS actions)
 Remote:  origin sincronizado
 ```
 
@@ -210,7 +211,7 @@ Remote:  origin sincronizado
 | `proyecto28.cl` | ⏳ verificar propagación NIC y redirect a `.com` |
 | Cloudflare zone `.cl` | ⏳ esperar `status: active` |
 | GH Actions workflow | ✅ `Build and deploy frontend to GitHub Pages` activo |
-| Node.js 20 actions | ⚠️ deprecated, fecha forzado **2026-06-02** — bumpear en patch o Etapa 15 |
+| Node.js 20 actions | ✅ mitigado en `v0.6.2` vía `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`; bumps formales en Etapa 15 |
 
 ## 7. Bloqueantes / decisiones pendientes
 
@@ -223,12 +224,9 @@ Remote:  origin sincronizado
 | §1.5 | Detalles del juego | ✅ defaults en `site.game` | — |
 | §1.6 | Admin Strapi creado | ❌ pendiente | Edición visual en Strapi |
 | §1.6 | `.cl` propagación | ⏳ verificar | — |
-| CI | Node 20 actions deprecated | ⚠️ fecha límite 2026-06-02 | Workflow GH Actions |
+| CI | Node 20 actions deprecated | ✅ mitigado en `v0.6.2` | — |
 
-**Ninguno bloquea Etapa 6.** Para el Node 20: bumpear los pin de
-`actions/*` a versiones con Node 24, o agregar
-`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` al env del job. Trabajo de
-~10 min, hacerlo como patch (`v0.6.2`) o agrupar con Etapa 15.
+**Ninguno bloquea Etapa 6.**
 
 ## 8. Stack actual
 
@@ -250,7 +248,7 @@ Remote:  origin sincronizado
 
 ```bash
 git -C "<path>/Proyecto28" status
-git -C "<path>/Proyecto28" describe --tags --abbrev=0   # esperado: v0.6.1
+git -C "<path>/Proyecto28" describe --tags --abbrev=0   # esperado: v0.6.2
 
 curl -s 'https://honest-candy-800d1e4a92.strapiapp.com/api/projects?populate=*' | python -c "import json,sys; d=json.load(sys.stdin); print('projects:', len(d.get('data',[])))"
 curl -s -o /dev/null -w "admin-whitelist: %{http_code}\n" 'https://honest-candy-800d1e4a92.strapiapp.com/api/admin-whitelists'
