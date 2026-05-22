@@ -1,7 +1,7 @@
 # HANDOFF — Proyecto 28
 
-> **Última actualización:** 2026-05-22 13:25 UTC (cierre Etapa 6 + docs `v0.7.1`)
-> **Tag activo:** `v0.7.0` (cierre Etapa 6) · `v0.7.1` (patch documental sobre este cierre)
+> **Última actualización:** 2026-05-22 15:30 UTC (Etapa 6 polish `v0.8.0` + docs `v0.8.1`)
+> **Tag activo:** `v0.8.0` (polish Etapa 6: CCD + spawn + sombra + tweaks juego) · `v0.8.1` (docs)
 > **Branch de trabajo:** `main` (sin etapa abierta)
 > **Owner:** @nitenacho — cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
@@ -20,7 +20,13 @@ Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite).
 - Etapas 1-6 cerradas: versionado, schema v2 Strapi, data layer frontend,
   luz controlable, físicas Kirby **opt-in**, cubos encendidos + respawn al
   vacío + HUD `LUCES CAÍDAS`.
-- Próximo paso: **Etapa 7 — Tweaks panel oculto por default + sliders nuevos**.
+- Polish post-Etapa 6 (`v0.8.0`): **continuous collision** (anti-traspaso),
+  **respawn dinámico** sobre `tiles[0]`, **sombra-decal cyan** debajo de
+  la luz, **activeTile** = visual de hover (sube + brilla), **defaults
+  más suaves** y **sliders de juego** en vivo (velocidad / altura salto /
+  gravedad / mouse-follow delay).
+- Próximo paso: **Etapa 7 — Tweaks panel oculto por default + sliders restantes**
+  (streaming, admin). Parte de los sliders de juego ya está hecha en `v0.8.0`.
 
 ---
 
@@ -32,7 +38,7 @@ Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite).
 cd "C:/Users/incon/OneDrive/Desktop/Proyectos_Claude/Claude_P28/Proyecto28"
 
 git status                              # esperado: clean en main
-git describe --tags --abbrev=0          # esperado: v0.7.1 (o v0.7.0 si no hay patch docs aún)
+git describe --tags --abbrev=0          # esperado: v0.8.1 (o v0.8.0 si no hay patch docs aún)
 git log --oneline -5
 ```
 
@@ -87,52 +93,55 @@ Ver §3 para el detalle de la etapa.
 
 ## 2. Última etapa cerrada
 
-**Etapa 6 — Cubos encendidos + respawn + contador HUD** (`v0.7.0`, 2026-05-22)
+**Etapa 6 polish — CCD + spawn dinámico + sombra + tweaks juego** (`v0.8.0`, 2026-05-22)
 
 Commits:
-- `88d4518` feat(scene): expose activeEmissive on project tile userData
-- `b31e9d4` feat(game): track activeTile + respawn al caer al vacío
-- `99bce02` feat(hud): contador LUCES CAÍDAS + wire active tile glow
+- `fda4246` fix(game): continuous collision + spawn sobre tile[0] + shadow decal + defaults más suaves
+- `3ffef61` feat(ui): activeTile se eleva como hover + sliders de juego en vivo
 
-Entregables:
-- **`src/game/light.js`**:
-  - `onActiveTileChange(tile|null)` callback: en physics + grounded,
-    expone el cubo bajo la luz (sólo project tiles).
-  - Respawn cuando `y < -10`: fade-out durante `config.fallDuration`
-    mientras sigue cayendo → snap a `(0, 5, 0)` con `vy=0` /
-    `grounded=false` → fade-in 0.3s. Incrementa `fallCount` y emite
-    `onRespawn(n)` post fade-out.
-  - Material ahora `transparent:true`; `PointLight.intensity` sigue la
-    `opacity` para que el fade afecte la iluminación.
-  - Input WASD + saltos bloqueados durante el respawn.
-- **`src/scene/scene.js`**: `ud.activeEmissive` distinguible del hover
-  (`0.95` default / `0.25` en mono). `applyTileStyle` lo recomputa al
-  cambiar de paleta.
-- **`src/ui/hud.js`** (módulo nuevo): contador `LUCES CAÍDAS · 000` en
-  esquina sup-der. Tipografía mono + token cyan, padding-zero a 3 dígitos.
-  Pulse copper-bright al incrementar. API: `mountHud().setFallCount(n)`.
-- **`src/main.js`**: cablea callbacks de `controlLight` al render loop y al
-  HUD. `targetGlow` prioriza `hover > activeTile > baseGlow`; el activo
-  **no** levanta la altura (distingue visualmente del hover).
+Bugs corregidos:
+- **Traspaso de cubos**: el raycast original solo hacía snap si la luz
+  ya estaba apoyada. Con `vy*dt` grande, la luz cruzaba el cubo en un
+  frame sin ser detectada. Fix: raycast desde `prevY` con `far =
+  (prevY-newY) + SPHERE_RADIUS + ε` (continuous collision).
+- **Respawn al vacío**: `(0,5,0)` cae sobre la celda central que es empty
+  (slot `Rectangle 21`). Fix: `RESPAWN_XZ` se calcula desde `tiles[0]`
+  (top-left del grid).
 
-**Decisiones de diseño**:
-- Empty tiles no se marcan activos. El `PointLight` ya los ilumina.
-- Activo usa `emissiveIntensity` intermedio (0.95) entre base (0.35) y
-  hover (1.4). Combinado con altura plana del activo (vs. hover levantado
-  a 0.65), las dos señales se distinguen sin ambigüedad — y si el mouse
-  pasa sobre el cubo activo, hover gana.
-- Estado del contador en memoria — se resetea al recargar (intencional).
+Features:
+- **Sombra-decal cyan** debajo de la luz (mesh circular, raycast hacia
+  abajo cada frame). Escala/opacidad varían con altura. Da feedback de
+  dónde caerá la luz incluso en floating mode.
+- **Cubo bajo la luz** se trata visualmente como hover: sube a `hoverY`
+  y brilla a `hoverEmissive`. Eliminada la distinción visual anterior
+  (que lo dejaba plano).
+- **Sliders de juego** en sección "Juego" del panel: Velocidad,
+  Altura salto, Gravedad, Delay mouse-follow. Mutan `site.game` in
+  place — `controlLight` ve los nuevos valores en el siguiente frame.
+- **Defaults más suaves**: `lightSpeed` 8→5, `jumpHeight` 3→2.5,
+  `gravity` 20→16.
 
-Verificado: build 624.32 KB (+2.65 KB), GH Pages deploy verde.
+Tweak previo (Etapa 6 base `v0.7.0`): el contador HUD `LUCES CAÍDAS`,
+el callback `onActiveTileChange` y el respawn con fade siguen vigentes.
+La propiedad `ud.activeEmissive` agregada en `v0.7.0` ya no se usa en el
+render loop pero se dejó en `userData` por compatibilidad — limpieza
+opcional.
 
-**Patch posterior `v0.7.1`** (este commit): docs CHANGELOG + README +
-HANDOFF para cierre Etapa 6.
+Verificado: build 626.51 KB (+2.19 KB), GH Pages deploy verde.
+
+**Patch posterior `v0.8.1`** (este commit): docs CHANGELOG + README +
+HANDOFF.
 
 ---
 
 ## 3. Próximo paso exacto — Etapa 7
 
-**Etapa 7 — Tweaks panel: ocultar por default + sliders nuevos**
+**Etapa 7 — Tweaks panel: ocultar por default + sliders restantes**
+
+Estado parcial: en `v0.8.0` se agregaron 4 sliders de juego
+(`lightSpeed`, `jumpHeight`, `gravity`, `mouseFollowDelay`). Quedan
+pendientes: ocultar el panel por default, y agregar los sliders de
+`streaming` / `admin` / `jumpCount` / `velocityCurve` / `fallDuration`.
 
 Tareas (detalle en `PLAN-PROYECTO28-V2.md §4 Etapa 7`):
 
@@ -141,10 +150,10 @@ Tareas (detalle en `PLAN-PROYECTO28-V2.md §4 Etapa 7`):
    gobernado por `window.adminMode` (boolean, default `false`).
 2. Eliminar cualquier trigger visible que abra el panel por default — la
    "rueda de comandos" actual queda detrás del gate admin (Etapa 8).
-3. Agregar al panel los sliders correspondientes a los campos v2 ya
-   presentes en `site.game` / `site.streaming` / `site.admin`:
-   - **Game**: `lightSpeed`, `jumpHeight`, `jumpCount`, `gravity`,
-     `velocityCurve` (dropdown), `mouseFollowDelay`, `fallDuration`.
+3. Agregar los sliders restantes (los de juego ya están en `v0.8.0`):
+   - **Game (resto)**: `jumpCount` (slider int 1-6), `velocityCurve`
+     (dropdown — single option `kirby` por ahora), `fallDuration`
+     (slider 0.2-3s).
    - **Streaming**: `enabled` (toggle), `mode` (dropdown).
    - **Admin**: `adminButtonVisible` (toggle — meta-control de Etapa 8,
      requiere estar como admin para verlo).
@@ -198,7 +207,9 @@ Tags:    v0.1.0 (f7a3a30 — estado handoff v1)
          v0.6.1 (a26bff1 — docs cierre Etapa 5)
          v0.6.2 (7f59252 — patch CI: opt-in Node 24 para JS actions)
          v0.7.0 (99bce02 — cierre Etapa 6: cubos + respawn + HUD)
-         v0.7.1 (HEAD     — docs Etapa 6 + handoff a Etapa 7)
+         v0.7.1 (56d79ea — docs Etapa 6 + handoff a Etapa 7)
+         v0.8.0 (3ffef61 — polish Etapa 6: CCD + spawn + sombra + tweaks juego)
+         v0.8.1 (HEAD     — docs v0.8.0 + handoff actualizado)
 Remote:  origin sincronizado
 ```
 

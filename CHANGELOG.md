@@ -10,6 +10,63 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-05-22 — Polish Etapa 6: CCD + spawn + sombra + tweaks juego
+
+### Fixed
+- **Bug de traspaso (`src/game/light.js`)**: con `vy*dt` grande la luz
+  atravesaba los cubos porque el raycast solo hacía snap si la luz ya
+  estaba apoyada (`lightBottomY <= tileTopY + ε`) — no detectaba el
+  cruce ocurrido durante el frame. Reemplazado por **continuous collision**:
+  raycast desde `prevY` hacia abajo con `far = (prevY-newY) + SPHERE_RADIUS + ε`.
+  Si hay hit, snap al top del tile.
+- **Respawn en (0,5,0) caía al vacío**: la celda central del grid es
+  empty (slot `Rectangle 21`) y la luz aparecía justo encima sin tener
+  cubo debajo. Fix: `RESPAWN_XZ` se calcula en el constructor a partir de
+  `tiles[0]` (top-left del grid) — la luz aparece encima de un cubo real
+  y aterriza ahí.
+
+### Changed
+- **Cubo bajo la luz se eleva como hover** (`src/main.js`): el cubo activo
+  ahora recibe el mismo trato visual que el hover — sube a `ud.hoverY` y
+  brilla a `ud.hoverEmissive`. Eliminada la distinción visual previa que
+  lo dejaba plano. Una luz que pisa un cubo se siente como "contacto"
+  fuerte, equivalente al cursor encima.
+- **Defaults más suaves** (`src/data/fallback.js`):
+  - `lightSpeed`: 8.0 → 5.0 (movimiento más lento)
+  - `jumpHeight`: 3.0 → 2.5 (saltos menos exagerados)
+  - `gravity`:    20.0 → 16.0 (arco más flotante, feel Kirby pulido)
+
+### Added
+- **Sombra-decal cyan debajo de la luz** (`src/game/light.js`): mesh
+  `CircleGeometry` orientada horizontal, raycast hacia abajo cada frame
+  para posicionarla en `hit.point.y + 0.012` (sobre tile o floor). Escala
+  y opacidad varían con la altura: más alto = mayor radio + más translúcida.
+  Visible siempre que la luz esté sobre el escenario; se oculta durante
+  respawn al vacío. Resuelve el feedback de "dónde caerá la luz".
+- **Sliders de juego en el panel de tweaks** (`src/main.js`): sección
+  "Juego" expone 4 controles nuevos en vivo —
+  - Velocidad (1-12, step 0.5)
+  - Altura salto (0.5-6, step 0.25)
+  - Gravedad (5-40, step 0.5)
+  - Delay mouse-follow (0-3s, step 0.1)
+  `onChange` muta `site.game` in place; `controlLight` captura la
+  referencia y usa los nuevos valores en el siguiente frame sin reinit.
+
+### Notes
+- El cubo `activeEmissive` que se agregó en Etapa 6 (`v0.7.0`) ya no se
+  usa en el render loop, pero la propiedad sigue en `userData` para no
+  hacer trabajo de cleanup en este patch — puede removerse en un futuro
+  patch puramente cosmético.
+- Build: 626.51 KB (+2.19 KB vs `0.7.x`). Warning >500 KB persiste —
+  pendiente Etapa 15.
+
+### Verified
+- Build local OK.
+- Smoke test post-deploy esperado: tweak `gravityEnabled` ON → la luz
+  cae sobre un cubo (no al vacío), no traspasa al aterrizar desde
+  saltos altos, el cubo bajo se eleva y brilla, la sombra cyan sigue
+  la posición, los sliders de Juego cambian el feel en vivo.
+
 ## [0.7.0] — 2026-05-22 — Etapa 6: Cubos encendidos + respawn + HUD
 
 ### Added
@@ -306,7 +363,9 @@ o a un fix puntual entre etapas.
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/nitenacho/Proyecto28/compare/v0.7.1...v0.8.0
+[0.7.1]: https://github.com/nitenacho/Proyecto28/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/nitenacho/Proyecto28/compare/v0.6.2...v0.7.0
 [0.6.2]: https://github.com/nitenacho/Proyecto28/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/nitenacho/Proyecto28/compare/v0.6.0...v0.6.1
