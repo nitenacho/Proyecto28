@@ -150,6 +150,7 @@ export function createScene({ canvas, grid, projects }) {
         restY: 0, hoverY: 0.65,
         baseEmissive: isProject ? 0.35 : 0.0,
         hoverEmissive: isProject ? 1.4 : 0.6,
+        activeEmissive: isProject ? 0.95 : 0.0,
         breathPhase: Math.random() * Math.PI * 2,
         defaultColorKey: project ? project.color : 'empty',
       };
@@ -176,11 +177,13 @@ export function createScene({ canvas, grid, projects }) {
       if (style === 'mono') {
         ud.baseEmissive = 0.08;
         ud.hoverEmissive = 0.4;
+        ud.activeEmissive = 0.25;
         tile.material.roughness = 0.7;
         tile.material.metalness = 0.05;
       } else {
         ud.baseEmissive = 0.35;
         ud.hoverEmissive = 1.4;
+        ud.activeEmissive = 0.95;
         tile.material.roughness = 0.42;
         tile.material.metalness = 0.18;
       }
