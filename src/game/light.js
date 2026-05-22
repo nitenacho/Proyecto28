@@ -1,30 +1,22 @@
 /* =========================================================
    PROYECTO 28 — luz controlable
-     - Etapa 4 (default, sin físicas):
-         · Esfera + PointLight flotando a y=1 sobre el grid.
-         · Mouse-follow suave + WASD horizontal al mismo y.
-         · Tras `mouseFollowDelay` sin WASD vuelve a seguir mouse.
-     - Etapa 5 (opt-in via tweak `gravityEnabled`):
-         · Cuando el tweak está ON, presionar WASD entra a "modo físicas"
-           en la posición actual: gravedad + saltos múltiples (espacio).
-         · Cualquier movimiento del mouse sale del modo físicas y la y
-           lerpea de vuelta a 1.0 (no hay snap visible).
-     - Etapa 6 (encima de físicas):
-         · Cuando está grounded en physics, el cubo bajo la luz se marca
-           como "activeTile" y se notifica via onActiveTileChange.
-         · Caer al vacío (y<-10) dispara respawn: fade-out durante
-           config.fallDuration mientras sigue cayendo, snap a (0,5,0),
-           fade-in 0.3s. Incrementa contador y emite onRespawn(n).
+     - Etapa 4: floating (mouse-follow + WASD a y=1).
+     - Etapa 5: physics opt-in via tweak gravityEnabled (gravedad + saltos Kirby).
+     - Etapa 6: activeTile callback + respawn al caer al vacío + HUD counter.
+     - Etapa 6 polish (v0.8.0):
+         · Continuous collision: raycast desde prevY para evitar traspaso
+           cuando vy*dt es grande.
+         · Respawn position dinámica sobre tiles[0] (no centro vacío).
+         · Sombra mesh debajo de la luz (decal cyan) en todo momento.
    ========================================================= */
 
 import * as THREE from 'three';
 
 const LIGHT_Y = 1.0;
-const SPAWN_POSITION = new THREE.Vector3(0, LIGHT_Y, 0);
-const RESPAWN_POSITION = new THREE.Vector3(0, 5, 0);
+const RESPAWN_HEIGHT = 4.0;          // metros sobre el tile de respawn
 const SPHERE_RADIUS = 0.18;
-const TILE_TOP_Y = 0.19;            // TILE_HEIGHT/2 — debe coincidir con scene.js
-const FOLLOW_SMOOTHING = 6;         // tasa exponencial → frame-rate independiente
+const TILE_TOP_Y = 0.19;              // TILE_HEIGHT/2 — debe coincidir con scene.js
+const FOLLOW_SMOOTHING = 6;
 const GROUND_EPSILON = 0.02;
 const LIGHT_COLOR = 0x6BC4BB;
 const LIGHT_EMISSIVE = 0x5ee5d6;
@@ -33,26 +25,23 @@ const FADE_IN_DURATION = 0.3;
 const BASE_LIGHT_INTENSITY = 4.5;
 const BASE_EMISSIVE_INTENSITY = 2.5;
 
+// Sombra (decal) — círculo proyectado en la superficie bajo la luz
+const SHADOW_RADIUS = 0.45;
+const SHADOW_BASE_OPACITY = 0.5;
+const SHADOW_Y_OFFSET = 0.012;         // evita z-fighting con el top del cubo
+const FLOOR_Y = -0.20;                 // debe coincidir con scene.js floor.position.y
+
 // Kirby feel: cada salto en aire es más débil que el anterior.
 const KIRBY_MULTIPLIERS = [1.0, 0.85, 0.7, 0.55];
 
 /**
  * @param {Object} opts
  * @param {THREE.Scene} opts.scene
- * @param {{ lightSpeed:number, mouseFollowDelay:number, gravity:number, jumpHeight:number, jumpCount:number, fallDuration:number }} opts.config  site.game
- * @param {THREE.Mesh[]} opts.tiles  malla de cubos para raycast hacia abajo (modo físicas)
- * @param {boolean} [opts.gravityEnabled=false]  tweak inicial
- * @param {(tile:THREE.Mesh|null)=>void} [opts.onActiveTileChange]  callback al cambiar el cubo activo (sólo project tiles)
- * @param {(fallCount:number)=>void} [opts.onRespawn]  callback al completar un respawn (post fade-out)
- * @returns {{
- *   mesh: THREE.Mesh,
- *   light: THREE.PointLight,
- *   onKeyDown: (e:KeyboardEvent)=>void,
- *   onKeyUp: (e:KeyboardEvent)=>void,
- *   update: (dt:number, nowMs:number, raycaster:THREE.Raycaster|null)=>void,
- *   setGravityEnabled: (v:boolean)=>void,
- *   notifyMouseMoved: ()=>void,
- * }}
+ * @param {{ lightSpeed:number, mouseFollowDelay:number, gravity:number, jumpHeight:number, jumpCount:number, fallDuration:number }} opts.config  site.game (mutable — los tweaks lo modifican in place)
+ * @param {THREE.Mesh[]} opts.tiles
+ * @param {boolean} [opts.gravityEnabled=false]
+ * @param {(tile:THREE.Mesh|null)=>void} [opts.onActiveTileChange]
+ * @param {(fallCount:number)=>void} [opts.onRespawn]
  */
 export function createControllableLight({
   scene, config, tiles,
@@ -72,41 +61,62 @@ export function createControllableLight({
       opacity: 1.0,
     }),
   );
-  mesh.position.copy(SPAWN_POSITION);
   scene.add(mesh);
 
   const light = new THREE.PointLight(LIGHT_COLOR, BASE_LIGHT_INTENSITY, 12, 1.8);
-  light.position.copy(mesh.position);
   scene.add(light);
 
+  // Sombra (decal cyan) — siempre debajo de la luz, sobre cubo o floor
+  const shadow = new THREE.Mesh(
+    new THREE.CircleGeometry(SHADOW_RADIUS, 32),
+    new THREE.MeshBasicMaterial({
+      color: 0x5ee5d6,
+      transparent: true,
+      opacity: SHADOW_BASE_OPACITY,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    }),
+  );
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.renderOrder = 1;
+  scene.add(shadow);
+
+  // Posición de respawn: encima del primer cubo (top-left del grid)
+  const RESPAWN_XZ = new THREE.Vector3(0, 0, 0);
+  if (tiles && tiles.length > 0) {
+    RESPAWN_XZ.set(tiles[0].position.x, 0, tiles[0].position.z);
+  }
+  const SPAWN_POSITION = new THREE.Vector3(RESPAWN_XZ.x, LIGHT_Y, RESPAWN_XZ.z);
+  mesh.position.copy(SPAWN_POSITION);
+  light.position.copy(mesh.position);
+
   let gravityFlag = !!gravityEnabled;
-  let mode = 'floating';              // 'floating' | 'physics'
+  let mode = 'floating';
 
   const target = mesh.position.clone();
   const velocity = new THREE.Vector3();
   const keysActive = new Set();
   let lastWASDInput = -Infinity;
 
-  // Estado físicas (sólo válido cuando mode === 'physics')
   let vy = 0;
   let grounded = false;
   let jumpsUsed = 0;
   let activeTile = null;
 
-  // Estado respawn
-  let respawnPhase = 'none';          // 'none' | 'fadingOut' | 'fadingIn'
+  let respawnPhase = 'none';
   let respawnT = 0;
   let fallCount = 0;
 
-  // Plano horizontal fijo a y=LIGHT_Y para proyectar el cursor.
   const cursorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -LIGHT_Y);
   const planeHit = new THREE.Vector3();
 
-  // Raycast hacia abajo para detectar cubo bajo la luz (sólo modo físicas).
   const downRay = new THREE.Raycaster();
   const downOrigin = new THREE.Vector3();
   const downDir = new THREE.Vector3(0, -1, 0);
-  downRay.far = 10;
+
+  // Raycaster auxiliar para la sombra (no comparte estado con el de física)
+  const shadowRay = new THREE.Raycaster();
+  const shadowOrigin = new THREE.Vector3();
 
   function setActiveTile(next) {
     if (next === activeTile) return;
@@ -117,6 +127,7 @@ export function createControllableLight({
   function setOpacity(o) {
     mesh.material.opacity = o;
     light.intensity = BASE_LIGHT_INTENSITY * o;
+    shadow.material.opacity = SHADOW_BASE_OPACITY * o;
   }
 
   function enterPhysics() {
@@ -131,7 +142,6 @@ export function createControllableLight({
     if (mode === 'floating') return;
     mode = 'floating';
     setActiveTile(null);
-    // y volverá a LIGHT_Y vía lerp en updateFloating
   }
 
   function setGravityEnabled(v) {
@@ -205,13 +215,11 @@ export function createControllableLight({
       mesh.position.x += (target.x - mesh.position.x) * k;
       mesh.position.z += (target.z - mesh.position.z) * k;
     }
-    // Smooth-return de y a LIGHT_Y (no-op cuando ya está ahí; útil tras salir de físicas).
     const kY = 1 - Math.exp(-dt * FOLLOW_SMOOTHING);
     mesh.position.y += (LIGHT_Y - mesh.position.y) * kY;
   }
 
   function updatePhysics(dt) {
-    // Durante respawn fadingOut: seguimos cayendo, sin input WASD ni saltos
     const inputAllowed = respawnPhase === 'none';
 
     if (inputAllowed) {
@@ -228,31 +236,41 @@ export function createControllableLight({
     if (!grounded) {
       vy -= config.gravity * dt;
     }
-    mesh.position.y += vy * dt;
 
-    // No raycast contra tiles mientras está cayendo al vacío.
+    const prevY = mesh.position.y;
+    const newY = prevY + vy * dt;
+
     if (respawnPhase !== 'none') {
+      mesh.position.y = newY;
       setActiveTile(null);
       return;
     }
 
-    downOrigin.copy(mesh.position);
-    downRay.set(downOrigin, downDir);
-    const hits = downRay.intersectObjects(tiles, false);
-
+    // Continuous collision: si vamos hacia abajo o estamos en reposo,
+    // raycast desde (newX, prevY, newZ) hacia abajo, far = (prevY - newY) + SPHERE_RADIUS + ε.
+    // Si hay hit, la luz cruzó o está apoyada → snap al top del cubo.
     let landed = false;
     let landedTile = null;
-    if (hits.length > 0 && vy <= 0) {
-      const tile = hits[0].object;
-      const tileTopY = tile.position.y + TILE_TOP_Y;
-      const lightBottomY = mesh.position.y - SPHERE_RADIUS;
-      if (lightBottomY <= tileTopY + GROUND_EPSILON) {
+    if (vy <= 0) {
+      downOrigin.set(mesh.position.x, prevY, mesh.position.z);
+      downRay.set(downOrigin, downDir);
+      const drop = Math.max(0, prevY - newY);
+      downRay.far = drop + SPHERE_RADIUS + GROUND_EPSILON;
+      const hits = downRay.intersectObjects(tiles, false);
+      if (hits.length > 0) {
+        const tile = hits[0].object;
+        const tileTopY = tile.position.y + TILE_TOP_Y;
         mesh.position.y = tileTopY + SPHERE_RADIUS;
         vy = 0;
         landed = true;
         landedTile = tile;
       }
     }
+
+    if (!landed) {
+      mesh.position.y = newY;
+    }
+
     if (landed) {
       if (!grounded) {
         grounded = true;
@@ -260,7 +278,7 @@ export function createControllableLight({
       }
       setActiveTile(landedTile && landedTile.userData.isProject ? landedTile : null);
     } else {
-      if (grounded) grounded = false;          // walked off the edge
+      if (grounded) grounded = false;
       setActiveTile(null);
     }
   }
@@ -278,8 +296,11 @@ export function createControllableLight({
     if (respawnPhase === 'fadingOut') {
       respawnT += dt / Math.max(config.fallDuration, 0.01);
       if (respawnT >= 1) {
-        // Snap a posición de respawn, prep para fade-in
-        mesh.position.copy(RESPAWN_POSITION);
+        mesh.position.set(
+          RESPAWN_XZ.x,
+          RESPAWN_XZ.y + RESPAWN_HEIGHT,
+          RESPAWN_XZ.z,
+        );
         vy = 0;
         grounded = false;
         jumpsUsed = 0;
@@ -303,6 +324,29 @@ export function createControllableLight({
     }
   }
 
+  // Actualiza la sombra-decal bajo la luz: raycast hacia abajo desde la luz,
+  // mete la mesh en el hit point (top del cubo o piso). Escala/opacidad
+  // varían con la altura para dar feedback de distancia.
+  function updateShadow() {
+    shadowOrigin.set(mesh.position.x, mesh.position.y, mesh.position.z);
+    shadowRay.set(shadowOrigin, downDir);
+    shadowRay.far = 50;
+    const hits = shadowRay.intersectObjects(tiles, false);
+    let surfaceY = FLOOR_Y;
+    if (hits.length > 0) {
+      surfaceY = hits[0].point.y;
+    }
+    shadow.position.set(mesh.position.x, surfaceY + SHADOW_Y_OFFSET, mesh.position.z);
+
+    const heightAbove = Math.max(0, mesh.position.y - SPHERE_RADIUS - surfaceY);
+    const scale = 1 + heightAbove * 0.18;
+    shadow.scale.setScalar(scale);
+    const fadeFactor = Math.max(0.15, 1 - heightAbove * 0.10);
+    const respawnFade = mesh.material.opacity;  // si la luz está en fade, sombra también
+    shadow.material.opacity = SHADOW_BASE_OPACITY * fadeFactor * respawnFade;
+    shadow.visible = mesh.position.y > VOID_Y + 1;  // ocultar mientras cae al vacío
+  }
+
   function update(dt, nowMs, raycaster) {
     if (mode === 'physics') {
       updatePhysics(dt);
@@ -312,7 +356,8 @@ export function createControllableLight({
       updateFloating(dt, nowMs, raycaster);
     }
     light.position.copy(mesh.position);
+    updateShadow();
   }
 
-  return { mesh, light, onKeyDown, onKeyUp, update, setGravityEnabled, notifyMouseMoved };
+  return { mesh, light, shadow, onKeyDown, onKeyUp, update, setGravityEnabled, notifyMouseMoved };
 }

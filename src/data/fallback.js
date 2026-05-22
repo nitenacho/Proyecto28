@@ -26,10 +26,10 @@ export const FALLBACK_SITE = {
 
   // v2 (Etapa 2/3) — match SiteSetting schema defaults
   game: {
-    lightSpeed: 8.0,
-    jumpHeight: 3.0,
+    lightSpeed: 5.0,           // Etapa 6 polish: bajado de 8.0 para feel más suave
+    jumpHeight: 2.5,           // Etapa 6 polish: bajado de 3.0
     jumpCount: 4,
-    gravity: 20.0,
+    gravity: 16.0,             // Etapa 6 polish: bajado de 20.0 para arco más suave
     velocityCurve: 'kirby',
     mouseFollowDelay: 1.0,
     fallDuration: 1.0,
