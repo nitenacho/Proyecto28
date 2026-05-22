@@ -1,36 +1,38 @@
 # HANDOFF — Proyecto 28
 
-> **Última actualización:** 2026-05-22 03:15 UTC (cierre Etapa 5 + patch CI Node 24 `v0.6.2`)
-> **Tag activo:** `v0.6.2` (patch CI: opt-in Node 24 para JS actions, sobre `v0.6.1` docs y `v0.6.0` Etapa 5)
+> **Última actualización:** 2026-05-22 13:25 UTC (cierre Etapa 6 + docs `v0.7.1`)
+> **Tag activo:** `v0.7.0` (cierre Etapa 6) · `v0.7.1` (patch documental sobre este cierre)
 > **Branch de trabajo:** `main` (sin etapa abierta)
 > **Owner:** @nitenacho — cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 
 Este documento es **autosuficiente**: contiene todo lo necesario para que un
-agente IA nuevo continúe desde Etapa 6 sin necesidad de contexto extra.
+agente IA nuevo continúe desde Etapa 7 sin necesidad de contexto extra.
 Pega este documento entero al inicio de la sesión.
 
 ---
 
 ## 0. Resumen en 30 segundos
 
-- Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite).
+Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite).
 - CMS Strapi Cloud headless para contenido editable.
 - Plan completo de evolución en [`PLAN-PROYECTO28-V2.md`](PLAN-PROYECTO28-V2.md) (16 etapas).
-- Etapas 1-5 cerradas: versionado, schema v2 Strapi, data layer frontend,
-  luz controlable, físicas Kirby **opt-in** (gravityEnabled tweak).
-- Próximo paso: **Etapa 6 — Cubos encendidos + respawn + contador HUD**.
+- Etapas 1-6 cerradas: versionado, schema v2 Strapi, data layer frontend,
+  luz controlable, físicas Kirby **opt-in**, cubos encendidos + respawn al
+  vacío + HUD `LUCES CAÍDAS`.
+- Próximo paso: **Etapa 7 — Tweaks panel oculto por default + sliders nuevos**.
 
 ---
 
 ## 1. Cómo arrancar como nuevo agente IA (paso a paso)
 
 ### Paso 1 — Identificar el repo y abrirlo
+
 ```bash
 cd "C:/Users/incon/OneDrive/Desktop/Proyectos_Claude/Claude_P28/Proyecto28"
 
 git status                              # esperado: clean en main
-git describe --tags --abbrev=0          # esperado: v0.6.2
+git describe --tags --abbrev=0          # esperado: v0.7.1 (o v0.7.0 si no hay patch docs aún)
 git log --oneline -5
 ```
 
@@ -38,6 +40,7 @@ Si no estás en ese path, pregunta al owner. El repo remoto es
 `https://github.com/nitenacho/Proyecto28`.
 
 ### Paso 2 — Leer la documentación clave (en orden)
+
 1. Este archivo: `HANDOFF-LATEST.md` (estás aquí).
 2. `PLAN-PROYECTO28-V2.md` — Plan completo de 16 etapas.
 3. `VERSIONING.md` — Flujo branches + Conventional Commits + checklist.
@@ -45,6 +48,7 @@ Si no estás en ese path, pregunta al owner. El repo remoto es
 5. `README.md` — Overview y tabla de etapas.
 
 ### Paso 3 — Validar que el sistema está vivo
+
 ```bash
 curl -s 'https://honest-candy-800d1e4a92.strapiapp.com/api/projects?populate=*' | python -c "import json,sys; d=json.load(sys.stdin); p=d.get('data',[])[0] if d.get('data') else {}; print('projects:', len(d.get('data',[])), '| has unrealEnabled:', 'unrealEnabled' in p)"
 curl -s -o /dev/null -w "admin-whitelist HTTP: %{http_code}\n" 'https://honest-candy-800d1e4a92.strapiapp.com/api/admin-whitelists'
@@ -52,131 +56,137 @@ curl -I https://proyecto28.com | head -3
 gh run list --limit 3 -R nitenacho/Proyecto28
 ```
 
-### Paso 4 — Empezar Etapa 6
+### Paso 4 — Empezar Etapa 7
+
 ```bash
 git checkout main && git pull
-git checkout -b etapa-6-cubos-encendidos
+git checkout -b etapa-7-tweaks-ocultos
 ```
 
 Ver §3 para el detalle de la etapa.
 
 ### Paso 5 — Al cerrar la etapa
-1. Verificar criterios de éxito (ver `PLAN-PROYECTO28-V2.md §4 Etapa 6`).
+
+1. Verificar criterios de éxito (ver `PLAN-PROYECTO28-V2.md §4 Etapa 7`).
 2. Build local OK (`npm run build`).
-3. Commit en Conventional Commits con scope `game` (o `scene` si tocas
-   solo tiles, o `hud` si separas el contador). Mezclar scopes en
-   commits separados si la etapa requiere varios.
-4. `git push -u origin etapa-6-cubos-encendidos`.
-5. `git checkout main && git merge --ff-only etapa-6-cubos-encendidos && git push origin main`.
-6. Tag: `git tag -a v0.7.0 -m "Etapa 6: ..." && git push origin v0.7.0`.
+3. Commit en Conventional Commits con scope `ui` (panel de tweaks) o
+   `tweaks`. Si agregás un módulo nuevo, scope acorde. Mezclar scopes en
+   commits separados si la etapa lo requiere.
+4. `git push -u origin etapa-7-tweaks-ocultos`.
+5. `git checkout main && git merge --ff-only etapa-7-tweaks-ocultos && git push origin main`.
+6. Tag: `git tag -a v0.8.0 -m "Etapa 7: tweaks ocultos + sliders v2" && git push origin v0.8.0`.
 7. Esperar GH Actions verde (`gh run watch <ID>`).
-8. Smoke test `proyecto28.com` — al activar el tweak `gravityEnabled`,
-   los cubos pisados deben encenderse; caer al vacío respawnea con
-   animación y el contador HUD incrementa.
+8. Smoke test `proyecto28.com` — al cargar fresh, no se ve el panel ni
+   la rueda. `window.adminMode = true` en consola debería mostrarlo
+   (placeholder hasta Etapa 9). Los sliders nuevos deben estar.
 9. Actualizar `CHANGELOG.md`, `README.md` (tabla etapas), `HANDOFF-LATEST.md`.
-10. Commit docs directo a main, push, tag `v0.7.1` si aplica.
+10. Commit docs directo a main, push, tag `v0.8.1` si aplica.
 11. Respaldar handoff en Google Doc (ver §13 quirks).
 
 ---
 
 ## 2. Última etapa cerrada
 
-**Etapa 5 — Físicas Kirby opt-in** (`v0.6.0`, 2026-05-22, commit `f75a96e`)
+**Etapa 6 — Cubos encendidos + respawn + contador HUD** (`v0.7.0`, 2026-05-22)
+
+Commits:
+- `88d4518` feat(scene): expose activeEmissive on project tile userData
+- `b31e9d4` feat(game): track activeTile + respawn al caer al vacío
+- `99bce02` feat(hud): contador LUCES CAÍDAS + wire active tile glow
 
 Entregables:
-- **State machine** en `src/game/light.js`: modos `'floating'` y `'physics'`.
-  - `floating` (default): comportamiento Etapa 4 sin cambios — mouse-follow
-    a `y=1` + WASD horizontal + `mouseFollowDelay`.
-  - `physics` (opt-in): gravedad `config.gravity`, raycast hacia abajo
-    sobre `sceneCtx.tiles`, snap a `tile.position.y + TILE_HEIGHT/2 +
-    SPHERE_RADIUS`. Saltos con espacio, multipliers Kirby `[1.0, 0.85,
-    0.7, 0.55]` indexados por `jumpsUsed` (max = `config.jumpCount=4`).
-  - Transiciones: WASD entra a `physics` si `gravityFlag=true`; pointermove
-    o `setGravityEnabled(false)` salen.
-- **Tweak `gravityEnabled`** en `site.defaults` (default `false`). Toggle
-  visible en panel Tweaks → sección "Juego" → "Gravedad + saltos (WASD)".
-  - `fallback.js` define el default.
-  - `cms.js` mapea `a.defaultGravityEnabled ?? fb.defaults.gravityEnabled`
-    (campo futuro de Strapi).
-- **API nueva** en `controlLight`: `setGravityEnabled(bool)`,
-  `notifyMouseMoved()` (wire en `main.js` con `onChange` y `pointermove`).
-- En `floating`, `y` lerpea suave hacia `LIGHT_Y=1` para evitar teleport
-  al salir de físicas.
+- **`src/game/light.js`**:
+  - `onActiveTileChange(tile|null)` callback: en physics + grounded,
+    expone el cubo bajo la luz (sólo project tiles).
+  - Respawn cuando `y < -10`: fade-out durante `config.fallDuration`
+    mientras sigue cayendo → snap a `(0, 5, 0)` con `vy=0` /
+    `grounded=false` → fade-in 0.3s. Incrementa `fallCount` y emite
+    `onRespawn(n)` post fade-out.
+  - Material ahora `transparent:true`; `PointLight.intensity` sigue la
+    `opacity` para que el fade afecte la iluminación.
+  - Input WASD + saltos bloqueados durante el respawn.
+- **`src/scene/scene.js`**: `ud.activeEmissive` distinguible del hover
+  (`0.95` default / `0.25` en mono). `applyTileStyle` lo recomputa al
+  cambiar de paleta.
+- **`src/ui/hud.js`** (módulo nuevo): contador `LUCES CAÍDAS · 000` en
+  esquina sup-der. Tipografía mono + token cyan, padding-zero a 3 dígitos.
+  Pulse copper-bright al incrementar. API: `mountHud().setFallCount(n)`.
+- **`src/main.js`**: cablea callbacks de `controlLight` al render loop y al
+  HUD. `targetGlow` prioriza `hover > activeTile > baseGlow`; el activo
+  **no** levanta la altura (distingue visualmente del hover).
 
-**Decisión de diseño**: el spec original del plan describe gravedad como
-default. El owner pidió que el default Etapa 4 quede intacto y la física
-sea opt-in. La versión final refleja esa decisión — el plan está
-actualizado implícitamente vía este handoff.
+**Decisiones de diseño**:
+- Empty tiles no se marcan activos. El `PointLight` ya los ilumina.
+- Activo usa `emissiveIntensity` intermedio (0.95) entre base (0.35) y
+  hover (1.4). Combinado con altura plana del activo (vs. hover levantado
+  a 0.65), las dos señales se distinguen sin ambigüedad — y si el mouse
+  pasa sobre el cubo activo, hover gana.
+- Estado del contador en memoria — se resetea al recargar (intencional).
 
-Verificado: build 621.67 KB (+0.77 KB), GH Pages deploy verde en 8s,
-`proyecto28.com` sirviendo `index-Cdkh2u7j.js`.
+Verificado: build 624.32 KB (+2.65 KB), GH Pages deploy verde.
 
-**Patch posterior `v0.6.1`** (este commit): docs CHANGELOG + README +
-HANDOFF para cierre Etapa 5. Incluye también backfill de la sección
-`[0.5.1]` que faltaba en el CHANGELOG.
+**Patch posterior `v0.7.1`** (este commit): docs CHANGELOG + README +
+HANDOFF para cierre Etapa 6.
 
-## 3. Próximo paso exacto — Etapa 6
+---
 
-**Etapa 6 — Cubos encendidos + respawn + contador HUD**
+## 3. Próximo paso exacto — Etapa 7
 
-Tareas (detalle en `PLAN-PROYECTO28-V2.md §4 Etapa 6`):
+**Etapa 7 — Tweaks panel: ocultar por default + sliders nuevos**
 
-1. **Detección de cubo activo** en `src/game/light.js`:
-   - Cada frame en modo `physics`, el raycast hacia abajo ya existe.
-     Guardar el `tile` impactado (si está grounded) como `activeTile`.
-   - Exponer `activeTile` o emitir callback al cambiar
-     (`onActiveTileChange`).
-2. **Visual del cubo activo** en `src/scene/scene.js` (o nuevo helper):
-   - Aumentar `emissiveIntensity` del cubo activo (~+0.5 a +0.8 sobre el
-     baseline `ud.baseEmissive`).
-   - Color un cyan más brillante o el copper definido por el cubo.
-   - Transición animada de ~200ms (suficiente con lerp en el render loop;
-     GSAP queda para Etapa 14).
-   - Si ya había otro cubo activo → desactivarlo con la misma transición.
-   - **Importante**: el estilo "cubo activo" debe ser distinguible del
-     hover normal del mouse (el hover ya usa `hoverEmissive=1.4` y sube
-     `position.y` a `hoverY=0.65`). El activo no debería subir el cubo.
-3. **Respawn al caer al vacío** en `light.js`:
-   - Cuando `mode === 'physics'` y `mesh.position.y < -10` → iniciar
-     respawn.
-   - Animación: la luz se desvanece (`material.opacity` 1→0 + flag
-     `transparent: true`) durante `config.fallDuration` segundos
-     mientras sigue cayendo.
-   - Al final → reposicionar en `(0, 5, 0)` con `vy=0`, `grounded=false`.
-     Fade in (`opacity` 0→1) en 0.3s.
-   - Incrementar `fallCounter` y emitir callback `onRespawn(fallCounter)`.
-4. **HUD contador** en nuevo módulo `src/ui/hud.js`:
-   - Crear elemento DOM en esquina superior derecha (o en HUD existente
-     en `index.html` — revisar primero qué hay).
-   - Tipografía monospace, color tokens existentes (ver `src/styles/`).
-   - Texto: `LUCES CAÍDAS: 003` con padding zero (3 dígitos).
-   - Estado en memoria — resetea al recargar.
-   - API: `hud.setFallCount(n)`.
-5. **Wire en `main.js`**: pasar callbacks a `controlLight`
-   (`onActiveTileChange`, `onRespawn`) y conectarlos al HUD + scene.
+Tareas (detalle en `PLAN-PROYECTO28-V2.md §4 Etapa 7`):
 
-**Criterio de éxito visible:**
-- Tweak `gravityEnabled` ON + WASD → la luz cae y aterriza en un cubo.
-- **El cubo bajo la luz se enciende** con un estilo distinguible del
-  hover de mouse.
-- Caminar a otro cubo → el anterior se apaga, el nuevo se enciende.
-- Caminar fuera del grid → la luz se desvanece, respawnea en `(0, 5, 0)`,
-  y el contador "LUCES CAÍDAS" sube en 1.
-- Activar el tweak OFF mientras está activo: el cubo activo se apaga, la
-  luz vuelve a `y=1`, no hay errores.
+1. **`src/ui/tweaks.js`**: estado inicial `display: none`. Exportar API
+   `tweaks.show()` / `tweaks.hide()` / `tweaks.isVisible()`. Estado
+   gobernado por `window.adminMode` (boolean, default `false`).
+2. Eliminar cualquier trigger visible que abra el panel por default — la
+   "rueda de comandos" actual queda detrás del gate admin (Etapa 8).
+3. Agregar al panel los sliders correspondientes a los campos v2 ya
+   presentes en `site.game` / `site.streaming` / `site.admin`:
+   - **Game**: `lightSpeed`, `jumpHeight`, `jumpCount`, `gravity`,
+     `velocityCurve` (dropdown), `mouseFollowDelay`, `fallDuration`.
+   - **Streaming**: `enabled` (toggle), `mode` (dropdown).
+   - **Admin**: `adminButtonVisible` (toggle — meta-control de Etapa 8,
+     requiere estar como admin para verlo).
+4. Persistencia local (`localStorage`) solo para preview en sesión actual.
+   La persistencia real al CMS llega en Etapa 12 ("Publicar").
 
-**Riesgo:** Bajo. Las piezas mecánicas ya existen (raycast en Etapa 5,
-hover-style en Etapa 4). El trabajo es de polish visual y un módulo HUD
-nuevo (~50 líneas).
+**Criterio de éxito visible**:
+- Al cargar fresh `proyecto28.com`, no se ve el panel ni la rueda.
+- `window.adminMode = true` en DevTools console → aparece el panel
+  (mecanismo temporal de QA, antes de Etapa 9).
+- Los sliders nuevos están y reflejan en vivo en la luz / cubos / cámara.
+- Reload sin tocar `adminMode` → panel oculto otra vez.
 
-**Dependencias:** Etapa 5.
+**Riesgo**: Bajo-medio. El módulo `mountTweaks` en `src/ui/tweaks.js` ya
+existe y acepta `controls: [...]` declarativos. La complejidad está en
+agregar los sliders sin romper los wirings existentes en `main.js`
+(`onChange`), y en exponer setters en vivo para que los sliders del juego
+muten `site.game` y/o llamen `controlLight.setConfig(...)` si hace falta.
+
+**Dependencias**: Etapa 3 (data layer ya expone los campos v2 via
+`site.game/streaming/admin`).
+
+**Hints**:
+- `controlLight` toma `config: site.game` en el constructor. Si captura
+  la referencia (en vez de copiarla), mutar `site.game.X` en el `onChange`
+  basta para que el siguiente frame use el nuevo valor. Verificar.
+- Para `jumpCount` mid-air, cuidado: si el slider lo baja por debajo de
+  `jumpsUsed`, no romper. Reset implícito al aterrizar es suficiente.
+- `streaming.enabled` y `mode` no tienen consumer todavía (Etapa 11) — los
+  sliders son no-op pero deben persistirse en el estado del panel.
+- Para `window.adminMode`, el toggle más limpio es exponer `show/hide`
+  desde `mountTweaks` y usar `Object.defineProperty(window, 'adminMode', …)`
+  para llamar al setter automáticamente cuando se asigna desde DevTools.
+
+---
 
 ## 4. Estado de git
 
 ```
 Repo:    https://github.com/nitenacho/Proyecto28
 Branch:  main (working tree clean)
-HEAD:    (commit del v0.6.1 con docs Etapa 5)
+HEAD:    (commit del v0.7.1 con docs Etapa 6)
 Tags:    v0.1.0 (f7a3a30 — estado handoff v1)
          v0.2.0 (0da2c23 — cierre Etapa 1: versionado)
          v0.3.0 (d61fec6 — cierre Etapa 2: Strapi schema v2)
@@ -185,10 +195,14 @@ Tags:    v0.1.0 (f7a3a30 — estado handoff v1)
          v0.5.0 (e7390e2 — cierre Etapa 4: luz controlable)
          v0.5.1 (4e9d077 — docs cierre Etapa 4)
          v0.6.0 (f75a96e — cierre Etapa 5: físicas Kirby opt-in)
-         v0.6.1 (a26bff1 — docs Etapa 5 + handoff a Etapa 6)
-         v0.6.2 (HEAD     — patch CI: opt-in Node 24 para JS actions)
+         v0.6.1 (a26bff1 — docs cierre Etapa 5)
+         v0.6.2 (7f59252 — patch CI: opt-in Node 24 para JS actions)
+         v0.7.0 (99bce02 — cierre Etapa 6: cubos + respawn + HUD)
+         v0.7.1 (HEAD     — docs Etapa 6 + handoff a Etapa 7)
 Remote:  origin sincronizado
 ```
+
+---
 
 ## 5. Estado de Strapi Cloud
 
@@ -202,6 +216,8 @@ Remote:  origin sincronizado
 | Admin de Strapi | ❌ **Owner pendiente de crear** en `/admin` |
 | Seed AdminWhitelist | ✅ inconcha@gmail.com (owner) + yk8arts@gmail.com (editor) |
 
+---
+
 ## 6. Estado de hosting
 
 | Item | Estado |
@@ -211,7 +227,9 @@ Remote:  origin sincronizado
 | `proyecto28.cl` | ⏳ verificar propagación NIC y redirect a `.com` |
 | Cloudflare zone `.cl` | ⏳ esperar `status: active` |
 | GH Actions workflow | ✅ `Build and deploy frontend to GitHub Pages` activo |
-| Node.js 20 actions | ✅ mitigado en `v0.6.2` vía `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`; bumps formales en Etapa 15 |
+| Node 20 deprecation | ✅ resuelto en `v0.6.2` (flag `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`) |
+
+---
 
 ## 7. Bloqueantes / decisiones pendientes
 
@@ -224,13 +242,14 @@ Remote:  origin sincronizado
 | §1.5 | Detalles del juego | ✅ defaults en `site.game` | — |
 | §1.6 | Admin Strapi creado | ❌ pendiente | Edición visual en Strapi |
 | §1.6 | `.cl` propagación | ⏳ verificar | — |
-| CI | Node 20 actions deprecated | ✅ mitigado en `v0.6.2` | — |
 
-**Ninguno bloquea Etapa 6.**
+**Ninguno bloquea Etapa 7.**
+
+---
 
 ## 8. Stack actual
 
-- **Frontend:** Vite 6 + Three.js 0.176 + vanilla JS modules. Bundle 621.67 KB
+- **Frontend:** Vite 6 + Three.js 0.176 + vanilla JS modules. Bundle 624.32 KB
   (warning >500KB — pendiente code-splitting en Etapa 15).
 - **CMS:** Strapi 5.13.1 en Strapi Cloud (Postgres managed, plan Free).
   Schema v2 desplegado.
@@ -240,15 +259,16 @@ Remote:  origin sincronizado
 - **Pixel Streaming:** Aún no implementado (Etapa 11), modo decidido =
   `shared`.
 - **GSAP:** Aún no instalado (Etapa 14).
-- **Mini-juego:** Etapa 4 cerrada — esfera de luz controlable.
-  Etapa 5 cerrada — físicas Kirby opt-in. Etapa 6 agrega cubos encendidos
-  + respawn + contador.
+- **Mini-juego:** Etapas 4-6 cerradas — luz controlable, físicas Kirby
+  opt-in, cubos encendidos + respawn + contador.
+
+---
 
 ## 9. Comandos de verificación rápida
 
 ```bash
 git -C "<path>/Proyecto28" status
-git -C "<path>/Proyecto28" describe --tags --abbrev=0   # esperado: v0.6.2
+git -C "<path>/Proyecto28" describe --tags --abbrev=0   # esperado: v0.7.1
 
 curl -s 'https://honest-candy-800d1e4a92.strapiapp.com/api/projects?populate=*' | python -c "import json,sys; d=json.load(sys.stdin); print('projects:', len(d.get('data',[])))"
 curl -s -o /dev/null -w "admin-whitelist: %{http_code}\n" 'https://honest-candy-800d1e4a92.strapiapp.com/api/admin-whitelists'
@@ -260,6 +280,8 @@ gh run list -R nitenacho/Proyecto28 --limit 3
 # (no debe haber logs [p28:v2] — fueron removidos en v0.5.0)
 curl -I https://proyecto28.com
 ```
+
+---
 
 ## 10. Estructura del repo
 
@@ -280,12 +302,13 @@ Proyecto28/
 │   └── release.sh
 ├── src/
 │   ├── main.js                        Bootstrap + raycaster + render loop
-│   ├── scene/scene.js                 Three.js scene + tiles
+│   ├── scene/scene.js                 Three.js scene + tiles + activeEmissive
 │   ├── scene/hoverModel.js            Modelo procedural al hover
 │   ├── game/
-│   │   └── light.js                   Etapa 4 + 5: state machine floating/physics
+│   │   └── light.js                   Etapas 4-6: floating/physics + activeTile + respawn
 │   ├── ui/popup.js                    Popup HUD
-│   ├── ui/tweaks.js                   Panel de tweaks
+│   ├── ui/tweaks.js                   Panel de tweaks (próximo target Etapa 7)
+│   ├── ui/hud.js                      HUD LUCES CAÍDAS (Etapa 6)
 │   ├── data/
 │   │   ├── cms.js                     Fetch Strapi + JSDoc typedefs
 │   │   └── fallback.js                Defaults v2 cuando Strapi cae
@@ -304,6 +327,8 @@ Proyecto28/
 └── .github/workflows/deploy.yml       CI: build Vite + GH Pages
 ```
 
+---
+
 ## 11. Memorias persistidas (en máquina del owner)
 
 `C:\Users\incon\.claude\projects\C--Users-incon-OneDrive-Desktop-Proyectos-Claude-Claude-P28\memory\`:
@@ -314,6 +339,8 @@ Proyecto28/
 
 Estas memorias son por-máquina (no viajan al repo). Un agente IA en otra
 máquina las regenerará automáticamente.
+
+---
 
 ## 12. Secretos y tokens
 
@@ -327,7 +354,9 @@ Sin cambios desde el handoff v1. Resumen para arrancar:
 
 Owner rotará todos antes de salir de "desarrollo base".
 
-## 13. Quirks del Google Doc backup (importante para próximo agente)
+---
+
+## 13. Quirks del Google Doc backup
 
 El handoff de cada cierre de etapa se respalda en una subpestaña del Google Doc:
 https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/edit
@@ -364,6 +393,8 @@ nombre `YYYY-MM-DD HH:MM UTC - Etapa N cierre`.
 10. type del contenido en chunks de ~2KB dentro de browser_batch
 ```
 
+---
+
 ## 14. Reglas de mantención (recordatorio)
 
 De `VERSIONING.md`:
@@ -376,24 +407,21 @@ De `VERSIONING.md`:
 - **GitHub Actions + Strapi Cloud + (futuro) Claude Design syncs son
   automáticos** — no haces deploys manuales.
 
+---
+
 ## 15. Cómo continuar (resumen para el próximo agente IA)
 
 1. Pegar este documento entero al inicio de la sesión.
 2. Validar §1 paso 3 (sistema vivo) — debe pasar.
-3. Crear branch `etapa-6-cubos-encendidos` (§1 paso 4).
+3. Crear branch `etapa-7-tweaks-ocultos` (§1 paso 4).
 4. Ejecutar tareas §3 una por una. Marcar tasks completed conforme avances.
 5. Al cierre, seguir §1 paso 5 al pie de la letra.
-6. Regenerar este archivo. Bumpear tag a `v0.7.0`.
+6. Regenerar este archivo. Bumpear tag a `v0.8.0`.
 7. Crear nueva subpestaña en el Google Doc (§13).
 
 **Si algo del sistema (Strapi, GH Actions, DNS) no responde como espera el
 §9, NO empezar la etapa — diagnosticar primero con el owner.**
 
-**Hint para Etapa 6**: el raycast hacia abajo en `light.js` (mode physics)
-ya identifica el cubo bajo la luz. Esa data es la base del "cubo activo"
-— sólo hay que exponerla via callback. El respawn aprovecha el mismo
-mode + `mesh.position.y < -10` como trigger. El contador es DOM puro.
-
 ---
 
-**Fin del handoff. Listo para Etapa 6.**
+**Fin del handoff. Listo para Etapa 7.**

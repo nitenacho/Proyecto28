@@ -10,6 +10,55 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-05-22 — Etapa 6: Cubos encendidos + respawn + HUD
+
+### Added
+- **`src/game/light.js`** (Etapa 6 encima de Etapa 5):
+  - Tracking de `activeTile`: en modo physics, cada frame con `landed=true`
+    expone el cubo bajo la luz (sólo project tiles) vía callback nuevo
+    `onActiveTileChange(tile|null)`.
+  - **Respawn al caer al vacío** (`mesh.position.y < -10` en modo physics):
+    fade-out durante `config.fallDuration` mientras sigue cayendo, snap a
+    `(0, 5, 0)` con `vy=0` / `grounded=false`, fade-in de 0.3s. Incrementa
+    `fallCount` y emite `onRespawn(n)` post fade-out. Input WASD y saltos
+    bloqueados durante el respawn.
+  - Material ahora `transparent:true` y `PointLight.intensity` sigue la
+    `opacity` para que el fade afecte la iluminación de la escena.
+- **`src/scene/scene.js`**: `ud.activeEmissive` distinguible del hover
+  (`0.95` default / `0.25` en mono — entre `baseEmissive` y `hoverEmissive`).
+  `applyTileStyle` lo recomputa al cambiar de paleta.
+- **`src/ui/hud.js`** (módulo nuevo): contador `LUCES CAÍDAS · 000` en
+  esquina sup-der. Tipografía mono + token cyan, padding-zero a 3 dígitos,
+  pulse copper-bright al incrementar para feedback visible. CSS inyectado
+  vía `<style>` para evitar tocar `app.css`. API: `mountHud().setFallCount(n)`.
+- **`src/main.js`**: cablea `onActiveTileChange` / `onRespawn` al estado
+  del render loop y al HUD. `targetGlow` ahora prioriza
+  `hover > activeTile > baseGlow`; el cubo activo **no** levanta la altura
+  (distingue visualmente del hover, que sí sube a `hoverY=0.65`).
+
+### Notes
+- Empty tiles no se marcan como activos (no son `isProject`). El
+  `PointLight` ya los ilumina implícitamente, sin necesidad de emissive
+  boost.
+- Decisión de diseño: el activo usa `emissiveIntensity` intermedio (≈0.95)
+  entre base (0.35) y hover (1.4). Combinado con la altura plana del
+  activo (vs. hover levantado), las dos señales se distinguen sin
+  ambigüedad incluso si el mouse pasa sobre el cubo activo (hover gana
+  en ese caso).
+- Estado del contador en memoria — se resetea al recargar (intencional
+  para Etapa 6; persistencia queda fuera de scope).
+- Build: 624.32 KB (+2.65 KB vs `0.6.x`). Warning >500 KB persiste — se
+  aborda en Etapa 15.
+
+### Verified
+- Build local OK.
+- GH Pages deploy verde (run TBD).
+- Smoke test post-deploy: tweak `gravityEnabled` ON + WASD → la luz cae
+  y aterriza, el cubo bajo se enciende con un tono cyan intermedio sin
+  levantarse, caminar entre cubos transfiere el "activo", caer al vacío
+  desvanece la luz, respawnea en `(0,5,0)`, y el HUD `LUCES CAÍDAS` sube
+  con pulse copper.
+
 ## [0.6.2] — 2026-05-22 — Patch CI: opt-in Node 24 para JS actions
 
 ### Changed
@@ -257,7 +306,8 @@ o a un fix puntual entre etapas.
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/nitenacho/Proyecto28/compare/v0.6.2...v0.7.0
 [0.6.2]: https://github.com/nitenacho/Proyecto28/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/nitenacho/Proyecto28/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/nitenacho/Proyecto28/compare/v0.5.1...v0.6.0
