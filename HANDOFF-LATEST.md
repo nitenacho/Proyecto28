@@ -1,7 +1,7 @@
 # HANDOFF — Proyecto 28
 
-> **Última actualización:** 2026-05-22 16:45 UTC (polish 2 `v0.9.0` + docs `v0.9.1`)
-> **Tag activo:** `v0.9.0` (sombra anillo + tweak tamaño + flechas + gamepad) · `v0.9.1` (docs)
+> **Última actualización:** 2026-05-22 18:30 UTC (cierre sesión — Etapa 7 parcial `v0.10.0` + docs `v0.10.1`)
+> **Tag activo:** `v0.10.0` (tweaks panel oculto + window.adminMode gate) · `v0.10.1` (docs)
 > **Branch de trabajo:** `main` (sin etapa abierta)
 > **Owner:** @nitenacho — cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
@@ -29,8 +29,15 @@ Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite).
   transparente), nuevo tweak **"Tamaño sombra"** (mantiene el efecto
   altura), **flechas del teclado** mapeadas a WASD, **gamepad** (stick
   izq + Face Button Bottom para saltar).
-- Próximo paso: **Etapa 7 — Tweaks panel oculto por default + sliders restantes**
-  (streaming, admin). Parte de los sliders de juego ya está hecha.
+- Polish 3 (`v0.9.2`): defaults persistidos en `fallback.js` con los
+  valores que el owner validó en vivo (`tilt=49`, `yaw=-40`,
+  `gravityEnabled=true`, `jumpHeight=1.5`, `gravity=30`, `shadowSize=0.3`).
+- **Etapa 7 parcial** (`v0.10.0`): panel de tweaks oculto por default.
+  Toggle via `window.adminMode` desde DevTools console. Mecanismo
+  temporal hasta Etapa 8 (botón admin secreto) + Etapa 9 (OAuth).
+- Próximo paso: **Etapa 7 cierre formal** — sliders restantes
+  (`jumpCount`, `velocityCurve`, `fallDuration`, `streaming.*`,
+  `admin.adminButtonVisible`).
 
 ---
 
@@ -42,7 +49,7 @@ Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite).
 cd "C:/Users/incon/OneDrive/Desktop/Proyectos_Claude/Claude_P28/Proyecto28"
 
 git status                              # esperado: clean en main
-git describe --tags --abbrev=0          # esperado: v0.9.1 (o v0.9.0 si no hay patch docs aún)
+git describe --tags --abbrev=0          # esperado: v0.10.1
 git log --oneline -5
 ```
 
@@ -97,11 +104,46 @@ Ver §3 para el detalle de la etapa.
 
 ## 2. Última etapa cerrada
 
-**Polish 2 — sombra anillo + tweak tamaño + flechas + gamepad** (`v0.9.0`, 2026-05-22)
+**Etapa 7 parcial — tweaks panel oculto + window.adminMode gate** (`v0.10.0`, 2026-05-22)
 
-Commits:
+Commits desde `v0.9.0`:
+- `173885c` feat(defaults): ajustes finos del owner como defaults persistentes (v0.9.2)
+- `95cfc58` docs: CHANGELOG [0.9.2] (v0.9.2 docs)
+- `2ab3077` feat(tweaks): panel oculto por default + gate por window.adminMode (v0.10.0)
+
+Cambios en `v0.10.0`:
+- `src/ui/tweaks.js`: `mountTweaks` acepta `initiallyVisible` (default
+  `false`). Expone `show()`/`hide()`/`isVisible()`. Cuando hidden,
+  ni el panel ni el FAB engranaje se renderizan.
+- `src/main.js`: `Object.defineProperty(window, 'adminMode')` con
+  getter/setter — asignar desde DevTools llama `tweaks.show()/hide()`.
+
+Cambios en `v0.9.2` (ajustes finos persistidos en `fallback.js`):
+- `defaults.tilt` 58 → 49
+- `defaults.yaw` 0 → -40
+- `defaults.gravityEnabled` false → **true** (físicas activas desde el inicio)
+- `game.jumpHeight` 2.5 → 1.5
+- `game.gravity` 16.0 → 30.0
+- `game.shadowSize` 0.45 → 0.3
+
+Cierre anterior (`v0.9.0`):
 - `135e59f` feat(game): sombra anillo + arrow keys + gamepad (stick izq + face bottom)
 - `cbb27da` feat(ui): slider 'Tamaño sombra' + actualiza label gravedad con inputs
+
+### Tech debt detectado en esta sesión
+
+**Strapi enum legacy — `Project.status` "Invalid status"**: al editar
+cualquier proyecto desde el admin Strapi (incluso cambiar solo el
+título), aparece "Warning: Validation error: Invalid status". El
+dropdown muestra el valor seleccionado bien, pero la DB tiene values
+fuera del enum actual (`["EN PRODUCCIÓN", "BETA", "PROTOTIPO",
+"ARCHIVADO", "EN PAUSA"]`). Hipótesis: seed inicial guardó sin tilde
+(`EN PRODUCCION`) y al promover a enumeration ahora falla todo update.
+
+**Fix recomendado** (no aplicado): script de normalización en
+`cms/src/index.js` bootstrap — iterar los 6 records, si status está
+fuera del enum, escribir el valor válido del fallback. Se aborda en
+**Etapa 12** (Pipeline Publicar) que re-toca Strapi en serio.
 
 Cambios:
 - **Sombra anillo**: `CircleGeometry` → `RingGeometry(0.78, 1.0, 48)`.
@@ -159,31 +201,32 @@ HANDOFF.
 
 ---
 
-## 3. Próximo paso exacto — Etapa 7
+## 3. Próximo paso exacto — Etapa 7 cierre formal
 
-**Etapa 7 — Tweaks panel: ocultar por default + sliders restantes**
+**Etapa 7 cierre — sliders restantes (streaming, admin, etc.)**
 
-Estado parcial: en `v0.8.0` se agregaron 4 sliders de juego
-(`lightSpeed`, `jumpHeight`, `gravity`, `mouseFollowDelay`). Quedan
-pendientes: ocultar el panel por default, y agregar los sliders de
-`streaming` / `admin` / `jumpCount` / `velocityCurve` / `fallDuration`.
+Estado: los puntos 1 + 2 del scope ya están en `v0.10.0` (panel oculto
++ `window.adminMode` gate). Los 4 sliders principales de juego ya
+están en `v0.8.0` (`lightSpeed`, `jumpHeight`, `gravity`,
+`mouseFollowDelay`) + `shadowSize` en `v0.9.0`. Faltan los sliders
+restantes (streaming/admin/jumpCount/velocityCurve/fallDuration).
 
 Tareas (detalle en `PLAN-PROYECTO28-V2.md §4 Etapa 7`):
 
-1. **`src/ui/tweaks.js`**: estado inicial `display: none`. Exportar API
-   `tweaks.show()` / `tweaks.hide()` / `tweaks.isVisible()`. Estado
-   gobernado por `window.adminMode` (boolean, default `false`).
-2. Eliminar cualquier trigger visible que abra el panel por default — la
-   "rueda de comandos" actual queda detrás del gate admin (Etapa 8).
-3. Agregar los sliders restantes (los de juego ya están en `v0.8.0`):
+1. ✅ Panel oculto + show/hide API + window.adminMode gate (ya en `v0.10.0`).
+2. ✅ Sin trigger visible (FAB también oculto cuando `visible=false`).
+3. **Pendiente** — Agregar al panel:
    - **Game (resto)**: `jumpCount` (slider int 1-6), `velocityCurve`
      (dropdown — single option `kirby` por ahora), `fallDuration`
      (slider 0.2-3s).
-   - **Streaming**: `enabled` (toggle), `mode` (dropdown).
-   - **Admin**: `adminButtonVisible` (toggle — meta-control de Etapa 8,
-     requiere estar como admin para verlo).
-4. Persistencia local (`localStorage`) solo para preview en sesión actual.
-   La persistencia real al CMS llega en Etapa 12 ("Publicar").
+   - **Streaming** (nueva sección): `enabled` (toggle), `mode`
+     (dropdown).
+   - **Admin** (nueva sección): `adminButtonVisible` (toggle —
+     meta-control de Etapa 8).
+4. **Pendiente** — Persistencia local en `localStorage`:
+   `localStorage.setItem('p28-tweaks', JSON.stringify(state))` en cada
+   cambio; al cargar `mountTweaks` lee de `localStorage` antes de caer
+   al `defaults` del prop. La persistencia real al CMS llega en Etapa 12.
 
 **Criterio de éxito visible**:
 - Al cargar fresh `proyecto28.com`, no se ve el panel ni la rueda.
@@ -236,7 +279,10 @@ Tags:    v0.1.0 (f7a3a30 — estado handoff v1)
          v0.8.0 (3ffef61 — polish Etapa 6: CCD + spawn + sombra + tweaks juego)
          v0.8.1 (e747a27 — docs v0.8.0 + handoff actualizado)
          v0.9.0 (cbb27da — polish 2: sombra anillo + tamaño + flechas + gamepad)
-         v0.9.1 (HEAD     — docs v0.9.0 + handoff actualizado)
+         v0.9.1 (2d2736d — docs v0.9.0 + handoff actualizado)
+         v0.9.2 (173885c — polish 3: ajustes finos del owner como defaults)
+         v0.10.0 (2ab3077 — Etapa 7 parcial: tweaks panel oculto + window.adminMode)
+         v0.10.1 (HEAD     — docs v0.10.0 + handoff cierre sesión)
 Remote:  origin sincronizado
 ```
 
@@ -251,7 +297,7 @@ Remote:  origin sincronizado
 | `GET /api/projects?populate=*` | ✅ schema v2 (7 campos nuevos: unreal*, popup*, videoLoop) |
 | `GET /api/site-setting` | ✅ schema v2 (10 campos: game*, admin*, pixelStreaming*) |
 | `GET /api/admin-whitelists` | 🔒 HTTP 403 (correctamente bloqueado público) |
-| Admin de Strapi | ❌ **Owner pendiente de crear** en `/admin` |
+| Admin de Strapi | ⚠️ Owner inició registro pero no completó (sesión 2026-05-22) |
 | Seed AdminWhitelist | ✅ inconcha@gmail.com (owner) + yk8arts@gmail.com (editor) |
 
 ---

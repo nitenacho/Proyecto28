@@ -10,6 +10,42 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.10.0] — 2026-05-22 — Etapa 7 parcial: tweaks panel oculto por default
+
+### Changed
+- **`src/ui/tweaks.js`**: `mountTweaks` ahora acepta `initiallyVisible`
+  (default `false`). Cuando es `false`, ni el panel ni el FAB (engranaje)
+  se renderizan al cargar. Expone `show()` / `hide()` / `isVisible()`
+  en el objeto retornado.
+- **`src/main.js`**: define `window.adminMode` con getter/setter via
+  `Object.defineProperty`. Asignar `window.adminMode = true` desde la
+  DevTools console llama `tweaks.show()`; `false` lo oculta. Mecanismo
+  temporal de QA hasta Etapa 8 (botón admin secreto) + Etapa 9 (OAuth).
+
+### Notes
+- Adelanta los puntos 1 + 2 del scope original de Etapa 7
+  (PLAN-PROYECTO28-V2.md §4). Los sliders restantes (`jumpCount`,
+  `velocityCurve`, `fallDuration`, `streaming.*`, `admin.adminButtonVisible`)
+  siguen pendientes para el cierre formal de Etapa 7.
+
+### Tech debt — Strapi enum legacy
+- Bug reportado por el owner al intentar editar `Project` desde el admin
+  Strapi: "Warning: Validation error: Invalid status" al guardar
+  cualquier cambio (incluso al editar el título). El dropdown del campo
+  `status` muestra el valor seleccionado correctamente, pero la
+  validación falla.
+- **Hipótesis**: el seed inicial cargó valores como `EN PRODUCCION` sin
+  tilde, mientras que el schema actual exige el enum
+  `["EN PRODUCCIÓN", "BETA", "PROTOTIPO", "ARCHIVADO", "EN PAUSA"]` (con
+  tilde). Los 6 records de la DB tienen valores legacy fuera del enum.
+- **Fix recomendado** (no aplicado en este cierre): script de
+  normalización en `cms/src/index.js` (bootstrap) que use
+  `strapi.db.query('api::project.project').findMany()` + `update` con
+  status válido. Mantener no destructivo (solo escribir si valor está
+  fuera del enum).
+- Se aborda formalmente en **Etapa 12 — Pipeline Publicar**, donde se
+  re-toca Strapi para el flujo de save desde la web.
+
 ## [0.9.2] — 2026-05-22 — Patch: ajustes finos del owner como defaults
 
 ### Changed
@@ -433,7 +469,8 @@ o a un fix puntual entre etapas.
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.9.2...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/nitenacho/Proyecto28/compare/v0.9.2...v0.10.0
 [0.9.2]: https://github.com/nitenacho/Proyecto28/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/nitenacho/Proyecto28/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/nitenacho/Proyecto28/compare/v0.8.1...v0.9.0

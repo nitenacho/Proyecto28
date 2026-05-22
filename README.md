@@ -90,7 +90,9 @@ al repo, lo tiene el owner).
 | 6 — Cubos + respawn + contador | ✅ Cerrado | `v0.7.0` |
 | 6 polish — CCD + spawn + sombra + tweaks juego | ✅ Cerrado | `v0.8.0` |
 | 6 polish 2 — sombra anillo + tweak tamaño + flechas + gamepad | ✅ Cerrado | `v0.9.0` |
-| 7 — Tweaks ocultos | ⏳ Pendiente | — |
+| 6 polish 3 — defaults persistidos (tilt/yaw/gravity/shadow) | ✅ Cerrado | `v0.9.2` |
+| 7 parcial — Tweaks panel oculto + `window.adminMode` gate | ✅ Cerrado | `v0.10.0` |
+| 7 cierre — sliders restantes (streaming, admin, etc.) | ⏳ Pendiente | — |
 | 8 — Botón admin secreto | ⏳ Pendiente | — |
 | 9 — Google OAuth | ⏳ Pendiente | — |
 | 10 — Popup mejorado + mobile | ⏳ Pendiente | — |
