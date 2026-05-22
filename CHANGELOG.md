@@ -10,6 +10,42 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.11.0] — 2026-05-22 — Etapa 7 cierre: sliders restantes + persistencia localStorage
+
+### Added
+- **`src/main.js`** — controles que faltaban en el panel de tweaks:
+  - Sección **Juego**: `gameJumpCount` (slider 1-6), `gameVelocityCurve`
+    (select: `kirby` / `linear` / `constant`), `gameFallDuration`
+    (slider 0.2-3s).
+  - Nueva sección **Streaming**: `streamingEnabled` (toggle) +
+    `streamingMode` (select: `shared` / `dedicated`). Sólo persiste
+    state; los efectos en pixel streaming se conectan en **Etapa 11**.
+  - Nueva sección **Admin**: `adminButtonVisible` (toggle). Sólo
+    persiste state; el botón admin secreto en sí se implementa en
+    **Etapa 8**.
+- **`src/ui/tweaks.js`** — nueva opción `storageKey` (default
+  `'p28-tweaks'`) en `mountTweaks`. Al montar, hidrata el state desde
+  `localStorage` filtrando claves ajenas al schema actual (defensivo
+  ante upgrades del defaults). En cada `setKey` escribe el state
+  completo a `localStorage`. Try/catch para modo privado / quota.
+
+### Changed
+- Las mutaciones a `site.streaming.*` y `site.admin.buttonVisible`
+  ahora se reflejan en vivo desde el panel (antes ninguna ruta UI las
+  tocaba; ahora el panel actualiza el objeto compartido en memoria).
+- `tweakDefaults` ahora incluye 6 keys nuevas: `gameJumpCount`,
+  `gameVelocityCurve`, `gameFallDuration`, `streamingEnabled`,
+  `streamingMode`, `adminButtonVisible`.
+
+### Notes
+- Cierra los puntos pendientes de **Etapa 7** (PLAN-PROYECTO28-V2.md §4).
+  El panel sigue oculto por default (no regresión sobre v0.10.0); el
+  gate por `window.adminMode` no cambió.
+- Smoke test: reload sin tocar `adminMode` → panel sigue oculto, pero
+  si en una sesión previa moviste sliders y luego setás
+  `window.adminMode = true`, ves los valores guardados.
+- Bundle: 627.69 KB → **629.37 KB** (+1.7 KB).
+
 ## [0.10.0] — 2026-05-22 — Etapa 7 parcial: tweaks panel oculto por default
 
 ### Changed
