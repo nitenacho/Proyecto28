@@ -10,6 +10,7 @@ import { createScene } from './scene/scene.js';
 import { createControllableLight } from './game/light.js';
 import { createPopup } from './ui/popup.js';
 import { mountTweaks } from './ui/tweaks.js';
+import { mountHud } from './ui/hud.js';
 
 const canvas = document.getElementById('c');
 const bootEl = document.getElementById('boot');
@@ -31,11 +32,15 @@ async function boot() {
 
   const sceneCtx = createScene({ canvas, grid, projects });
   const defaults = site.defaults;
+  const hud = mountHud();
+  let activeTile = null;
   const controlLight = createControllableLight({
     scene: sceneCtx.scene,
     config: site.game,
     tiles: sceneCtx.tiles,
     gravityEnabled: defaults.gravityEnabled,
+    onActiveTileChange(tile) { activeTile = tile; },
+    onRespawn(n) { hud.setFallCount(n); },
   });
   const popup = createPopup();
 
@@ -202,7 +207,9 @@ async function boot() {
       if (ud.isProject) {
         const breath = 0.5 + 0.5 * Math.sin(t * 1.4 + ud.breathPhase);
         const baseGlow = ud.baseEmissive * (0.85 + 0.3 * breath);
-        const targetGlow = (tile === hovered) ? ud.hoverEmissive : baseGlow;
+        const targetGlow = (tile === hovered)
+          ? ud.hoverEmissive
+          : (tile === activeTile) ? ud.activeEmissive : baseGlow;
         tile.material.emissiveIntensity += (targetGlow - tile.material.emissiveIntensity) * Math.min(dt * 6, 1);
       }
     }
