@@ -44,9 +44,19 @@ async function boot() {
   });
   const popup = createPopup();
 
+  // Defaults para el panel: empieza con site.defaults y agrega los campos
+  // de site.game que el usuario puede ajustar en vivo (Etapa 6 polish).
+  const tweakDefaults = {
+    ...defaults,
+    gameLightSpeed: site.game.lightSpeed,
+    gameJumpHeight: site.game.jumpHeight,
+    gameGravity: site.game.gravity,
+    gameMouseFollowDelay: site.game.mouseFollowDelay,
+  };
+
   const tweaks = mountTweaks({
     host: document.getElementById('tweaks-root'),
-    defaults,
+    defaults: tweakDefaults,
     onChange(state) {
       // Brand
       brandNameEl.textContent = state.logo;
@@ -60,8 +70,13 @@ async function boot() {
       sceneCtx.camState.drift = !!state.cameraDrift;
       if (!state.cameraDrift) sceneCtx.setCameraFromState(state.tilt, state.yaw);
       sceneCtx.applyTileStyle(state.tileStyle);
-      // Game
+      // Game — mutación in place de site.game para que controlLight (que captura
+      // la referencia) use los nuevos valores en el siguiente frame.
       controlLight.setGravityEnabled(!!state.gravityEnabled);
+      site.game.lightSpeed       = state.gameLightSpeed;
+      site.game.jumpHeight       = state.gameJumpHeight;
+      site.game.gravity          = state.gameGravity;
+      site.game.mouseFollowDelay = state.gameMouseFollowDelay;
     },
     controls: [
       {
@@ -112,6 +127,10 @@ async function boot() {
         label: 'Juego',
         items: [
           { type: 'toggle', key: 'gravityEnabled', label: 'Gravedad + saltos (WASD)' },
+          { type: 'slider', key: 'gameLightSpeed',       label: 'Velocidad',         min: 1,   max: 12,  step: 0.5 },
+          { type: 'slider', key: 'gameJumpHeight',       label: 'Altura salto',      min: 0.5, max: 6,   step: 0.25 },
+          { type: 'slider', key: 'gameGravity',          label: 'Gravedad',          min: 5,   max: 40,  step: 0.5 },
+          { type: 'slider', key: 'gameMouseFollowDelay', label: 'Delay mouse-follow', min: 0,   max: 3,   step: 0.1, unit: 's' },
         ],
       },
     ],
@@ -202,14 +221,13 @@ async function boot() {
 
     for (const tile of sceneCtx.tiles) {
       const ud = tile.userData;
-      const targetY = (tile === hovered && ud.isProject) ? ud.hoverY : ud.restY;
+      const isLit = (tile === hovered || tile === activeTile) && ud.isProject;
+      const targetY = isLit ? ud.hoverY : ud.restY;
       tile.position.y += (targetY - tile.position.y) * Math.min(dt * 8, 1);
       if (ud.isProject) {
         const breath = 0.5 + 0.5 * Math.sin(t * 1.4 + ud.breathPhase);
         const baseGlow = ud.baseEmissive * (0.85 + 0.3 * breath);
-        const targetGlow = (tile === hovered)
-          ? ud.hoverEmissive
-          : (tile === activeTile) ? ud.activeEmissive : baseGlow;
+        const targetGlow = isLit ? ud.hoverEmissive : baseGlow;
         tile.material.emissiveIntensity += (targetGlow - tile.material.emissiveIntensity) * Math.min(dt * 6, 1);
       }
     }
