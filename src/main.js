@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { loadContent } from './data/cms.js';
 import { createScene } from './scene/scene.js';
+import { createControllableLight } from './game/light.js';
 import { createPopup } from './ui/popup.js';
 import { mountTweaks } from './ui/tweaks.js';
 
@@ -28,22 +29,8 @@ async function boot() {
   const { site, projects, grid, source } = await loadContent();
   console.log(`[p28] content source: ${source}`);
 
-  // [v2 debug] Etapa 3 — verificar que los nuevos campos llegan desde el CMS.
-  // TODO(Etapa 4): remover estos logs cuando se empiecen a consumir.
-  console.log('[p28:v2] site.game:', site.game);
-  console.log('[p28:v2] site.admin:', site.admin);
-  console.log('[p28:v2] site.streaming:', site.streaming);
-  console.log('[p28:v2] first project v2 fields:', projects[0] && {
-    unrealStreamURL: projects[0].unrealStreamURL,
-    unrealLevelName: projects[0].unrealLevelName,
-    unrealEnabled: projects[0].unrealEnabled,
-    popupImageURL: projects[0].popupImageURL,
-    popupBody: projects[0].popupBody,
-    popupCTALabel: projects[0].popupCTALabel,
-    videoLoopURL: projects[0].videoLoopURL,
-  });
-
   const sceneCtx = createScene({ canvas, grid, projects });
+  const controlLight = createControllableLight({ scene: sceneCtx.scene, config: site.game });
   const popup = createPopup();
 
   const defaults = site.defaults;
@@ -142,6 +129,9 @@ async function boot() {
 
   window.addEventListener('pointerleave', () => { pointer.x = pointer.y = -10; });
 
+  window.addEventListener('keydown', controlLight.onKeyDown);
+  window.addEventListener('keyup', controlLight.onKeyUp);
+
   // Route overlay (mock for relative URLs)
   const routeEl = document.getElementById('route-overlay');
   const routeLabelEl = document.getElementById('route-label');
@@ -175,6 +165,7 @@ async function boot() {
     }
 
     raycaster.setFromCamera(pointer, sceneCtx.camera);
+    controlLight.update(dt, now, raycaster);
     const hits = raycaster.intersectObjects(sceneCtx.tiles, false);
     const hit = hits.length ? hits[0].object : null;
 
