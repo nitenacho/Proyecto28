@@ -10,6 +10,29 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.9.2] — 2026-05-22 — Patch: ajustes finos del owner como defaults
+
+### Changed
+- `src/data/fallback.js` — tras validar valores en vivo con los sliders
+  del panel, el owner pidió persistirlos como defaults nuevos:
+  - `defaults.tilt`            58   → 49
+  - `defaults.yaw`             0    → -40
+  - `defaults.gravityEnabled`  false→ **true** (físicas activas desde el inicio)
+  - `game.jumpHeight`          2.5  → 1.5
+  - `game.gravity`             16.0 → 30.0
+  - `game.shadowSize`          0.45 → 0.3
+- `lightSpeed` (5.0) y `mouseFollowDelay` (1.0) ya estaban en los valores
+  deseados.
+
+### Notes
+- Strapi `SiteSetting` sigue con los defaults originales del schema v2
+  (lightSpeed=8.0, jumpHeight=3.0, gravity=20.0, etc). Cuando el owner
+  cree el admin Strapi (pendiente §1.6) debe replicar estos valores
+  ahí para que el sitio con CMS activo arranque con la misma
+  configuración. Por ahora el sitio parece estar usando `fallback` (el
+  Strapi Cloud Free plan suele dormirse) — el slider "Velocidad: 5"
+  visible confirma que fallback manda.
+
 ## [0.9.0] — 2026-05-22 — Polish: sombra anillo + tweak tamaño + flechas + gamepad
 
 ### Changed
@@ -410,7 +433,9 @@ o a un fix puntual entre etapas.
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.9.2...HEAD
+[0.9.2]: https://github.com/nitenacho/Proyecto28/compare/v0.9.1...v0.9.2
+[0.9.1]: https://github.com/nitenacho/Proyecto28/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/nitenacho/Proyecto28/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/nitenacho/Proyecto28/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/nitenacho/Proyecto28/compare/v0.7.1...v0.8.0
