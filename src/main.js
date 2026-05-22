@@ -52,6 +52,7 @@ async function boot() {
     gameJumpHeight: site.game.jumpHeight,
     gameGravity: site.game.gravity,
     gameMouseFollowDelay: site.game.mouseFollowDelay,
+    gameShadowSize: site.game.shadowSize ?? 0.45,
   };
 
   const tweaks = mountTweaks({
@@ -77,6 +78,7 @@ async function boot() {
       site.game.jumpHeight       = state.gameJumpHeight;
       site.game.gravity          = state.gameGravity;
       site.game.mouseFollowDelay = state.gameMouseFollowDelay;
+      site.game.shadowSize       = state.gameShadowSize;
     },
     controls: [
       {
@@ -126,11 +128,12 @@ async function boot() {
       {
         label: 'Juego',
         items: [
-          { type: 'toggle', key: 'gravityEnabled', label: 'Gravedad + saltos (WASD)' },
+          { type: 'toggle', key: 'gravityEnabled', label: 'Gravedad + saltos (WASD/↑↓←→/Pad)' },
           { type: 'slider', key: 'gameLightSpeed',       label: 'Velocidad',         min: 1,   max: 12,  step: 0.5 },
           { type: 'slider', key: 'gameJumpHeight',       label: 'Altura salto',      min: 0.5, max: 6,   step: 0.25 },
           { type: 'slider', key: 'gameGravity',          label: 'Gravedad',          min: 5,   max: 40,  step: 0.5 },
           { type: 'slider', key: 'gameMouseFollowDelay', label: 'Delay mouse-follow', min: 0,   max: 3,   step: 0.1, unit: 's' },
+          { type: 'slider', key: 'gameShadowSize',       label: 'Tamaño sombra',     min: 0.15, max: 1.2, step: 0.05 },
         ],
       },
     ],
