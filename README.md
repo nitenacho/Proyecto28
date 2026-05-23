@@ -95,7 +95,7 @@ al repo, lo tiene el owner).
 | 7 cierre — sliders restantes + persistencia localStorage | ✅ Cerrado | `v0.11.0` |
 | 8 — Botón Admin bajo brand-meta | ✅ Cerrado | `v0.12.0` |
 | 9 — Google OAuth + whitelist gating | ✅ Cerrado | `v0.13.0` |
-| 10 — Popup mejorado + mobile | ⏳ Pendiente | — |
+| 10 — Popup robusto + mobile responsive + touch | ✅ Cerrado | `v0.14.0` |
 | 11 — Pixel Streaming Unreal | ⏳ Pendiente | — |
 | 12 — Pipeline Publicar | ⏳ Pendiente | — |
 | 13 — Sync Claude Design | ⏳ Pendiente | — |

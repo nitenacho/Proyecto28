@@ -10,6 +10,48 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.14.0] — 2026-05-23 — Etapa 10: popup robusto + mobile responsive + touch handling
+
+### Added
+- **`src/styles/app.css`** — `.popup-image-wrap` con `aspect-ratio:
+  16/9`, overflow hidden, border-radius. Imagen con `opacity 0→1`
+  cuando `.loaded`. Border cyan semi.
+- **Media query mobile** (`@media (max-width: 768px), (pointer:
+  coarse)`):
+  - `.chrome-top` en columna, brand colapsado, status cluster en
+    segunda fila.
+  - `.admin-btn` más compacto (3×8px, font 9px).
+  - `.chrome-bottom` oculta engine + módulo (sólo Lat+Lon).
+  - **Popup full-width bottom sheet**: anula `side/cursor/corner`,
+    `left:0; right:0; bottom:0; max-height:65vh`, slide-up
+    `translateY(100% → 0)`.
+  - Tweaks panel full-width modal con margen 8px.
+
+### Changed
+- **`src/ui/popup.js`** — imageURL ahora: `loading="lazy"`,
+  `decoding="async"`, `onload` marca `wrap.loaded` para fade-in,
+  `onerror` oculta wrap + marca `.failed`. Limpia handlers cuando
+  el siguiente proyecto no tiene imagen.
+- **`src/main.js`** — touch handling vía `pointerdown`/`pointerup`:
+  - Captura `startXY` + `pointerType` en down.
+  - En up, si delta < 8px se considera tap.
+  - **Touch**: primer tap muestra popup (como hover), segundo tap
+    sobre el mismo `tile.id` dentro de 500ms navega. Tap fuera de
+    cubo cierra popup.
+  - **Mouse/pen**: tap = navegación inmediata (no regresión).
+  - Antes, `pointerdown` directamente navegaba — eliminado.
+
+### Notes
+- Decisión: animaciones via **CSS transitions** (no GSAP). Si en
+  futuro se quiere algo más coreografiado, GSAP queda para Etapa
+  14 sin migrar lo actual.
+- Smoke test producción desktop OK (popup HOLOGRAMA aparece al
+  hover, ADMIN sigue funcional). Mobile testing visual queda al
+  owner via dispositivo real — Chrome MCP `resize_window` no
+  afecta el viewport interno.
+- Bundle: JS 631.48 → **632.22 KB** (+0.7 KB). CSS 19.98 → **21.71
+  KB** (+1.7 KB).
+
 ## [0.13.0] — 2026-05-23 — Etapa 9: Google OAuth + whitelist gating
 
 ### Added
