@@ -746,12 +746,12 @@ body {
   .brand-mark { width: 26px; height: 26px; }
 
   .admin-btn {
-    /* móvil: queda más compacto, anclado abajo del header */
-    left: 42px;
-    top: calc(100% + 4px);
-    padding: 3px 8px;
-    font-size: 9px;
+    /* móvil: pill compacto en línea con el status (v0.14.2) */
+    padding: 6px 10px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
   }
+  .admin-btn::before { width: 5px; height: 5px; }
 
   .side-caption { display: none; }
   .chrome-bottom { padding: 12px 16px; flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -759,20 +759,29 @@ body {
   .coords > div:nth-child(n+3) { display: none; }  /* sólo Lat + Lon en mobile */
   .hint { font-size: 10px; }
 
-  /* Popup como bottom sheet — full width, sticky, ignora side/cursor/corner */
+  /* Popup como bottom sheet — full width, sticky, ignora side/cursor/corner.
+     v0.14.2: box-sizing border-box para que el padding no desborde el
+     viewport (causa de la "franja oscura" lateral en iOS Safari). Quitamos
+     backdrop-filter (caro en mobile + artifacts) y usamos fondo sólido. */
   .popup,
   .popup.side,
   .popup.corner,
   .popup.cursor {
+    box-sizing: border-box;
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
     top: auto !important;
-    width: 100%;
+    width: 100% !important;
+    max-width: 100vw;
     max-height: 65vh;
     overflow-y: auto;
+    overflow-x: hidden;
     border-radius: 14px 14px 0 0;
     padding: 18px 18px 24px;
+    background: rgba(5, 8, 16, 0.96);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     transform: translateY(100%);
     transition: transform 280ms var(--ease-out), opacity 240ms var(--ease-out);
   }
@@ -785,8 +794,10 @@ body {
   .popup-title { font-size: 22px; }
   .popup-desc { font-size: 13px; margin-bottom: 14px; }
   .popup-image-wrap { aspect-ratio: 21 / 9; margin-bottom: 12px; }
-  .popup-actions { gap: 8px; }
+  .popup-actions { gap: 8px; flex-wrap: nowrap; }
+  .popup-actions .btn-primary { min-width: 0; }
   .btn-primary { padding: 12px 14px; font-size: 12px; }
+  .btn-ghost { flex: 0 0 auto; width: 38px; height: 38px; }
 
   /* Tweaks panel: full-width modal */
   .twk-panel {

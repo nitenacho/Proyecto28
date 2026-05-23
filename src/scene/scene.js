@@ -69,16 +69,25 @@ export function createScene({ canvas, grid, projects }) {
   scene.background = new THREE.Color(0x000000);
   scene.fog = new THREE.Fog(0x000000, 18, 38);
 
-  const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.1, 100);
+  // v0.14.2: cámara adaptativa por aspect ratio. En portrait/mobile el grid
+  // entero queda fuera de cuadro con los defaults desktop; ampliamos FOV y
+  // alejamos para que entren todos los cubos.
+  function computeCamFov() {
+    return window.innerWidth < 768 ? 48 : 34;
+  }
+  function computeCamRadius() {
+    return window.innerWidth < 768 ? 22 : 15;
+  }
+  const camera = new THREE.PerspectiveCamera(computeCamFov(), window.innerWidth / window.innerHeight, 0.1, 100);
   const CAM_TARGET = new THREE.Vector3(0, 0, 0);
-  const CAM_RADIUS = 15;
+  let camRadius = computeCamRadius();
   const camState = { tilt: 58, yaw: 0, drift: true };
 
   function setCameraFromState(tiltDeg, yawDeg) {
     const t = THREE.MathUtils.degToRad(tiltDeg);
     const y = THREE.MathUtils.degToRad(yawDeg);
-    const hr = CAM_RADIUS * Math.cos(t);
-    camera.position.set(hr * Math.sin(y), CAM_RADIUS * Math.sin(t), hr * Math.cos(y));
+    const hr = camRadius * Math.cos(t);
+    camera.position.set(hr * Math.sin(y), camRadius * Math.sin(t), hr * Math.cos(y));
     camera.lookAt(CAM_TARGET);
   }
   setCameraFromState(camState.tilt, camState.yaw);
@@ -203,11 +212,14 @@ export function createScene({ canvas, grid, projects }) {
   // Hover model
   const hoverModel = createHoverModel(scene);
 
-  // Resize
+  // Resize — recalcula FOV + radius para que el grid encaje en mobile/desktop.
   window.addEventListener('resize', () => {
     const w = window.innerWidth, h = window.innerHeight;
     camera.aspect = w / h;
+    camera.fov = computeCamFov();
+    camRadius = computeCamRadius();
     camera.updateProjectionMatrix();
+    setCameraFromState(camState.tilt, camState.yaw);
     renderer.setSize(w, h);
     composer.setSize(w, h);
     bloom.setSize(w, h);

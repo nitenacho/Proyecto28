@@ -43,6 +43,17 @@ const HUD_CSS = `
   0%   { color: var(--copper-bright); text-shadow: 0 0 12px rgba(255,138,77,0.6); }
   100% { color: var(--cyan); text-shadow: none; }
 }
+@media (max-width: 768px), (pointer: coarse) {
+  .p28-hud {
+    top: auto;
+    bottom: 100px;
+    right: 12px;
+    padding: 5px 8px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    border-radius: 4px;
+  }
+}
 `;
 
 function ensureStyle() {
