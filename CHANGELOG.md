@@ -10,6 +10,43 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.14.4] — 2026-05-23 — Hotfix: cámara + canvas adaptive por aspect-ratio
+
+Feedback owner: en iPad portrait (810-1180px) la cámara seguía cerca
+porque no caía en el media query `max-width:768px`. Y al hacer pinch
+zoom Safari aparecían franjas negras (canvas no se readjustaba).
+
+### Fixed
+- **`src/scene/scene.js`**: `computeCamFov()` y `computeCamRadius()`
+  ahora son funciones del **aspect ratio** (no del width):
+  - aspect <0.7 → fov 58 / radius 28 (phone portrait estrecho)
+  - aspect <0.95 → fov 50 / radius 24 (tablet portrait, iPad)
+  - aspect <1.4 → fov 42 / radius 19 (square/laptop)
+  - aspect ≥1.4 → fov 34 / radius 15 (desktop wide)
+- **`getViewportSize()`** nuevo helper lee `window.visualViewport`
+  (cuando está disponible) en lugar de `innerWidth/Height`. Capta
+  pinch zoom, virtual keyboard y URL bar collapse de iOS Safari.
+- **Resize listeners**: `resize`, `orientationchange`,
+  `visualViewport.resize`, `visualViewport.scroll`. Más
+  `setTimeout(handleResize, 200)` para re-corregir tras carga
+  inicial (mobile reporta `innerHeight` chico hasta que la URL bar
+  se asienta).
+- **CSS media queries**: `@media (max-width: 768px)` →
+  `@media (max-width: 1024px), (pointer: coarse), (max-aspect-ratio: 1/1)`.
+  Captura iPad portrait + touch devices + cualquier portrait.
+  Aplicado a `app.css` y `hud.js`.
+- **`index.html`**: meta viewport con `viewport-fit=cover` (notch
+  iPhone) y `theme-color #000`.
+- **`three-host.css`**:
+  - `html/body margin:0 padding:0 100%`, `overscroll-behavior: none`
+    (sin rubber-band horizontal en iOS).
+  - `#c` con `!important` en width/height/position/inset para
+    sobrescribir los `style.width/height` inline que
+    `WebGLRenderer.setSize` escribe en el canvas.
+  - `height: 100dvh` (dynamic viewport) además de `100vh` para que
+    la URL bar de iOS no genere franja negra.
+  - `background: #000` en el canvas como red de seguridad.
+
 ## [0.14.3] — 2026-05-23 — Hotfix: ocultar viewfinder en mobile
 
 ### Fixed
