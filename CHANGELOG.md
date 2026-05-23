@@ -10,6 +10,59 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.13.0] — 2026-05-23 — Etapa 9: Google OAuth + whitelist gating
+
+### Added
+- **`src/auth/google.js`** (nuevo): wrapper de Google Identity
+  Services. Lazy load del script `https://accounts.google.com/gsi/client`,
+  `initGoogleAuth({ clientId })` idempotente que llama
+  `initialize({ use_fedcm_for_prompt: true })`, `signIn()` que
+  dispara `prompt()` (FedCM/One Tap), `getCurrentUser()` lee cache
+  `localStorage['p28-auth']` validado contra `exp` del JWT,
+  `signOut()` limpia state local.
+- **`src/auth/whitelist.js`** (nuevo): `checkWhitelist(email)` fetch
+  a `/api/auth/check` del CMS. Retorna `{ allowed, role? }`. Falla
+  silenciosa devuelve `{ allowed: false }`.
+- **`cms/src/api/admin-whitelist/routes/01-auth-check.js`** (nuevo):
+  ruta custom `GET /api/auth/check?email=...` con `auth: false`.
+- **`cms/src/api/admin-whitelist/controllers/admin-whitelist.js`** —
+  método `check(ctx)`: valida formato email, queryea por email en
+  la collection, retorna `{ allowed: boolean, role?: string }`. NO
+  expone la lista completa.
+
+### Changed
+- **`src/main.js`**: importa `initGoogleAuth` + helpers; al boot,
+  si `VITE_GOOGLE_CLIENT_ID` está seteado inicializa GIS lazy. El
+  `onActivate` del `adminButton` ahora es `handleAdminActivate`:
+  - User cacheado → `tweaks.show()` inmediato.
+  - Sin client ID (dev local) → bypass, abre panel directo.
+  - Sin cache + con client ID → `signIn()` → `checkWhitelist()` →
+    si `allowed` abre panel; si no `signOut()` + `alert("Acceso
+    denegado: …")`.
+  - `window.adminMode = true` sigue funcionando como fallback QA.
+  - `window.p28SignOut()` expuesto para QA.
+- **`cms/src/index.js`** — `seedIfEmpty()` ahora hace **upsert por
+  email** para `AdminWhitelist` (antes seed sólo si tabla vacía).
+  Agrega `cnignacioa@gmail.com` como `owner` alterno (además de
+  `inconcha@gmail.com`).
+- **`.github/workflows/deploy.yml`** — step build recibe
+  `VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}`
+  además del `VITE_CMS_URL` ya existente.
+
+### Notes
+- **Pre-requisitos resueltos en esta sesión** (no en este commit):
+  OAuth Client ID `644563573486-…apps.googleusercontent.com` creado
+  en Google Cloud (project `spartan-grail-401816`); 3 emails como
+  test users en OAuth consent screen
+  (`inconcha@gmail.com`, `cnignacioa@gmail.com`, `yk8arts@gmail.com`);
+  secret `VITE_GOOGLE_CLIENT_ID` agregado al repo en GitHub Actions
+  Secrets.
+- El consent screen está en modo **Testing** (no publicado): sólo
+  los test users pueden completar OAuth. Si se agrega un email
+  nuevo a `AdminWhitelist`, también hay que agregarlo como test
+  user en GCP (o publicar la app).
+- Bundle: 630.75 → **631.48 KB** (+0.7 KB). 32 módulos (antes 30).
+
 ## [0.12.0] — 2026-05-23 — Etapa 8: botón Admin bajo brand-meta
 
 ### Added

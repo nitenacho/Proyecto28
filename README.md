@@ -94,7 +94,7 @@ al repo, lo tiene el owner).
 | 7 parcial — Tweaks panel oculto + `window.adminMode` gate | ✅ Cerrado | `v0.10.0` |
 | 7 cierre — sliders restantes + persistencia localStorage | ✅ Cerrado | `v0.11.0` |
 | 8 — Botón Admin bajo brand-meta | ✅ Cerrado | `v0.12.0` |
-| 9 — Google OAuth | ⏳ Pendiente | — |
+| 9 — Google OAuth + whitelist gating | ✅ Cerrado | `v0.13.0` |
 | 10 — Popup mejorado + mobile | ⏳ Pendiente | — |
 | 11 — Pixel Streaming Unreal | ⏳ Pendiente | — |
 | 12 — Pipeline Publicar | ⏳ Pendiente | — |
