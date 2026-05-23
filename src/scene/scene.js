@@ -69,14 +69,23 @@ export function createScene({ canvas, grid, projects }) {
   scene.background = new THREE.Color(0x000000);
   scene.fog = new THREE.Fog(0x000000, 18, 38);
 
-  // v0.14.2: cámara adaptativa por aspect ratio. En portrait/mobile el grid
-  // entero queda fuera de cuadro con los defaults desktop; ampliamos FOV y
-  // alejamos para que entren todos los cubos.
+  // v0.14.4: cámara adaptativa por aspect ratio. El threshold de width
+  // fallaba en iPad portrait (810-1180px). Usamos aspect ratio como driver
+  // principal para que phone, tablet portrait, tablet landscape y desktop
+  // wide tengan encuadre apropiado sin breakpoints arbitrarios.
   function computeCamFov() {
-    return window.innerWidth < 768 ? 48 : 34;
+    const aspect = window.innerWidth / window.innerHeight;
+    if (aspect < 0.7) return 58;   // phone portrait estrecho
+    if (aspect < 0.95) return 50;  // tablet portrait
+    if (aspect < 1.4) return 42;   // square/laptop
+    return 34;                     // desktop wide
   }
   function computeCamRadius() {
-    return window.innerWidth < 768 ? 22 : 15;
+    const aspect = window.innerWidth / window.innerHeight;
+    if (aspect < 0.7) return 28;
+    if (aspect < 0.95) return 24;
+    if (aspect < 1.4) return 19;
+    return 15;
   }
   const camera = new THREE.PerspectiveCamera(computeCamFov(), window.innerWidth / window.innerHeight, 0.1, 100);
   const CAM_TARGET = new THREE.Vector3(0, 0, 0);
@@ -212,9 +221,17 @@ export function createScene({ canvas, grid, projects }) {
   // Hover model
   const hoverModel = createHoverModel(scene);
 
+  // v0.14.4: usa visualViewport cuando esté disponible (iOS Safari pinch
+  // zoom, virtual keyboard) — innerWidth/Height no reflejan esos cambios.
+  function getViewportSize() {
+    const vv = window.visualViewport;
+    if (vv && vv.width > 0 && vv.height > 0) return { w: vv.width, h: vv.height };
+    return { w: window.innerWidth, h: window.innerHeight };
+  }
+
   // Resize — recalcula FOV + radius para que el grid encaje en mobile/desktop.
-  window.addEventListener('resize', () => {
-    const w = window.innerWidth, h = window.innerHeight;
+  function handleResize() {
+    const { w, h } = getViewportSize();
     camera.aspect = w / h;
     camera.fov = computeCamFov();
     camRadius = computeCamRadius();
@@ -223,7 +240,16 @@ export function createScene({ canvas, grid, projects }) {
     renderer.setSize(w, h);
     composer.setSize(w, h);
     bloom.setSize(w, h);
-  });
+  }
+  window.addEventListener('resize', handleResize);
+  window.addEventListener('orientationchange', handleResize);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', handleResize);
+    window.visualViewport.addEventListener('scroll', handleResize);
+  }
+  // Re-corregir tras carga inicial (mobile a veces reporta innerHeight chico
+  // hasta que la URL bar se asienta).
+  setTimeout(handleResize, 200);
 
   return {
     renderer, scene, camera, composer, tiles, tilesGroup, hoverModel,

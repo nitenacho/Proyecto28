@@ -6,15 +6,21 @@
    ========================================================= */
 
 html, body, #root { background: #000; }
-body { overflow: hidden; }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
+body { overflow: hidden; overscroll-behavior: none; }
 
+/* v0.14.4: canvas siempre full-bleed con !important para sobrescribir
+   los style.width/height inline que THREE.WebGLRenderer.setSize escribe.
+   Combinado con dynamic-viewport (dvh) cubre la URL bar de iOS sin gaps. */
 #c {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
   display: block;
   z-index: 0;
+  background: #000;
 }
 
 .scene-bg-grid,

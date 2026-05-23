@@ -730,7 +730,7 @@ body {
    Etapa 10: el mini-juego sigue funcional en desktop pero
    en mobile el énfasis es UX de proyectos via tap.
    --------------------------------------------------------- */
-@media (max-width: 768px), (pointer: coarse) {
+@media (max-width: 1024px), (pointer: coarse), (max-aspect-ratio: 1/1) {
   .chrome-top {
     flex-direction: column;
     align-items: flex-start;
