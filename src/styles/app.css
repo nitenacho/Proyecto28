@@ -753,6 +753,12 @@ body {
   }
   .admin-btn::before { width: 5px; height: 5px; }
 
+  /* v0.14.3: el viewfinder (esquinas HUD con inset 80/32) deja un "frame"
+     dentro del viewport mobile que no aporta y rompe el full-bleed.
+     Lo escondemos siempre en mobile; el toggle del panel sigue funcional
+     en desktop. */
+  .viewfinder { display: none !important; }
+
   .side-caption { display: none; }
   .chrome-bottom { padding: 12px 16px; flex-direction: column; align-items: flex-start; gap: 8px; }
   .coords { gap: 8px; font-size: 9px; flex-wrap: wrap; }
