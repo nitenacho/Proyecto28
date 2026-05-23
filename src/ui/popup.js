@@ -31,10 +31,20 @@ export function createPopup() {
     subtitleEl.textContent = `▮ Proyecto · ${project.id.replace('.', ' · ')}`;
 
     if (project.imageURL) {
-      img.src = project.imageURL;
+      img.loading = 'lazy';
+      img.decoding = 'async';
       img.alt = project.title;
       imgWrap.hidden = false;
+      imgWrap.classList.remove('loaded', 'failed');
+      img.onload = () => imgWrap.classList.add('loaded');
+      img.onerror = () => {
+        imgWrap.classList.add('failed');
+        imgWrap.hidden = true;
+        img.removeAttribute('src');
+      };
+      img.src = project.imageURL;
     } else {
+      img.onload = img.onerror = null;
       img.removeAttribute('src');
       imgWrap.hidden = true;
     }

@@ -277,12 +277,49 @@ async function boot() {
     if (popup.placement === 'cursor') popup.positionAtCursor(e.clientX, e.clientY);
   });
 
+  // Etapa 10: tap vs drag + double-tap-to-navigate en mobile.
+  // Desktop (mouse/pen): click navega directo como antes.
+  // Mobile (touch): primer tap muestra popup, segundo tap dentro de 500ms
+  //   sobre el mismo cubo navega.
+  const TAP_THRESHOLD_PX = 8;
+  const DOUBLE_TAP_MS = 500;
+  let downXY = { x: 0, y: 0, type: 'mouse' };
+  let lastTap = { tileId: null, t: 0 };
+
   window.addEventListener('pointerdown', (e) => {
+    downXY = { x: e.clientX, y: e.clientY, type: e.pointerType || 'mouse' };
+    setPointerFromEvent(e);
+  });
+
+  window.addEventListener('pointerup', (e) => {
+    const dx = Math.abs(e.clientX - downXY.x);
+    const dy = Math.abs(e.clientY - downXY.y);
+    if (dx > TAP_THRESHOLD_PX || dy > TAP_THRESHOLD_PX) return;   // drag, no tap
     setPointerFromEvent(e);
     raycaster.setFromCamera(pointer, sceneCtx.camera);
     const hits = raycaster.intersectObjects(sceneCtx.tiles, false);
-    if (hits.length && hits[0].object.userData.isProject) {
-      navigateTo(hits[0].object.userData.project);
+    const tile = hits.length ? hits[0].object : null;
+    if (!tile || !tile.userData.isProject) {
+      // Tap fuera de un cubo en mobile cierra el popup.
+      if (downXY.type === 'touch') popup.hideNow();
+      return;
+    }
+    if (downXY.type === 'touch') {
+      const now = performance.now();
+      const same = lastTap.tileId === tile.id && (now - lastTap.t) < DOUBLE_TAP_MS;
+      if (same) {
+        navigateTo(tile.userData.project);
+        lastTap = { tileId: null, t: 0 };
+      } else {
+        // Primer tap: muestra popup como hover.
+        popup.show(tile.userData.project);
+        sceneCtx.hoverModel.setHovered(tile, tile.userData.project);
+        hovered = tile;
+        lastTap = { tileId: tile.id, t: now };
+      }
+    } else {
+      // Mouse/pen: navegación inmediata (comportamiento desktop original).
+      navigateTo(tile.userData.project);
     }
   });
 
