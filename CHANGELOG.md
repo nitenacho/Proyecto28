@@ -10,6 +10,36 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+### Known issues (sin resolver al cierre de sesión 2026-05-23)
+
+- **Responsive iPad/iPhone NO funciona en producción** aún después
+  de `v0.14.2` → `v0.14.3` → `v0.14.4`. El owner confirma con
+  capturas de iPhone + iPad sacadas justo al cargar la página: la
+  cámara sigue muy cerca y aparecen franjas negras laterales.
+- **Pista nueva del owner**: el loading inicial (`#boot` splash)
+  aparece **alineado a la izquierda** en lugar de centrado. Eso
+  sugiere que algún elemento empuja el body/html más angosto que
+  el viewport visible **antes** de que el JS de scene corra — es
+  decir, el problema está en el layout HTML/CSS base, no en la
+  cámara Three.js. Las correcciones de `v0.14.4` (cámara adaptive
+  + visualViewport) son válidas pero no atacan la causa raíz.
+- **Hipótesis a investigar**:
+  1. Algún elemento `position: fixed` con width fijo (popup 380px,
+     tweaks-root, admin-btn replace) podría estar dimensionando el
+     viewport scrollbar antes del media query mobile.
+  2. El meta `viewport-fit=cover` agregado en `v0.14.4` interactúa
+     mal con el body width en iPad portrait.
+  3. El `#boot` con `position: fixed; inset: 0; flex center` debería
+     estar siempre centrado — si no lo está, hay un ancestor con
+     `transform` o el html no ocupa el viewport (CSS html { width:
+     100% } puede no ser suficiente — probar `width: 100vw`).
+  4. `overflow: hidden` en body no limita: en mobile Safari el
+     viewport puede ser más ancho que el body si hay elementos
+     hijos con width fijo.
+
+Próximo agente: NO arrancar Etapa 11 hasta resolver esto. Ver §3
+del HANDOFF para plan de ataque.
+
 ## [0.14.4] — 2026-05-23 — Hotfix: cámara + canvas adaptive por aspect-ratio
 
 Feedback owner: en iPad portrait (810-1180px) la cámara seguía cerca
