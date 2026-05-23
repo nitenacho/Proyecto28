@@ -10,6 +10,7 @@ import { createScene } from './scene/scene.js';
 import { createControllableLight } from './game/light.js';
 import { createPopup } from './ui/popup.js';
 import { mountTweaks } from './ui/tweaks.js';
+import { mountAdminButton } from './ui/adminButton.js';
 import { mountHud } from './ui/hud.js';
 
 const canvas = document.getElementById('c');
@@ -43,6 +44,11 @@ async function boot() {
     onRespawn(n) { hud.setFallCount(n); },
   });
   const popup = createPopup();
+
+  // Botón admin (Etapa 8) — declarado antes de mountTweaks para que el
+  // onChange del panel pueda llamarlo. Se monta más abajo con tweaks.show
+  // como onActivate.
+  let adminButton = null;
 
   // Defaults para el panel: empieza con site.defaults y agrega los campos
   // de site.game / site.streaming / site.admin que el usuario puede ajustar
@@ -90,11 +96,12 @@ async function boot() {
       site.game.mouseFollowDelay = state.gameMouseFollowDelay;
       site.game.fallDuration     = state.gameFallDuration;
       site.game.shadowSize       = state.gameShadowSize;
-      // Streaming + Admin — sólo se persiste el estado; los efectos visuales
-      // se agregan en Etapas 8 (botón admin) y 11 (pixel streaming).
+      // Streaming — sólo persiste el estado (efectos en Etapa 11).
       site.streaming.enabled     = !!state.streamingEnabled;
       site.streaming.mode        = state.streamingMode;
+      // Admin — mutación in place + sincroniza visibilidad del botón en vivo (Etapa 8).
       site.admin.buttonVisible   = !!state.adminButtonVisible;
+      if (adminButton) adminButton.setVisible(site.admin.buttonVisible);
     },
     controls: [
       {
@@ -184,9 +191,18 @@ async function boot() {
     ],
   });
 
+  // v0.12.0: botón "Admin" anclado bajo .brand-meta abre el panel.
+  // Default visible — el toggle "Botón admin visible" del panel lo oculta
+  // si el owner quiere ver la página sin él. localStorage del panel
+  // (v0.11.0) recuerda la elección entre sesiones.
+  adminButton = mountAdminButton({
+    onActivate: () => tweaks.show(),
+    visible: site.admin.buttonVisible,
+  });
+
   // v0.10.0: gate del panel por window.adminMode. Por default = false → panel
   // oculto. Asignar window.adminMode = true desde DevTools console lo muestra.
-  // (Mecanismo temporal de QA hasta Etapa 8: botón admin secreto + Etapa 9: OAuth.)
+  // (Fallback de QA, persiste vigente además del botón Admin de Etapa 8.)
   let _adminMode = false;
   Object.defineProperty(window, 'adminMode', {
     configurable: true,

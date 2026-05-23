@@ -36,7 +36,7 @@ export const FALLBACK_SITE = {
     shadowSize: 0.3,           // v0.9.2: ajuste fino del owner (antes 0.45)
   },
   admin: {
-    buttonVisible: false,
+    buttonVisible: true,        // v0.12.0: botón admin visible por default (Etapa 8)
   },
   streaming: {
     enabled: false,
