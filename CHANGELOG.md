@@ -10,6 +10,38 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.12.0] — 2026-05-23 — Etapa 8: botón Admin bajo brand-meta
+
+### Added
+- **`src/ui/adminButton.js`** (nuevo): `mountAdminButton({ onActivate,
+  visible })` crea un `<button class="admin-btn">` con
+  `position:absolute` anclado bajo `.brand` (top: 100% + 6px, left:
+  48px para alinear con `.brand-name`). Estilo mono uppercase 10px,
+  border cyan semi-transparente, hover intensifica. Inyecta CSS
+  scoped al primer mount. Expone `setVisible(bool)` y `destroy()`.
+
+### Changed
+- **`src/main.js`** — importa `mountAdminButton`, lo monta tras
+  `mountTweaks` con `onActivate: () => tweaks.show()`. El `onChange`
+  del panel ahora llama `adminButton.setVisible(state.adminButtonVisible)`
+  para sincronizar la visibilidad en vivo. `let adminButton = null`
+  declarado antes de `mountTweaks` para que el closure del `onChange`
+  pueda referenciarlo (chequea `if (adminButton)` para la primera
+  emisión inicial).
+- **`src/data/fallback.js`** — `defaults.admin.buttonVisible`:
+  `false` → **`true`** para que el botón aparezca desde el primer
+  load. El owner puede ocultarlo desde el panel ("Botón admin
+  visible" toggle); la elección se persiste en localStorage
+  (`p28-tweaks`).
+
+### Notes
+- Posicionamiento per request del owner: "justo debajo del texto
+  HOLOGRAMA · V0.28.1" del header.
+- `window.adminMode = true` sigue funcionando como fallback de QA
+  (no regresión).
+- Bundle: 629.37 → **630.75 KB** (+1.4 KB). 30 módulos transformados
+  (antes 29).
+
 ## [0.11.0] — 2026-05-22 — Etapa 7 cierre: sliders restantes + persistencia localStorage
 
 ### Added

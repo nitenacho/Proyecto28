@@ -93,7 +93,7 @@ al repo, lo tiene el owner).
 | 6 polish 3 — defaults persistidos (tilt/yaw/gravity/shadow) | ✅ Cerrado | `v0.9.2` |
 | 7 parcial — Tweaks panel oculto + `window.adminMode` gate | ✅ Cerrado | `v0.10.0` |
 | 7 cierre — sliders restantes + persistencia localStorage | ✅ Cerrado | `v0.11.0` |
-| 8 — Botón admin secreto | ⏳ Pendiente | — |
+| 8 — Botón Admin bajo brand-meta | ✅ Cerrado | `v0.12.0` |
 | 9 — Google OAuth | ⏳ Pendiente | — |
 | 10 — Popup mejorado + mobile | ⏳ Pendiente | — |
 | 11 — Pixel Streaming Unreal | ⏳ Pendiente | — |
