@@ -10,6 +10,41 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.14.2] — 2026-05-23 — Hotfix mobile UX
+
+Feedback del owner sobre `v0.14.0` en iOS Safari real:
+
+### Fixed
+- **Botón ADMIN tapado** por el pill `WEBGL · THREE.JS` (que no tenía
+  función): `src/ui/adminButton.js` ahora **reemplaza** al `.engine-pill`
+  via `parentNode.replaceChild`. Estilo coherente (pill cyan + dot
+  indicador + glass bg). Fallback a `.brand` si no hay pill. El click
+  ahora dispara el flujo Google Sign-In normalmente — el Client ID
+  ya estaba embebido en el bundle (`grep 644563573486` lo confirma).
+- **HUD `LUCES CAÍDAS` solapaba el status**: `src/ui/hud.js` media
+  query mobile mueve el HUD a `bottom: 100px; right: 12px`, padding
+  y font reducidos, letter-spacing menor.
+- **Cámara muy cerca en mobile** (cubos del borde fuera del viewport):
+  `src/scene/scene.js` ahora calcula FOV y radius con
+  `computeCamFov() = 48° en <768px (vs 34°)` y `computeCamRadius() =
+  22 (vs 15)`. El listener `resize` recalcula y llama
+  `setCameraFromState`, así rota portrait/landscape sin reload.
+- **Popup mobile con "franja oscura" lateral + close × saliendo del
+  viewport**: `src/styles/app.css` popup media query:
+  - `box-sizing: border-box` (el padding desbordaba el width:100%).
+  - `max-width: 100vw` + `overflow-x: hidden` (no escape lateral).
+  - `background: rgba(5,8,16,0.96)` sólido + `backdrop-filter: none`
+    (eliminamos el blur — el owner lo describió como "filtro oscuro").
+  - `.btn-ghost` con `flex: 0 0 auto; width: 38px; height: 38px`
+    para que el close no se aplaste ni desborde.
+
+### Notes
+- `.admin-btn` mobile actualizado a `padding: 6px 10px; font: 10px`
+  para vivir en línea con el flex del `.status-cluster` (antes era
+  `position: absolute`).
+- Bundle: JS 632.22 → **632.82 KB** (+0.6 KB). CSS 21.71 → **21.98 KB**
+  (+0.3 KB).
+
 ## [0.14.0] — 2026-05-23 — Etapa 10: popup robusto + mobile responsive + touch handling
 
 ### Added
