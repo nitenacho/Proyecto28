@@ -10,6 +10,17 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.14.3] — 2026-05-23 — Hotfix: ocultar viewfinder en mobile
+
+### Fixed
+- **Viewfinder con frame que no llega al borde**: el `.viewfinder`
+  (4 esquinas HUD con `inset: 80px 32px 80px`) generaba un "recuadro
+  decorativo" dentro del viewport mobile que el owner reportó como
+  visualmente molesto. Media query mobile en `src/styles/app.css`
+  ahora hace `.viewfinder { display: none !important; }` para
+  sobrescribir el toggle JS (`applyHudVisibility`). En desktop sigue
+  controlable por el panel.
+
 ## [0.14.2] — 2026-05-23 — Hotfix mobile UX
 
 Feedback del owner sobre `v0.14.0` en iOS Safari real:
