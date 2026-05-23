@@ -50,6 +50,10 @@ jobs:
           # the build embeds it. Otherwise the frontend falls back to the static data
           # in src/data/fallback.js.
           VITE_CMS_URL: ${{ secrets.VITE_CMS_URL }}
+          # OAuth Client ID (Web Application) creado en console.cloud.google.com.
+          # Identifier público — se embeben en el bundle. La whitelist real vive
+          # en Strapi /api/auth/check (Etapa 9).
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
         run: npm run build
 
       - name: Make sure CNAME survived the build

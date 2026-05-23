@@ -68,6 +68,7 @@ const SAMPLE_PROJECTS = [
 
 const ADMIN_WHITELIST_SEED = [
   { email: 'inconcha@gmail.com', role: 'owner', note: 'Dueño del proyecto.' },
+  { email: 'cnignacioa@gmail.com', role: 'owner', note: 'Dueño del proyecto (cuenta alterna).' },
   { email: 'yk8arts@gmail.com', role: 'editor', note: 'Editor autorizado.' },
 ];
 
@@ -188,11 +189,15 @@ async function seedIfEmpty(strapi) {
     }
   }
 
-  // 3. AdminWhitelist (collection): seed inicial.
-  const whitelistCount = await strapi.db.query('api::admin-whitelist.admin-whitelist').count();
-  if (whitelistCount === 0) {
-    strapi.log.info('[bootstrap] seeding admin whitelist...');
-    for (const data of ADMIN_WHITELIST_SEED) {
+  // 3. AdminWhitelist (collection): upsert por email para que el seed se
+  //    aplique aunque la tabla ya tenga registros (ej. cuando agregamos un
+  //    email nuevo al array y queremos backfill en producción).
+  for (const data of ADMIN_WHITELIST_SEED) {
+    const existing = await strapi.db
+      .query('api::admin-whitelist.admin-whitelist')
+      .findOne({ where: { email: data.email } });
+    if (!existing) {
+      strapi.log.info(`[bootstrap] seeding admin whitelist: ${data.email} (${data.role})`);
       await strapi.entityService.create('api::admin-whitelist.admin-whitelist', { data });
     }
   }

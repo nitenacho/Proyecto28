@@ -12,6 +12,10 @@ import { createPopup } from './ui/popup.js';
 import { mountTweaks } from './ui/tweaks.js';
 import { mountAdminButton } from './ui/adminButton.js';
 import { mountHud } from './ui/hud.js';
+import { initGoogleAuth, signIn, signOut, getCurrentUser } from './auth/google.js';
+import { checkWhitelist } from './auth/whitelist.js';
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 const canvas = document.getElementById('c');
 const bootEl = document.getElementById('boot');
@@ -191,14 +195,55 @@ async function boot() {
     ],
   });
 
-  // v0.12.0: botón "Admin" anclado bajo .brand-meta abre el panel.
-  // Default visible — el toggle "Botón admin visible" del panel lo oculta
-  // si el owner quiere ver la página sin él. localStorage del panel
-  // (v0.11.0) recuerda la elección entre sesiones.
+  // v0.13.0 (Etapa 9): Google OAuth + whitelist check.
+  // Carga GIS lazy si VITE_GOOGLE_CLIENT_ID está seteado. Si no hay client
+  // id (dev local sin env var), el click del botón abre el panel directo —
+  // permite seguir trabajando sin auth en entorno local.
+  if (GOOGLE_CLIENT_ID) {
+    initGoogleAuth({ clientId: GOOGLE_CLIENT_ID }).catch((err) => {
+      console.warn('[p28 auth] GIS init failed:', err.message);
+    });
+  }
+
+  async function handleAdminActivate() {
+    // 1) Cached user: confiamos en el cache de localStorage (validado contra
+    //    exp). El owner ya pagó el costo del whitelist check la primera vez.
+    if (getCurrentUser()) {
+      tweaks.show();
+      return;
+    }
+    // 2) No hay client id configurado (dev local sin env): bypass auth.
+    if (!GOOGLE_CLIENT_ID) {
+      console.warn('[p28 auth] VITE_GOOGLE_CLIENT_ID missing — bypass auth, opening panel.');
+      tweaks.show();
+      return;
+    }
+    // 3) Auth + whitelist check.
+    try {
+      const user = await signIn();
+      const { allowed, role } = await checkWhitelist(user.email);
+      if (!allowed) {
+        signOut();
+        alert(`Acceso denegado: ${user.email} no está en la whitelist.`);
+        return;
+      }
+      console.log(`[p28 auth] signed in as ${user.email} (role: ${role || 'unknown'})`);
+      tweaks.show();
+    } catch (err) {
+      console.warn('[p28 auth] sign-in failed:', err.message);
+    }
+  }
+
+  // v0.12.0 + v0.13.0: botón "Admin" anclado bajo .brand-meta. Visibilidad
+  // controlada por site.admin.buttonVisible (toggle del panel, persistido en
+  // localStorage). Click dispara el flujo de auth.
   adminButton = mountAdminButton({
-    onActivate: () => tweaks.show(),
+    onActivate: handleAdminActivate,
     visible: site.admin.buttonVisible,
   });
+
+  // QA helper: forzar sign-out manual via DevTools.
+  window.p28SignOut = () => { signOut(); console.log('[p28 auth] signed out'); };
 
   // v0.10.0: gate del panel por window.adminMode. Por default = false → panel
   // oculto. Asignar window.adminMode = true desde DevTools console lo muestra.
