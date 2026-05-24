@@ -29,6 +29,23 @@ npm run develop          # http://localhost:1337/admin
 Si el frontend no encuentra el CMS (env `VITE_CMS_URL` no seteado, o CMS caído),
 cae a los datos estáticos de `src/data/fallback.js` y el sitio sigue funcionando.
 
+### QA Pixel Streaming
+
+En desarrollo, Etapa 11 permite previsualizar el overlay sin mover la luz:
+
+```bash
+npm run dev
+# fallback sobre cubo 028.A
+http://127.0.0.1:<vite-port>/?streamPreview=028.A
+
+# iframe con mock local que escucha showProject por postMessage
+http://127.0.0.1:<vite-port>/?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:<vite-port>/dev/pixel-stream-mock.html
+```
+
+En producción el iframe sólo carga si Strapi entrega `pixelStreamingEnabled`
+activo en SiteSetting y el Project activo tiene `unrealEnabled` + una
+`unrealStreamURL` absoluta (`https://...`).
+
 ## Producción
 
 - Frontend → GitHub Pages (custom domains `proyecto28.com` + `proyecto28.cl`)

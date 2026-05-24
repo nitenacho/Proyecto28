@@ -254,37 +254,51 @@ async function boot() {
 
   // QA helper: forzar sign-out manual via DevTools.
   window.p28SignOut = () => { signOut(); console.log('[p28 auth] signed out'); };
-  window.p28StreamDebug = {
-    show(projectId = '028.A') {
-      const tile = sceneCtx.tiles.find((t) => t.userData.project?.id === projectId) || null;
-      activeTile = tile;
-      streamOverlay.setActiveTile(tile);
-      return !!tile;
-    },
-    hide() {
-      activeTile = null;
-      streamOverlay.setActiveTile(null);
-    },
-    setEnabled(enabled = true) {
-      site.streaming.enabled = !!enabled;
-      streamOverlay.setStreamingConfig(site.streaming);
-    },
-    metrics() {
-      return {
-        activeProject: streamOverlay.activeProject?.id || null,
-        body: document.body.scrollWidth,
-        html: document.documentElement.scrollWidth,
-        inner: window.innerWidth,
-        visual: window.visualViewport?.width || null,
-      };
-    },
-  };
 
   if (import.meta.env.DEV) {
-    const previewProjectId = new URLSearchParams(window.location.search).get('streamPreview');
+    window.p28StreamDebug = {
+      show(projectId = '028.A', overrides = null) {
+        const tile = sceneCtx.tiles.find((t) => t.userData.project?.id === projectId) || null;
+        activeTile = tile;
+        if (overrides) streamOverlay.setPreviewTile(tile, overrides);
+        else streamOverlay.setActiveTile(tile);
+        return !!tile;
+      },
+      hide() {
+        activeTile = null;
+        streamOverlay.setActiveTile(null);
+      },
+      setEnabled(enabled = true) {
+        site.streaming.enabled = !!enabled;
+        streamOverlay.setStreamingConfig(site.streaming);
+      },
+      metrics() {
+        return {
+          activeProject: streamOverlay.activeProject?.id || null,
+          body: document.body.scrollWidth,
+          html: document.documentElement.scrollWidth,
+          inner: window.innerWidth,
+          visual: window.visualViewport?.width || null,
+        };
+      },
+    };
+
+    const previewParams = new URLSearchParams(window.location.search);
+    const previewProjectId = previewParams.get('streamPreview');
+    const previewStreamURL = previewParams.get('streamPreviewUrl');
+    const previewLevelName = previewParams.get('streamPreviewLevel');
     if (previewProjectId) {
       requestAnimationFrame(() => {
-        window.p28StreamDebug.show(previewProjectId);
+        const overrides = previewStreamURL ? {
+          unrealEnabled: true,
+          unrealStreamURL: previewStreamURL,
+          unrealLevelName: previewLevelName || `Preview_${previewProjectId.replace('.', '_')}`,
+        } : null;
+        if (previewStreamURL) {
+          site.streaming.enabled = true;
+          streamOverlay.setStreamingConfig(site.streaming);
+        }
+        window.p28StreamDebug.show(previewProjectId, overrides);
       });
     }
   }

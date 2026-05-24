@@ -22,6 +22,11 @@ o a un fix puntual entre etapas.
     `videoLoop`, imagen del popup/imagen del proyecto o una tarjeta procedural.
   - Helper local de QA en dev: `?streamPreview=028.A` muestra el fallback del
     overlay sin tener que mover la luz manualmente.
+  - Helper local de iframe: `?streamPreview=028.A&streamPreviewUrl=<url>`
+    fuerza el modo iframe en dev, activa temporalmente streaming y permite
+    probar `postMessage` antes de tener Unreal disponible.
+  - Mock local `public/dev/pixel-stream-mock.html` para validar que el iframe
+    recibe el comando `showProject`.
 
 ### Changed
 - El toggle Streaming del panel de tweaks ahora afecta al overlay en vivo.
@@ -30,8 +35,11 @@ o a un fix puntual entre etapas.
 
 ### Verified
 - `npm run build` OK.
-- Preview local en `http://127.0.0.1:5174/?streamPreview=028.A`:
+- Preview local fallback en `http://127.0.0.1:5174/?streamPreview=028.A`:
   overlay `fallback`, sin `iframe.src`, sin errores de consola.
+- Preview local iframe con
+  `?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:5174/dev/pixel-stream-mock.html`:
+  overlay `stream`, iframe cargado y mock recibe `showProject`.
 - Responsive local con overlay activo:
   - phone `390x844`: `html=390`, `body=390`, `canvas=390`.
   - tablet portrait `810x1080`: `html=810`, `body=810`, `canvas=810`.

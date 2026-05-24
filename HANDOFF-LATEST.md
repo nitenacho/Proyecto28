@@ -38,6 +38,9 @@ Trabajo en curso Etapa 11:
   están disponibles, el overlay monta iframe.
 - Si falta infraestructura o el toggle está off, muestra fallback local
   usando `videoLoop`, imagen del proyecto o tarjeta procedural.
+- En dev, `?streamPreview=028.A` fuerza el overlay fallback y
+  `?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:5174/dev/pixel-stream-mock.html`
+  fuerza iframe contra un mock local que recibe `showProject`.
 - Verificación local inicial: `npm run build` OK y responsive con overlay activo
   mantiene `html/body/canvas === innerWidth` en phone `390x844` e iPad portrait
   `810x1080`.

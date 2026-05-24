@@ -62,9 +62,12 @@ export function createStreamOverlay({ site, camera }) {
   let activeProject = null;
   let streaming = normalizeStreamingConfig(site?.streaming);
 
-  function setActiveTile(tile) {
+  function activateTile(tile, projectOverrides = null) {
     const nextTile = tile?.userData?.isProject ? tile : null;
-    const nextProject = nextTile?.userData?.project || null;
+    const baseProject = nextTile?.userData?.project || null;
+    const nextProject = baseProject && projectOverrides
+      ? { ...baseProject, ...projectOverrides }
+      : baseProject;
 
     activeTile = nextTile;
     activeProject = nextProject;
@@ -78,6 +81,14 @@ export function createStreamOverlay({ site, camera }) {
     root.hidden = false;
     frame.setProject({ project: activeProject, streaming });
     update(camera);
+  }
+
+  function setActiveTile(tile) {
+    activateTile(tile);
+  }
+
+  function setPreviewTile(tile, projectOverrides = {}) {
+    activateTile(tile, projectOverrides);
   }
 
   function setStreamingConfig(nextStreaming) {
@@ -134,6 +145,7 @@ export function createStreamOverlay({ site, camera }) {
     setStreamingConfig,
     update,
     destroy,
+    setPreviewTile,
     get activeProject() { return activeProject; },
   };
 }

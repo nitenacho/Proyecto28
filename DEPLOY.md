@@ -63,3 +63,57 @@ See [`cms/README.md`](cms/README.md). After it's running:
 The frontend will start fetching content from Strapi. If the CMS goes down or
 the secret isn't set, the site silently falls back to the static data in
 `src/data/fallback.js`.
+
+---
+
+## 3 · Pixel Streaming (Etapa 11)
+
+El frontend de GitHub Pages no ejecuta Unreal ni WebRTC propio. Sólo monta un
+iframe sobre el cubo activo cuando Strapi entrega una URL externa válida.
+
+Infra mínima esperada:
+
+1. Servidor GPU separado con Unreal empaquetado en modo Pixel Streaming.
+2. Signaling Server oficial de Epic expuesto por HTTPS.
+3. Subdominio recomendado: `stream.proyecto28.com`.
+4. Certificado TLS válido, idealmente Let's Encrypt.
+5. La URL debe abrir desde un navegador externo antes de conectarla a Strapi.
+
+DNS recomendado en Cloudflare:
+
+| Type  | Name     | Value |
+|-------|----------|-------|
+| A     | `stream` | IP publica del servidor GPU |
+| CNAME | `stream` | host del proveedor, si aplica |
+
+Usa **A** o **CNAME**, no ambos para el mismo nombre.
+
+Configuración en Strapi:
+
+1. En `SiteSetting`, activar `pixelStreamingEnabled`.
+2. Mantener `pixelStreamingMode = shared` para la primera versión.
+3. En cada Project que deba usar stream:
+   - `unrealEnabled = true`
+   - `unrealStreamURL = https://stream.proyecto28.com` o URL equivalente
+   - `unrealLevelName = <nombre Level/SubLevel>`
+
+El frontend envía al iframe el mensaje:
+
+```json
+{
+  "command": "showProject",
+  "projectId": "028.A",
+  "unrealLevelName": "Level_028_A",
+  "mode": "shared"
+}
+```
+
+El player o la página contenedora del Pixel Streaming debe traducir ese mensaje
+a `emitUIInteraction` para que Unreal cambie Level/SubLevel.
+
+QA local:
+
+```text
+http://127.0.0.1:<vite-port>/?streamPreview=028.A
+http://127.0.0.1:<vite-port>/?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:<vite-port>/dev/pixel-stream-mock.html
+```

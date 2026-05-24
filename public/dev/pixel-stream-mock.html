@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Proyecto28 Pixel Stream Mock</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #020509;
+      color: #eaf3ff;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    body {
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(ellipse 70% 70% at 50% 40%, rgba(94, 229, 214, 0.22), transparent 68%),
+        linear-gradient(rgba(127, 211, 203, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(127, 211, 203, 0.08) 1px, transparent 1px),
+        #020509;
+      background-size: auto, 28px 28px, 28px 28px, auto;
+    }
+    main {
+      width: min(92vw, 560px);
+      padding: 22px;
+      border: 1px solid rgba(127, 211, 203, 0.34);
+      background: rgba(5, 8, 16, 0.78);
+      box-shadow: 0 0 44px rgba(127, 211, 203, 0.18);
+    }
+    .eyebrow {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      color: #7fd3cb;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font: 700 34px/1 system-ui, sans-serif;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    pre {
+      min-height: 82px;
+      margin: 18px 0 0;
+      padding: 14px;
+      overflow: auto;
+      border: 1px solid rgba(127, 211, 203, 0.18);
+      color: #9ab1cc;
+      background: rgba(0, 0, 0, 0.32);
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">
+      <span>Pixel Stream Mock</span>
+      <span id="status">listening</span>
+    </div>
+    <h1 id="project">Proyecto 28</h1>
+    <div>Mock iframe local para validar overlay y postMessage.</div>
+    <pre id="payload">{}</pre>
+  </main>
+  <script>
+    var project = document.getElementById('project');
+    var payload = document.getElementById('payload');
+    var status = document.getElementById('status');
+
+    window.addEventListener('message', function (event) {
+      var data = event.data && event.data.payload ? event.data.payload : event.data;
+      if (!data || data.command !== 'showProject') return;
+      project.textContent = data.projectId || 'Proyecto 28';
+      status.textContent = data.mode || 'shared';
+      payload.textContent = JSON.stringify(data, null, 2);
+    });
+  </script>
+</body>
+</html>
