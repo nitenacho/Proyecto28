@@ -54,11 +54,18 @@ export function createScene({ canvas, grid, projects }) {
   const projectBySlot = new Map();
   for (const p of projects) projectBySlot.set(p.slot, p);
 
+  function getViewportSize() {
+    const vv = window.visualViewport;
+    if (vv && vv.width > 0 && vv.height > 0) return { w: vv.width, h: vv.height };
+    return { w: window.innerWidth, h: window.innerHeight };
+  }
+
   const renderer = new THREE.WebGLRenderer({
     canvas, antialias: true, alpha: false, powerPreference: 'high-performance',
   });
+  const initialViewport = getViewportSize();
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(initialViewport.w, initialViewport.h, false);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -74,20 +81,22 @@ export function createScene({ canvas, grid, projects }) {
   // principal para que phone, tablet portrait, tablet landscape y desktop
   // wide tengan encuadre apropiado sin breakpoints arbitrarios.
   function computeCamFov() {
-    const aspect = window.innerWidth / window.innerHeight;
-    if (aspect < 0.7) return 58;   // phone portrait estrecho
-    if (aspect < 0.95) return 50;  // tablet portrait
+    const { w, h } = getViewportSize();
+    const aspect = w / Math.max(h, 1);
+    if (aspect < 0.7) return 56;   // phone portrait estrecho
+    if (aspect < 0.95) return 48;  // tablet portrait
     if (aspect < 1.4) return 42;   // square/laptop
     return 34;                     // desktop wide
   }
   function computeCamRadius() {
-    const aspect = window.innerWidth / window.innerHeight;
-    if (aspect < 0.7) return 28;
-    if (aspect < 0.95) return 24;
+    const { w, h } = getViewportSize();
+    const aspect = w / Math.max(h, 1);
+    if (aspect < 0.7) return 24;
+    if (aspect < 0.95) return 22;
     if (aspect < 1.4) return 19;
     return 15;
   }
-  const camera = new THREE.PerspectiveCamera(computeCamFov(), window.innerWidth / window.innerHeight, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(computeCamFov(), initialViewport.w / Math.max(initialViewport.h, 1), 0.1, 100);
   const CAM_TARGET = new THREE.Vector3(0, 0, 0);
   let camRadius = computeCamRadius();
   const camState = { tilt: 58, yaw: 0, drift: true };
@@ -212,7 +221,7 @@ export function createScene({ canvas, grid, projects }) {
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(
-    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    new THREE.Vector2(initialViewport.w, initialViewport.h),
     0.55, 0.85, 0.15,
   );
   composer.addPass(bloom);
@@ -220,14 +229,6 @@ export function createScene({ canvas, grid, projects }) {
 
   // Hover model
   const hoverModel = createHoverModel(scene);
-
-  // v0.14.4: usa visualViewport cuando esté disponible (iOS Safari pinch
-  // zoom, virtual keyboard) — innerWidth/Height no reflejan esos cambios.
-  function getViewportSize() {
-    const vv = window.visualViewport;
-    if (vv && vv.width > 0 && vv.height > 0) return { w: vv.width, h: vv.height };
-    return { w: window.innerWidth, h: window.innerHeight };
-  }
 
   // Resize — recalcula FOV + radius para que el grid encaje en mobile/desktop.
   function handleResize() {
@@ -237,7 +238,7 @@ export function createScene({ canvas, grid, projects }) {
     camRadius = computeCamRadius();
     camera.updateProjectionMatrix();
     setCameraFromState(camState.tilt, camState.yaw);
-    renderer.setSize(w, h);
+    renderer.setSize(w, h, false);
     composer.setSize(w, h);
     bloom.setSize(w, h);
   }

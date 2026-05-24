@@ -6,18 +6,39 @@
    ========================================================= */
 
 html, body, #root { background: #000; }
-html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
-body { overflow: hidden; overscroll-behavior: none; }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  min-width: 100vw;
+  max-width: 100vw;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+body { overscroll-behavior: none; }
+
+:root {
+  --p28-vv-left: 0px;
+  --p28-vv-top: 0px;
+  --p28-vv-width: 100vw;
+  --p28-vv-height: 100vh;
+}
+@supports (height: 100dvh) {
+  :root { --p28-vv-height: 100dvh; }
+}
 
 /* v0.14.4: canvas siempre full-bleed con !important para sobrescribir
    los style.width/height inline que THREE.WebGLRenderer.setSize escribe.
    Combinado con dynamic-viewport (dvh) cubre la URL bar de iOS sin gaps. */
 #c {
   position: fixed !important;
-  inset: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  height: 100dvh !important;
+  left: var(--p28-vv-left, 0px) !important;
+  top: var(--p28-vv-top, 0px) !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: var(--p28-vv-width, 100vw) !important;
+  height: var(--p28-vv-height, 100dvh) !important;
   display: block;
   z-index: 0;
   background: #000;
@@ -29,12 +50,31 @@ body { overflow: hidden; overscroll-behavior: none; }
 .chrome { z-index: 10; }
 
 .scene-bg-grid {
+  position: fixed;
+  inset: 0;
+  width: var(--p28-vv-width, 100vw);
+  height: var(--p28-vv-height, 100dvh);
   opacity: 0.10;
+  transform: scale(1.2);
+  transform-origin: center;
   mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, black 10%, transparent 70%);
 }
 
 .scene-bg-vignette {
+  position: fixed;
+  inset: 0;
+  width: var(--p28-vv-width, 100vw);
+  height: var(--p28-vv-height, 100dvh);
   background: radial-gradient(ellipse 90% 90% at 50% 50%, transparent 40%, rgba(0,0,0,0.85) 100%);
+}
+
+.scene-bg-scanlines,
+.chrome,
+.route-overlay {
+  position: fixed;
+  inset: 0;
+  width: var(--p28-vv-width, 100vw);
+  height: var(--p28-vv-height, 100dvh);
 }
 
 .engine-pill {
@@ -73,6 +113,8 @@ body { overflow: hidden; overscroll-behavior: none; }
 }
 
 #popup {
+  box-sizing: border-box;
+  max-width: calc(100vw - 32px);
   right: auto;
   bottom: auto;
   transform: translate(0, 0);
@@ -106,7 +148,12 @@ body { overflow: hidden; overscroll-behavior: none; }
 
 #boot {
   position: fixed;
-  inset: 0;
+  left: var(--p28-vv-left, 0px);
+  top: var(--p28-vv-top, 0px);
+  right: auto;
+  bottom: auto;
+  width: var(--p28-vv-width, 100vw);
+  height: var(--p28-vv-height, 100dvh);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -128,4 +175,10 @@ body { overflow: hidden; overscroll-behavior: none; }
   border-top-color: var(--cyan);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+@media (max-width: 1024px), (pointer: coarse), (max-aspect-ratio: 1/1) {
+  #popup {
+    max-width: 100vw;
+  }
 }

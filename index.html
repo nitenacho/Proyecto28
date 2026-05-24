@@ -9,6 +9,27 @@
   <meta property="og:description" content="Tiles 3D interactivos · WebGL · Three.js" />
   <title>PROYECTO 28 — Interactive Tiles 3D</title>
   <link rel="icon" href="/assets/proyecto28-logo-isometric.png" type="image/png" />
+  <script>
+    (function () {
+      function syncVisualViewport() {
+        var vv = window.visualViewport;
+        var root = document.documentElement;
+        var width = vv && vv.width > 0 ? vv.width : window.innerWidth;
+        var height = vv && vv.height > 0 ? vv.height : window.innerHeight;
+        root.style.setProperty('--p28-vv-left', ((vv && vv.offsetLeft) || 0) + 'px');
+        root.style.setProperty('--p28-vv-top', ((vv && vv.offsetTop) || 0) + 'px');
+        root.style.setProperty('--p28-vv-width', width + 'px');
+        root.style.setProperty('--p28-vv-height', height + 'px');
+      }
+      syncVisualViewport();
+      window.addEventListener('resize', syncVisualViewport, { passive: true });
+      window.addEventListener('orientationchange', syncVisualViewport, { passive: true });
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', syncVisualViewport, { passive: true });
+        window.visualViewport.addEventListener('scroll', syncVisualViewport, { passive: true });
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="/src/styles/tokens.css" />
   <link rel="stylesheet" href="/src/styles/app.css" />
   <link rel="stylesheet" href="/src/styles/three-host.css" />
