@@ -16,7 +16,8 @@ seguirlo.
 > 6. Tag semver `v0.X.Y` al cierre de etapa o fix.
 > 7. Entrada en `CHANGELOG.md`.
 > 8. Regenerar `HANDOFF-LATEST.md` con el nuevo estado.
-> 9. Respaldar handoff en el Google Doc oficial (subpestaña con fecha/hora).
+> 9. Respaldar handoff en el Google Doc oficial como subpestaña con fecha/hora
+>    bajo el tab raíz `Handoff` (nunca como pestaña raíz del documento).
 
 GitHub Actions se encarga del deploy automático a GitHub Pages. Strapi Cloud
 se encarga del rebuild automático cuando hay cambios en `cms/**`. **No hay
@@ -121,7 +122,23 @@ estar OK. **Si alguno falla, la etapa NO se cierra.**
 - [ ] GitHub Actions verde en `main` después del merge.
 - [ ] Strapi Cloud verde (si tocamos `cms/**`).
 - [ ] Smoke test en `https://proyecto28.com` — el sitio carga.
-- [ ] Handoff respaldado en Google Doc (subpestaña fecha/hora).
+- [ ] Handoff respaldado en Google Doc como subpestaña fecha/hora bajo
+  `Handoff` (nunca pestaña raíz).
+
+## 5.1 Regla Google Doc
+
+El Google Doc oficial usa el tab raíz `Handoff` como contenedor permanente de
+continuidad. Cada cierre de etapa o sesión debe crear/mover una subpestaña
+dentro de `Handoff`.
+
+Formato recomendado de título:
+
+```text
+YYYY-MM-DD HH:mm UTC - vX.Y.Z <slug>
+```
+
+El próximo agente debe tomar siempre la última subpestaña bajo `Handoff`.
+Si un respaldo queda como pestaña raíz, corregirlo antes de entregar.
 
 ## 6. Comandos rápidos
 

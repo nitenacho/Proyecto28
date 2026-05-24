@@ -68,11 +68,15 @@ Resumen del flujo:
 6. tag v0.N.0 (scripts/release.ps1 o .sh lo automatiza)
 7. CHANGELOG.md actualizado
 8. HANDOFF-LATEST.md regenerado
-9. respaldar handoff en Google Doc
+9. respaldar handoff en Google Doc como subpestaña bajo `Handoff`
 ```
 
 GitHub Actions se encarga del deploy automático a GH Pages. Strapi Cloud
 hace rebuild automático de `cms/**`. **No hay deploy manual.**
+
+Regla de continuidad: el Google Doc oficial no usa pestañas raíz para cierres.
+Cada respaldo debe quedar como subpestaña dentro del tab raíz `Handoff`, con
+formato `YYYY-MM-DD HH:mm UTC - vX.Y.Z <slug>`.
 
 El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md` (no commiteado
 al repo, lo tiene el owner).

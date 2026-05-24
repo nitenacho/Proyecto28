@@ -262,6 +262,21 @@ revocación.
 Documento de respaldo:
 `https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/edit`
 
+Estructura obligatoria:
+- El respaldo debe quedar SIEMPRE como subpestaña dentro del tab raíz `Handoff`.
+- Nunca crear el respaldo como pestaña raíz del documento.
+- El próximo agente debe abrir la última subpestaña bajo `Handoff` y continuar
+  desde ahí.
+- Formato recomendado de título: `YYYY-MM-DD HH:mm UTC - vX.Y.Z <slug>`.
+- Si una pestaña queda creada por error en la raíz, moverla bajo `Handoff`
+  antes de cerrar la sesión.
+
+Estado corregido 2026-05-24:
+- La subpestaña correcta es `2026-05-24 19:50 UTC - v0.14.6 responsive`.
+- Está bajo el tab raíz `Handoff`.
+- Si se usa Google Docs API, el `tabId` actual del padre `Handoff` es
+  `t.7lpfc5ado1h` (verificar de nuevo si el documento se reestructura).
+
 Contenido que debe quedar respaldado:
 - Este handoff `v0.14.6`.
 - Confirmación de que el bug responsive quedó resuelto.
@@ -272,6 +287,8 @@ Gotchas ya conocidos:
 2. `type >4KB` puede dar timeout CDP; usar chunks de 3-4 KB.
 3. Google Docs puede autocorregir guiones; aceptable.
 4. Subpestañas pueden crearse genéricas; renombrar manualmente si hace falta.
+5. Si el respaldo queda como pestaña raíz, es un error: moverlo bajo `Handoff`
+   antes de entregar.
 
 ---
 
@@ -285,7 +302,8 @@ Gotchas ya conocidos:
 - Validar `https://proyecto28.com` para responsive/hosting.
 - Actualizar `CHANGELOG.md`, `README.md`, `HANDOFF-LATEST.md`.
 - Tag semver al cierre.
-- Respaldar handoff en Google Doc.
+- Respaldar handoff en Google Doc como subpestaña bajo `Handoff`, nunca como
+  pestaña raíz.
 
 ---
 

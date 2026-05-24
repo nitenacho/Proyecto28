@@ -59,9 +59,11 @@
 4. **Cambios solo a docs** (CHANGELOG/README/HANDOFF/PLAN) pueden ir
    directos a main con tag patch `v0.X.Y` si urge. Ya se aplicó: `v0.4.1`
    para los docs de transición a nuevo agente.
-5. **Google Doc backup quirks documentados** — ver `HANDOFF-LATEST.md` §13
-   para la lista de gotchas (autocorrect, renumeración de listas, clipboard
-   JS no propaga, type lento con strings grandes — partir en chunks).
+5. **Google Doc backup quirks documentados** — ver `HANDOFF-LATEST.md` §9
+   para la lista de gotchas y la regla estructural obligatoria: cada respaldo
+   debe quedar como subpestaña bajo el tab raíz `Handoff`, nunca como pestaña
+   raíz. El próximo agente debe tomar siempre la última subpestaña de
+   `Handoff`.
 
 ---
 

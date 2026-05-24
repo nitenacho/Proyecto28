@@ -10,7 +10,14 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
-Sin cambios todavía.
+### Fixed
+- Google Doc backup `v0.14.6` corregido: la pestaña quedó como subpestaña bajo
+  `Handoff` y se reforzó la regla para futuros agentes.
+
+### Documentation
+- `HANDOFF-LATEST.md`, `VERSIONING.md`, `README.md` y
+  `PLAN-PROYECTO28-V2.md` aclaran que los respaldos del Google Doc deben
+  crearse/moverse siempre bajo `Handoff`, nunca como pestañas raíz.
 
 ## [0.14.6] — 2026-05-24 — Hotfix: responsive root cause confirmado
 
