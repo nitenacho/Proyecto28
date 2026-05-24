@@ -10,35 +10,49 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
-### Known issues (sin resolver al cierre de sesión 2026-05-23)
+Sin cambios todavía.
 
-- **Responsive iPad/iPhone NO funciona en producción** aún después
-  de `v0.14.2` → `v0.14.3` → `v0.14.4`. El owner confirma con
-  capturas de iPhone + iPad sacadas justo al cargar la página: la
-  cámara sigue muy cerca y aparecen franjas negras laterales.
-- **Pista nueva del owner**: el loading inicial (`#boot` splash)
-  aparece **alineado a la izquierda** en lugar de centrado. Eso
-  sugiere que algún elemento empuja el body/html más angosto que
-  el viewport visible **antes** de que el JS de scene corra — es
-  decir, el problema está en el layout HTML/CSS base, no en la
-  cámara Three.js. Las correcciones de `v0.14.4` (cámara adaptive
-  + visualViewport) son válidas pero no atacan la causa raíz.
-- **Hipótesis a investigar**:
-  1. Algún elemento `position: fixed` con width fijo (popup 380px,
-     tweaks-root, admin-btn replace) podría estar dimensionando el
-     viewport scrollbar antes del media query mobile.
-  2. El meta `viewport-fit=cover` agregado en `v0.14.4` interactúa
-     mal con el body width en iPad portrait.
-  3. El `#boot` con `position: fixed; inset: 0; flex center` debería
-     estar siempre centrado — si no lo está, hay un ancestor con
-     `transform` o el html no ocupa el viewport (CSS html { width:
-     100% } puede no ser suficiente — probar `width: 100vw`).
-  4. `overflow: hidden` en body no limita: en mobile Safari el
-     viewport puede ser más ancho que el body si hay elementos
-     hijos con width fijo.
+## [0.14.6] — 2026-05-24 — Hotfix: responsive root cause confirmado
 
-Próximo agente: NO arrancar Etapa 11 hasta resolver esto. Ver §3
-del HANDOFF para plan de ataque.
+Fix confirmado por el owner en device real: el sitio "se arreglo muy
+bien". Se desbloquea Etapa 11 después de este cierre.
+
+### Fixed
+- **Causa raíz del overflow responsive**: producción mostraba
+  `document.documentElement.scrollWidth > window.innerWidth` en
+  phone/tablet. El culpable era `.scene-bg-grid` con `inset: -10%`,
+  que ensanchaba el documento (`390px → 429px` en phone,
+  `810px → 891px` en iPad portrait) antes del render Three.js.
+- **`src/styles/three-host.css`**:
+  - `html, body` ahora cierran el layout a `100vw`/`max-width:100vw`
+    con `overflow:hidden`.
+  - `#c`, `#boot`, `.chrome`, `.route-overlay`, `.scene-bg-vignette`
+    y `.scene-bg-scanlines` usan las vars `--p28-vv-*` para cubrir
+    el visual viewport real.
+  - `.scene-bg-grid` queda `position: fixed; inset: 0` y escala con
+    `transform: scale(1.2)` para conservar el margen visual sin
+    modificar el `scrollWidth` del documento.
+  - `#popup` base usa `box-sizing:border-box` y `max-width`; en
+    mobile vuelve a `max-width:100vw`.
+- **`index.html`**: script temprano sincroniza `window.visualViewport`
+  con CSS vars (`--p28-vv-left/top/width/height`) antes del boot.
+- **`src/scene/scene.js`**:
+  - `getViewportSize()` ahora existe antes de construir renderer,
+    cámara y bloom.
+  - `renderer.setSize(w, h, false)` evita escribir estilos inline
+    sobre el canvas.
+  - Cámara portrait ajustada para usar más ancho sin cortar cubos:
+    phone `fov 56 / radius 24`, tablet portrait `fov 48 / radius 22`.
+
+### Verified
+- `npm run build` OK.
+- GitHub Actions deploy a Pages OK.
+- Smoke en producción `https://proyecto28.com` OK.
+- Métricas de producción:
+  - phone `390x844`: `html=390`, `body=390`, `canvas=390`.
+  - tablet portrait `810x1080`: `html=810`, `canvas=810`.
+  - landscape `1024x768`: `html=1024`, `canvas=1024`.
+- Confirmación owner posterior a deploy: "se arreglo muy bien".
 
 ## [0.14.4] — 2026-05-23 — Hotfix: cámara + canvas adaptive por aspect-ratio
 

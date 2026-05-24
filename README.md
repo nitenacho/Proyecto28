@@ -97,6 +97,7 @@ al repo, lo tiene el owner).
 | 9 — Google OAuth + whitelist gating | ✅ Cerrado | `v0.13.0` |
 | 10 — Popup robusto + mobile responsive + touch | ✅ Cerrado | `v0.14.0` |
 | 10 hotfix — Admin pill + cámara mobile + popup overflow | ✅ Cerrado | `v0.14.2` |
+| 10 hotfix — Responsive root cause iPhone/iPad | ✅ Cerrado | `v0.14.6` |
 | 11 — Pixel Streaming Unreal | ⏳ Pendiente | — |
 | 12 — Pipeline Publicar | ⏳ Pendiente | — |
 | 13 — Sync Claude Design | ⏳ Pendiente | — |

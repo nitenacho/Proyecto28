@@ -1,25 +1,31 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
+> **Última actualización operativa:** 2026-05-24 — `v0.14.6`
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1, 2 y 3 cerradas. Tag activo: `v0.4.1`.
+> **Status:** En ejecución — etapas 1-10 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Próxima etapa: 11 — Pixel Streaming Unreal.
 
-## Estado del plan al 2026-05-21 20:55 UTC
+## Estado del plan al 2026-05-24 16:55 America/Santiago
 
 | Etapa | Estado | Tag | Commit |
 |---|---|---|---|
 | 1 — Fundación versionado | ✅ Cerrada | `v0.2.0` | `0da2c23` |
 | 2 — Strapi schema extendido | ✅ Cerrada | `v0.3.0` | `d61fec6` |
 | 3 — Frontend data layer | ✅ Cerrada | `v0.4.0` | `00968cc` |
-| 4 — Luz controlable | ⏳ Próxima | — | — |
-| 5 — Físicas Kirby | ⏳ Pendiente | — | — |
-| 6 — Cubos + respawn + contador | ⏳ Pendiente | — | — |
-| 7 — Tweaks ocultos | ⏳ Pendiente | — | — |
-| 8 — Botón admin secreto | ⏳ Pendiente | — | — |
-| 9 — Google OAuth + whitelist | ⏳ Pendiente | — | — |
-| 10 — Popup mejorado + mobile | ⏳ Pendiente | — | — |
-| 11 — Pixel Streaming Unreal | ⏳ Pendiente | — | — |
+| 4 — Luz controlable | ✅ Cerrada | `v0.5.0` | — |
+| 5 — Físicas Kirby | ✅ Cerrada | `v0.6.0` | — |
+| 6 — Cubos + respawn + contador | ✅ Cerrada | `v0.7.0` | — |
+| 6 polish — CCD + spawn + sombra + tweaks juego | ✅ Cerrada | `v0.8.0` | — |
+| 6 polish 2 — sombra anillo + flechas + gamepad | ✅ Cerrada | `v0.9.0` | — |
+| 6 polish 3 — defaults persistidos | ✅ Cerrada | `v0.9.2` | — |
+| 7 — Tweaks ocultos + adminMode | ✅ Cerrada | `v0.10.0` | — |
+| 7 cierre — sliders + localStorage | ✅ Cerrada | `v0.11.0` | — |
+| 8 — Botón admin secreto | ✅ Cerrada | `v0.12.0` | — |
+| 9 — Google OAuth + whitelist | ✅ Cerrada | `v0.13.0` | — |
+| 10 — Popup mejorado + mobile | ✅ Cerrada | `v0.14.0` | — |
+| 10 hotfix — Responsive root cause | ✅ Cerrada | `v0.14.6` | `b96ddbb` |
+| 11 — Pixel Streaming Unreal | ⏳ Próxima | `v0.15.0` | — |
 | 12 — Pipeline Publicar (Discord) | ⏳ Pendiente | — | — |
 | 13 — Sync Claude Design | ⏳ Pendiente | — | — |
 | 14 — GSAP polish | ⏳ Pendiente | — | — |
@@ -31,15 +37,16 @@
 - **§1.1 Pixel Streaming infra:** ✅ 1 instancia compartida con switch de Level
   desde la stream. Servidor GPU separado (a configurar en pre-requisitos de
   Etapa 11). Budget esperado $50-150/mes.
-- **§1.2 Google OAuth:** ❌ Sin resolver. OAuth Client ID debe crearse antes
-  de Etapa 9.
+- **§1.2 Google OAuth:** ✅ Resuelto en Etapa 9. Google Identity Services +
+  whitelist Strapi `/api/auth/check` funcionando en producción.
 - **§1.3 Discord bot:** ⏳ A definir al iniciar Etapa 12.
 - **§1.4 Claude Design:** ⏳ A definir al iniciar Etapa 13.
 - **§1.5 Detalles del juego:** ✅ Defaults documentados en Strapi
   `SiteSetting` y reflejados en `src/data/fallback.js`. Ajustables vía
   panel de tweaks una vez exista (Etapas 7+).
-- **§1.6 Admin Strapi:** ❌ Owner pendiente de crear cuenta en
-  `https://honest-candy-800d1e4a92.strapiapp.com/admin`.
+- **§1.6 Admin Strapi:** ⏳ Cuenta/admin operativo parcialmente; queda como
+  pendiente de gestión owner si se requiere acceso nuevo. Tech debt activo:
+  enum legacy `Project.status` puede bloquear edición de proyectos en Strapi.
 
 ## Ajustes al flujo aprendidos durante la ejecución
 
