@@ -643,6 +643,157 @@ body {
 .reticle .bl { bottom: 0; left: 0; border-bottom: 1px solid; border-left: 1px solid; }
 .reticle .br { bottom: 0; right: 0; border-bottom: 1px solid; border-right: 1px solid; }
 
+/* Pixel Streaming overlay projected from the active 3D tile */
+.stream-overlay {
+  position: fixed;
+  left: 50vw;
+  top: 50vh;
+  z-index: 35;
+  max-width: calc(var(--p28-vv-width, 100vw) - 32px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  transform-origin: 50% 100%;
+  transition:
+    opacity 220ms var(--ease-out),
+    left 160ms linear,
+    top 160ms linear;
+  contain: layout style paint;
+}
+.stream-overlay:not([hidden]) { opacity: 1; }
+.stream-overlay.is-offscreen {
+  opacity: 0;
+  pointer-events: none;
+}
+.stream-overlay[data-interactive="true"]:not(.is-offscreen) {
+  pointer-events: auto;
+}
+
+.stream-card {
+  overflow: hidden;
+  border: 1px solid rgba(127, 211, 203, 0.36);
+  border-radius: 8px;
+  background: rgba(5, 8, 16, 0.74);
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.52),
+    0 0 32px rgba(127, 211, 203, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+}
+
+.stream-head {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border-bottom: 1px solid rgba(127, 211, 203, 0.20);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.stream-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--copper-bright);
+  box-shadow: 0 0 10px currentColor;
+}
+.stream-overlay[data-state="stream"] .stream-live-dot {
+  background: var(--success);
+}
+.stream-head-status {
+  margin-left: auto;
+  color: var(--cyan);
+}
+
+.stream-stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 75% 75% at 50% 35%, rgba(127, 211, 203, 0.16), transparent 70%),
+    #020509;
+}
+.stream-frame,
+.stream-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.stream-frame {
+  display: block;
+  border: 0;
+  background: #000;
+}
+.stream-frame[hidden],
+.stream-fallback[hidden] {
+  display: none;
+}
+
+.stream-fallback {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+.stream-fallback-media {
+  position: absolute;
+  inset: 0;
+}
+.stream-fallback-image,
+.stream-fallback-video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  opacity: 0.72;
+  filter: saturate(0.92) contrast(1.05);
+}
+.stream-fallback-empty {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(rgba(127, 211, 203, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(127, 211, 203, 0.06) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 70% at 50% 45%, rgba(216, 115, 64, 0.16), transparent 72%),
+    #050810;
+  background-size: 20px 20px, 20px 20px, auto, auto;
+  color: rgba(127, 211, 203, 0.62);
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.stream-fallback-copy {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 28px 12px 12px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.78), transparent);
+}
+.stream-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.05;
+  color: var(--ink-1);
+  text-transform: uppercase;
+}
+.stream-subtitle {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--cyan);
+  text-transform: uppercase;
+}
+
 /* mock route overlay */
 .route-overlay {
   position: fixed;
@@ -804,6 +955,22 @@ body {
   .popup-actions .btn-primary { min-width: 0; }
   .btn-primary { padding: 12px 14px; font-size: 12px; }
   .btn-ghost { flex: 0 0 auto; width: 38px; height: 38px; }
+
+  .stream-overlay {
+    z-index: 34;
+  }
+  .stream-card {
+    background: rgba(5, 8, 16, 0.88);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .stream-head {
+    height: 24px;
+    font-size: 8px;
+    padding: 0 8px;
+  }
+  .stream-title { font-size: 13px; }
+  .stream-fallback-copy { padding: 24px 10px 10px; }
 
   /* Tweaks panel: full-width modal */
   .twk-panel {

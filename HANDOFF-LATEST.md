@@ -1,13 +1,13 @@
 # HANDOFF — Proyecto 28
 
-> **Última actualización:** 2026-05-24 (cierre respaldo completo Google Doc — `v0.14.7` docs)
+> **Última actualización:** 2026-05-24 (Etapa 11 en curso — overlay iframe/fallback)
 > **Tag activo:** `v0.14.7` (docs) · último código funcional: `v0.14.6`
-> **Branch de trabajo:** `main` (sin etapa abierta)
+> **Branch de trabajo:** `etapa-11-pixel-streaming` (base `main` / `v0.14.7`)
 > **Owner:** @nitenacho — cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 
 > ✅ **BUG RESPONSIVE iPhone/iPad RESUELTO Y CONFIRMADO POR OWNER.**
-> Próximo agente puede retomar Etapa 11, pero debe validar producción antes de codear.
+> 🚧 **Etapa 11 en curso:** primer corte de Pixel Streaming con overlay iframe/fallback.
 
 ---
 
@@ -21,7 +21,8 @@ Estado actual:
 - Hotfix responsive raíz cerrado en `v0.14.6`.
 - Respaldo completo de continuidad cerrado en `v0.14.7` (docs-only).
 - Owner confirmó en device real: "se arreglo muy bien".
-- Etapa 11 (Pixel Streaming Unreal) queda desbloqueada.
+- Etapa 11 (Pixel Streaming Unreal) está en curso en branch
+  `etapa-11-pixel-streaming`.
 
 Qué se resolvió:
 - En producción `html.scrollWidth` era mayor que `window.innerWidth`.
@@ -30,6 +31,19 @@ Qué se resolvió:
 - Síntomas eliminados: splash `#boot` corrido/izquierdo, franjas laterales
   al pinch zoom, grid que no aprovechaba bien el ancho mobile.
 - Se ajustó además el encuadre portrait para usar más ancho sin cortar cubos.
+
+Trabajo en curso Etapa 11:
+- Nuevo overlay HTML proyectado desde el cubo activo de la luz.
+- Si `pixelStreamingEnabled` + `unrealEnabled` + `unrealStreamURL` absoluta
+  están disponibles, el overlay monta iframe.
+- Si falta infraestructura o el toggle está off, muestra fallback local
+  usando `videoLoop`, imagen del proyecto o tarjeta procedural.
+- Verificación local inicial: `npm run build` OK y responsive con overlay activo
+  mantiene `html/body/canvas === innerWidth` en phone `390x844` e iPad portrait
+  `810x1080`.
+- Pendiente antes de cierre `v0.15.0`: validar con URL real de
+  `stream.proyecto28.com` o endpoint equivalente, producción `proyecto28.com`,
+  owner review y respaldo Google Doc.
 
 ---
 

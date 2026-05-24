@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { loadContent } from './data/cms.js';
 import { createScene } from './scene/scene.js';
 import { createControllableLight } from './game/light.js';
+import { createStreamOverlay } from './streaming/streamOverlay.js';
 import { createPopup } from './ui/popup.js';
 import { mountTweaks } from './ui/tweaks.js';
 import { mountAdminButton } from './ui/adminButton.js';
@@ -21,6 +22,10 @@ const canvas = document.getElementById('c');
 const bootEl = document.getElementById('boot');
 const coordModule = document.getElementById('coord-module');
 const brandNameEl = document.getElementById('brand-name');
+
+function normalizeStreamingMode(mode) {
+  return mode === 'per-cube' || mode === 'dedicated' ? 'per-cube' : 'shared';
+}
 
 function applyHudVisibility({ showGrid, showScanlines, showViewfinder }) {
   const grid = document.querySelector('.scene-bg-grid');
@@ -38,13 +43,17 @@ async function boot() {
   const sceneCtx = createScene({ canvas, grid, projects });
   const defaults = site.defaults;
   const hud = mountHud();
+  const streamOverlay = createStreamOverlay({ site, camera: sceneCtx.camera });
   let activeTile = null;
   const controlLight = createControllableLight({
     scene: sceneCtx.scene,
     config: site.game,
     tiles: sceneCtx.tiles,
     gravityEnabled: defaults.gravityEnabled,
-    onActiveTileChange(tile) { activeTile = tile; },
+    onActiveTileChange(tile) {
+      activeTile = tile;
+      streamOverlay.setActiveTile(tile);
+    },
     onRespawn(n) { hud.setFallCount(n); },
   });
   const popup = createPopup();
@@ -68,7 +77,7 @@ async function boot() {
     gameFallDuration: site.game.fallDuration,
     gameShadowSize: site.game.shadowSize ?? 0.45,
     streamingEnabled: site.streaming.enabled,
-    streamingMode: site.streaming.mode,
+    streamingMode: normalizeStreamingMode(site.streaming.mode),
     adminButtonVisible: site.admin.buttonVisible,
   };
 
@@ -100,9 +109,10 @@ async function boot() {
       site.game.mouseFollowDelay = state.gameMouseFollowDelay;
       site.game.fallDuration     = state.gameFallDuration;
       site.game.shadowSize       = state.gameShadowSize;
-      // Streaming — sólo persiste el estado (efectos en Etapa 11).
+      // Streaming — Etapa 11: iframe sobre el cubo activo o fallback local.
       site.streaming.enabled     = !!state.streamingEnabled;
-      site.streaming.mode        = state.streamingMode;
+      site.streaming.mode        = normalizeStreamingMode(state.streamingMode);
+      streamOverlay.setStreamingConfig(site.streaming);
       // Admin — mutación in place + sincroniza visibilidad del botón en vivo (Etapa 8).
       site.admin.buttonVisible   = !!state.adminButtonVisible;
       if (adminButton) adminButton.setVisible(site.admin.buttonVisible);
@@ -181,7 +191,7 @@ async function boot() {
             type: 'select', key: 'streamingMode', label: 'Modo',
             options: [
               { value: 'shared',    label: 'Compartido' },
-              { value: 'dedicated', label: 'Dedicado' },
+              { value: 'per-cube',  label: 'Por cubo' },
             ],
           },
         ],
@@ -244,6 +254,40 @@ async function boot() {
 
   // QA helper: forzar sign-out manual via DevTools.
   window.p28SignOut = () => { signOut(); console.log('[p28 auth] signed out'); };
+  window.p28StreamDebug = {
+    show(projectId = '028.A') {
+      const tile = sceneCtx.tiles.find((t) => t.userData.project?.id === projectId) || null;
+      activeTile = tile;
+      streamOverlay.setActiveTile(tile);
+      return !!tile;
+    },
+    hide() {
+      activeTile = null;
+      streamOverlay.setActiveTile(null);
+    },
+    setEnabled(enabled = true) {
+      site.streaming.enabled = !!enabled;
+      streamOverlay.setStreamingConfig(site.streaming);
+    },
+    metrics() {
+      return {
+        activeProject: streamOverlay.activeProject?.id || null,
+        body: document.body.scrollWidth,
+        html: document.documentElement.scrollWidth,
+        inner: window.innerWidth,
+        visual: window.visualViewport?.width || null,
+      };
+    },
+  };
+
+  if (import.meta.env.DEV) {
+    const previewProjectId = new URLSearchParams(window.location.search).get('streamPreview');
+    if (previewProjectId) {
+      requestAnimationFrame(() => {
+        window.p28StreamDebug.show(previewProjectId);
+      });
+    }
+  }
 
   // v0.10.0: gate del panel por window.adminMode. Por default = false → panel
   // oculto. Asignar window.adminMode = true desde DevTools console lo muestra.
@@ -392,6 +436,7 @@ async function boot() {
     }
 
     sceneCtx.hoverModel.update(t, hovered);
+    streamOverlay.update(sceneCtx.camera);
 
     // Tile-anchored popup placement (used when not in cursor/side/corner)
     if (hovered && hovered.userData.isProject && popup.placement === 'cursor') {

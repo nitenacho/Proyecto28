@@ -4,7 +4,7 @@
 > **Última actualización operativa:** 2026-05-24 — `v0.14.7` docs / `v0.14.6` código
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-10 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Respaldo completo Google Doc cerrado en `v0.14.7`. Próxima etapa: 11 — Pixel Streaming Unreal.
+> **Status:** En ejecución — etapas 1-10 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Respaldo completo Google Doc cerrado en `v0.14.7`. Etapa 11 en curso: primer corte overlay iframe/fallback.
 
 ## Estado del plan al 2026-05-24 16:55 America/Santiago
 
@@ -26,7 +26,7 @@
 | 10 — Popup mejorado + mobile | ✅ Cerrada | `v0.14.0` | — |
 | 10 hotfix — Responsive root cause | ✅ Cerrada | `v0.14.6` | `b96ddbb` |
 | 10 docs — Handoff completo Google Doc | ✅ Cerrada | `v0.14.7` | — |
-| 11 — Pixel Streaming Unreal | ⏳ Próxima | `v0.15.0` | — |
+| 11 — Pixel Streaming Unreal | 🚧 En curso | `v0.15.0` | overlay iframe/fallback en branch |
 | 12 — Pipeline Publicar (Discord) | ⏳ Pendiente | — | — |
 | 13 — Sync Claude Design | ⏳ Pendiente | — | — |
 | 14 — GSAP polish | ⏳ Pendiente | — | — |

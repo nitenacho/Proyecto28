@@ -10,7 +10,31 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
-Sin cambios todavía.
+### Added
+- **Etapa 11 / Pixel Streaming inicial**:
+  - Nuevo módulo `src/streaming/pixelStream.js` para montar un iframe sólo
+    cuando el proyecto tiene `unrealEnabled`, URL absoluta válida y el master
+    switch `pixelStreamingEnabled` está activo.
+  - Nuevo módulo `src/streaming/streamOverlay.js` para proyectar un overlay
+    HTML desde el cubo activo de la luz a coordenadas de pantalla.
+  - Fallback visual local sobre el cubo activo cuando Pixel Streaming está
+    apagado, falta URL o el cubo no tiene stream habilitado. El fallback usa
+    `videoLoop`, imagen del popup/imagen del proyecto o una tarjeta procedural.
+  - Helper local de QA en dev: `?streamPreview=028.A` muestra el fallback del
+    overlay sin tener que mover la luz manualmente.
+
+### Changed
+- El toggle Streaming del panel de tweaks ahora afecta al overlay en vivo.
+- `streamingMode` se normaliza a `shared` / `per-cube`; el valor legacy
+  `dedicated` se interpreta como `per-cube`.
+
+### Verified
+- `npm run build` OK.
+- Preview local en `http://127.0.0.1:5174/?streamPreview=028.A`:
+  overlay `fallback`, sin `iframe.src`, sin errores de consola.
+- Responsive local con overlay activo:
+  - phone `390x844`: `html=390`, `body=390`, `canvas=390`.
+  - tablet portrait `810x1080`: `html=810`, `body=810`, `canvas=810`.
 
 ## [0.14.7] — 2026-05-24 — Docs: handoff completo Google Doc
 
