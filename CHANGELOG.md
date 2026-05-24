@@ -10,14 +10,32 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+Sin cambios todavía.
+
+## [0.14.7] — 2026-05-24 — Docs: handoff completo Google Doc
+
+Release documental. No cambia código de producción; el último código funcional
+sigue siendo `v0.14.6`.
+
 ### Fixed
-- Google Doc backup `v0.14.6` corregido: la pestaña quedó como subpestaña bajo
-  `Handoff` y se reforzó la regla para futuros agentes.
+- Google Doc backup corregido dos veces:
+  - La pestaña de cierre dejó de estar en la raíz y quedó como subpestaña bajo
+    `Handoff`.
+  - El primer respaldo era demasiado compacto (aprox. 3 páginas) para servir
+    como handoff operativo. Se amplió la subpestaña vigente con un anexo
+    completo para que el siguiente agente pueda continuar sin reconstruir
+    contexto.
 
 ### Documentation
 - `HANDOFF-LATEST.md`, `VERSIONING.md`, `README.md` y
   `PLAN-PROYECTO28-V2.md` aclaran que los respaldos del Google Doc deben
   crearse/moverse siempre bajo `Handoff`, nunca como pestañas raíz.
+- La subpestaña vigente del Google Doc quedó como:
+  `2026-05-24 20:40 UTC - v0.14.7 handoff completo`.
+- El contenido ampliado incluye estado actual, comandos de entrada,
+  verificación de servicios, diagnóstico responsive, evidencia de cierre,
+  plan de Etapa 11, riesgos activos y regla explícita contra respaldos
+  resumidos de 3 páginas.
 
 ## [0.14.6] — 2026-05-24 — Hotfix: responsive root cause confirmado
 

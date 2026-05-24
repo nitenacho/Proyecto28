@@ -78,8 +78,11 @@ Regla de continuidad: el Google Doc oficial no usa pestañas raíz para cierres.
 Cada respaldo debe quedar como subpestaña dentro del tab raíz `Handoff`, con
 formato `YYYY-MM-DD HH:mm UTC - vX.Y.Z <slug>`.
 
-El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md` (no commiteado
-al repo, lo tiene el owner).
+El respaldo del Google Doc debe ser un handoff operativo completo, no un
+resumen corto. Si queda en 3 páginas y faltan comandos, validaciones,
+evidencia, riesgos o próximos pasos, hay que ampliarlo antes de entregar.
+
+El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 
 ### Estado de etapas
 
@@ -102,6 +105,7 @@ al repo, lo tiene el owner).
 | 10 — Popup robusto + mobile responsive + touch | ✅ Cerrado | `v0.14.0` |
 | 10 hotfix — Admin pill + cámara mobile + popup overflow | ✅ Cerrado | `v0.14.2` |
 | 10 hotfix — Responsive root cause iPhone/iPad | ✅ Cerrado | `v0.14.6` |
+| 10 docs — Handoff completo Google Doc | ✅ Cerrado | `v0.14.7` |
 | 11 — Pixel Streaming Unreal | ⏳ Pendiente | — |
 | 12 — Pipeline Publicar | ⏳ Pendiente | — |
 | 13 — Sync Claude Design | ⏳ Pendiente | — |

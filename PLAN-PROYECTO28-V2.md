@@ -1,10 +1,10 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-05-24 — `v0.14.6`
+> **Última actualización operativa:** 2026-05-24 — `v0.14.7` docs / `v0.14.6` código
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-10 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Próxima etapa: 11 — Pixel Streaming Unreal.
+> **Status:** En ejecución — etapas 1-10 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Respaldo completo Google Doc cerrado en `v0.14.7`. Próxima etapa: 11 — Pixel Streaming Unreal.
 
 ## Estado del plan al 2026-05-24 16:55 America/Santiago
 
@@ -25,6 +25,7 @@
 | 9 — Google OAuth + whitelist | ✅ Cerrada | `v0.13.0` | — |
 | 10 — Popup mejorado + mobile | ✅ Cerrada | `v0.14.0` | — |
 | 10 hotfix — Responsive root cause | ✅ Cerrada | `v0.14.6` | `b96ddbb` |
+| 10 docs — Handoff completo Google Doc | ✅ Cerrada | `v0.14.7` | — |
 | 11 — Pixel Streaming Unreal | ⏳ Próxima | `v0.15.0` | — |
 | 12 — Pipeline Publicar (Discord) | ⏳ Pendiente | — | — |
 | 13 — Sync Claude Design | ⏳ Pendiente | — | — |
@@ -64,6 +65,10 @@
    debe quedar como subpestaña bajo el tab raíz `Handoff`, nunca como pestaña
    raíz. El próximo agente debe tomar siempre la última subpestaña de
    `Handoff`.
+6. **Respaldo Google Doc debe ser completo, no sólo breve** — el cierre
+   `v0.14.6` quedó primero demasiado resumido (aprox. 3 páginas). Fue ampliado
+   y versionado como `v0.14.7` para que el siguiente agente tenga contexto
+   operativo suficiente.
 
 ---
 

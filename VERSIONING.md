@@ -124,6 +124,9 @@ estar OK. **Si alguno falla, la etapa NO se cierra.**
 - [ ] Smoke test en `https://proyecto28.com` — el sitio carga.
 - [ ] Handoff respaldado en Google Doc como subpestaña fecha/hora bajo
   `Handoff` (nunca pestaña raíz).
+- [ ] Respaldo suficientemente completo para retomar: debe incluir estado,
+  comandos, validaciones, evidencia, riesgos y próximo paso. Un resumen de
+  3 páginas no basta si omite contexto operativo.
 
 ## 5.1 Regla Google Doc
 
@@ -139,6 +142,20 @@ YYYY-MM-DD HH:mm UTC - vX.Y.Z <slug>
 
 El próximo agente debe tomar siempre la última subpestaña bajo `Handoff`.
 Si un respaldo queda como pestaña raíz, corregirlo antes de entregar.
+
+El contenido debe ser un handoff completo, no sólo una síntesis. Debe poder
+responder por sí solo:
+
+- qué tag es el vigente y cuál fue el último código funcional;
+- qué confirmó el owner y qué quedó pendiente;
+- qué comandos ejecutar al entrar;
+- qué servicios validar y qué respuestas esperar;
+- qué pruebas de producción importan;
+- qué archivos leer antes de continuar;
+- qué riesgos/tech debt no mezclar con la siguiente etapa.
+
+Si al revisar el Google Doc el respaldo queda mucho más corto que cierres
+anteriores o ronda sólo 3 páginas, ampliarlo antes de cerrar la sesión.
 
 ## 6. Comandos rápidos
 

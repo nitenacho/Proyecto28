@@ -1,7 +1,7 @@
 # HANDOFF — Proyecto 28
 
-> **Última actualización:** 2026-05-24 (cierre fix responsive root cause — `v0.14.6`)
-> **Tag activo:** `v0.14.6`
+> **Última actualización:** 2026-05-24 (cierre respaldo completo Google Doc — `v0.14.7` docs)
+> **Tag activo:** `v0.14.7` (docs) · último código funcional: `v0.14.6`
 > **Branch de trabajo:** `main` (sin etapa abierta)
 > **Owner:** @nitenacho — cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
@@ -19,6 +19,7 @@ CMS Strapi Cloud + Google OAuth + whitelist gating funcionando.
 Estado actual:
 - Etapas 1-10 cerradas.
 - Hotfix responsive raíz cerrado en `v0.14.6`.
+- Respaldo completo de continuidad cerrado en `v0.14.7` (docs-only).
 - Owner confirmó en device real: "se arreglo muy bien".
 - Etapa 11 (Pixel Streaming Unreal) queda desbloqueada.
 
@@ -39,21 +40,24 @@ Qué se resolvió:
 ```bash
 cd "C:/Users/incon/OneDrive/Desktop/Proyectos_Claude/Claude_P28/Proyecto28"
 git status
-git describe --tags --abbrev=0          # esperado: v0.14.6
+git describe --tags --abbrev=0          # esperado: v0.14.7
 git log --oneline -15
 ```
 
 Esperado:
 - branch `main`
 - working tree clean
-- último tag `v0.14.6`
+- último tag `v0.14.7` (docs-only)
+- último código funcional `v0.14.6`
 
 ### Paso 2 — Leer docs (orden)
 
 1. `HANDOFF-LATEST.md` (este archivo).
-2. `CHANGELOG.md` — entrada `[0.14.6]`.
-3. `PLAN-PROYECTO28-V2.md` — Etapa 11 es el siguiente bloque.
-4. `DEPLOY.md` si vas a tocar hosting/domains.
+2. `CHANGELOG.md` — entradas `[0.14.7]` y `[0.14.6]`.
+3. Google Doc oficial — última subpestaña bajo `Handoff`:
+   `2026-05-24 20:40 UTC - v0.14.7 handoff completo`.
+4. `PLAN-PROYECTO28-V2.md` — Etapa 11 es el siguiente bloque.
+5. `DEPLOY.md` si vas a tocar hosting/domains.
 
 ### Paso 3 — Validar sistema vivo
 
@@ -102,6 +106,28 @@ Si reaparece overflow:
 
 ## 2. Lo último que se hizo
 
+### `v0.14.7` — docs/handoff completo
+
+Commit documental:
+- `9609570 docs: aclarar respaldo Google Doc como subpestana`
+- este cierre documental queda bajo el tag `v0.14.7`
+
+Qué corrige:
+- El cierre `v0.14.6` se había respaldado inicialmente en Google Doc como
+  una pestaña raíz. Eso fue corregido: ahora está bajo `Handoff`.
+- Después se detectó que el contenido del Google Doc era demasiado resumido
+  (aprox. 3 páginas) comparado con los cierres anteriores. Eso no era
+  suficiente para que otro agente retomara con seguridad.
+- La subpestaña vigente fue ampliada con un anexo operativo completo:
+  estado actual, comandos de entrada, validaciones de servicios, diagnóstico
+  responsive, evidencia de cierre, plan de Etapa 11, riesgos y reglas de
+  mantención.
+
+Importante:
+- `v0.14.7` no modifica producción.
+- Si hay duda entre tags, usar `v0.14.6` para rollback de código y `v0.14.7`
+  para leer la continuidad más completa.
+
 ### `v0.14.6` — fix responsive root cause
 
 Commit de código:
@@ -149,7 +175,7 @@ Esperado al entrar:
 
 ```text
 Branch: main
-Tag:    v0.14.6
+Tag:    v0.14.7
 Estado: clean
 ```
 
@@ -163,6 +189,7 @@ Tags recientes:
 - `v0.14.4` — hotfix camera+canvas adaptive aspect-ratio
 - `v0.14.5` — docs cierre con bug responsive persistente
 - `v0.14.6` — fix responsive root cause confirmado
+- `v0.14.7` — docs-only, respaldo Google Doc completo y regla reforzada
 
 ---
 
@@ -272,13 +299,24 @@ Estructura obligatoria:
   antes de cerrar la sesión.
 
 Estado corregido 2026-05-24:
-- La subpestaña correcta es `2026-05-24 19:50 UTC - v0.14.6 responsive`.
+- La subpestaña correcta y vigente es
+  `2026-05-24 20:40 UTC - v0.14.7 handoff completo`.
 - Está bajo el tab raíz `Handoff`.
 - Si se usa Google Docs API, el `tabId` actual del padre `Handoff` es
   `t.7lpfc5ado1h` (verificar de nuevo si el documento se reestructura).
+- `tabId` de la subpestaña vigente: `t.l6ij3vk4l1ae`.
+- Verificación por conector: el anexo ampliado empieza cerca del índice `4587`
+  y termina cerca del índice `12934` con el marcador
+  `FIN DEL ANEXO AMPLIADO`.
+
+Nota crítica:
+- Un respaldo de 3 páginas no es suficiente para este proyecto. El Google Doc
+  debe contener un handoff operativo completo, no sólo un resumen. La
+  subpestaña vigente debe permitir a otro agente continuar sin preguntar por
+  estado de repo, tags, producción, validaciones, próximos pasos ni riesgos.
 
 Contenido que debe quedar respaldado:
-- Este handoff `v0.14.6`.
+- Este handoff `v0.14.7`.
 - Confirmación de que el bug responsive quedó resuelto.
 - Siguiente etapa desbloqueada: Etapa 11 / Pixel Streaming Unreal.
 
@@ -289,6 +327,8 @@ Gotchas ya conocidos:
 4. Subpestañas pueden crearse genéricas; renombrar manualmente si hace falta.
 5. Si el respaldo queda como pestaña raíz, es un error: moverlo bajo `Handoff`
    antes de entregar.
+6. Si el respaldo queda demasiado corto (por ejemplo 3 páginas cuando el cierre
+   real requiere contexto operativo), ampliarlo antes de entregar.
 
 ---
 
@@ -307,4 +347,4 @@ Gotchas ya conocidos:
 
 ---
 
-Fin del handoff `v0.14.6`.
+Fin del handoff `v0.14.7`.
