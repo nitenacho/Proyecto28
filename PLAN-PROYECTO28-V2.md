@@ -26,7 +26,7 @@
 | 10 — Popup mejorado + mobile | ✅ Cerrada | `v0.14.0` | — |
 | 10 hotfix — Responsive root cause | ✅ Cerrada | `v0.14.6` | `b96ddbb` |
 | 10 docs — Handoff completo Google Doc | ✅ Cerrada | `v0.14.7` | — |
-| 11 — Pixel Streaming Unreal | ✅ Cerrada | `v0.15.0` | `68130ee` + docs cierre |
+| 11 — Pixel Streaming Unreal | ✅ Cerrada | `v0.15.0` | `f5b0c42` |
 | 12 — Pipeline Publicar (Discord) | ⏳ Pendiente | — | — |
 | 13 — Sync Claude Design | ⏳ Pendiente | — | — |
 | 14 — GSAP polish | ⏳ Pendiente | — | — |

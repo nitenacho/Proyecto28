@@ -60,7 +60,10 @@ Sin cambios todavía.
   - phone `390x844`: `html=390`, `body=390`, `canvas=390`.
   - tablet portrait `810x1080`: `html=810`, `body=810`, `canvas=810`.
 - `npm run build` OK y `npm run build` en `cms/` OK.
+- Commit final de cierre en `main`: `f5b0c42`.
 - GitHub Actions Pages run `26376864785` OK (`success`) para `68130ee`.
+  `f5b0c42` no dispara Pages porque el workflow ignora `cms/**` y docs; el
+  bundle publico no cambio despues de `68130ee`.
 - `https://proyecto28.com` OK. Producción sirve bundle con overlay creado y
   oculto por default; `window.p28StreamDebug` no existe en producción.
 - Responsive producción:
@@ -76,6 +79,8 @@ Sin cambios todavía.
   - CORS con `Origin: https://proyecto28.com` devuelve
     `access-control-allow-origin: https://proyecto28.com` despues del redeploy
     Strapi.
+- Browser production post-CORS: `/api/projects` y `/api/site-setting` cargan
+  `200` desde `proyecto28.com`, sin errores/warnings de consola.
 
 ## [0.14.7] — 2026-05-24 — Docs: handoff completo Google Doc
 

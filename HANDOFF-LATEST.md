@@ -61,7 +61,8 @@ Esperado:
 - branch `main`
 - working tree clean
 - ultimo tag `v0.15.0`
-- ultimo codigo funcional Etapa 11: `68130ee feat(streaming): add preview visibility toggle`
+- HEAD de cierre: `f5b0c42 fix(cms): allow production cors for proyecto28`
+- frontend Pixel Streaming: `68130ee feat(streaming): add preview visibility toggle`
 
 ### Paso 2 - Leer docs (orden)
 
@@ -127,6 +128,7 @@ Si reaparece overflow:
 - `a71958a feat(streaming): add pixel streaming overlay fallback`
 - `54cd110 test(streaming): add iframe preview mock`
 - `68130ee feat(streaming): add preview visibility toggle`
+- `f5b0c42 fix(cms): allow production cors for proyecto28`
 
 ### Archivos principales
 
@@ -217,6 +219,9 @@ Casos validados:
 - `https://proyecto28.com` responde `200`.
 - HTML produccion `last-modified: Mon, 25 May 2026 00:19:57 GMT`.
 - Bundle de produccion incluye `pixelStreamingPreviewEnabled`.
+- `f5b0c42` no disparo nuevo Pages run porque `.github/workflows/deploy.yml`
+  ignora `cms/**` y docs. Esto es esperado: el bundle frontend ya estaba
+  desplegado desde `68130ee`; el cambio critico fue redeploy de Strapi Cloud.
 
 Smoke production fresh load:
 - desktop `1280`:
@@ -224,16 +229,22 @@ Smoke production fresh load:
   - `html=1280`
   - overlay existe y queda oculto
   - `window.p28StreamDebug` no existe
+  - `/api/projects` y `/api/site-setting` responden `200` desde browser
+  - sin errores/warnings de consola
 - phone `390x844`:
   - `body=390`
   - `html=390`
   - `canvas=390`
   - overlay oculto
+  - `/api/projects` y `/api/site-setting` responden `200` desde browser
+  - sin errores/warnings de consola
 - tablet portrait `810x1080`:
   - `body=810`
   - `html=810`
   - `canvas=810`
   - overlay oculto
+  - `/api/projects` y `/api/site-setting` responden `200` desde browser
+  - sin errores/warnings de consola
 
 ---
 
@@ -251,6 +262,7 @@ Validado al cierre:
   `{"allowed":true,"role":"editor"}`
 - CORS con `Origin: https://proyecto28.com` =>
   `access-control-allow-origin: https://proyecto28.com`
+  - Propago despues del push `f5b0c42` a Strapi Cloud.
 
 SiteSetting en produccion incluye:
 - `pixelStreamingEnabled:false`
