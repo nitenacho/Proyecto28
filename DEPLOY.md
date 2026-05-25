@@ -91,8 +91,10 @@ Usa **A** o **CNAME**, no ambos para el mismo nombre.
 Configuración en Strapi:
 
 1. En `SiteSetting`, activar `pixelStreamingEnabled`.
-2. Mantener `pixelStreamingMode = shared` para la primera versión.
-3. En cada Project que deba usar stream:
+2. Activar `pixelStreamingPreviewEnabled` sólo si quieres mostrar el fallback
+   visual cuando todavía no exista URL real.
+3. Mantener `pixelStreamingMode = shared` para la primera versión.
+4. En cada Project que deba usar stream:
    - `unrealEnabled = true`
    - `unrealStreamURL = https://stream.proyecto28.com` o URL equivalente
    - `unrealLevelName = <nombre Level/SubLevel>`

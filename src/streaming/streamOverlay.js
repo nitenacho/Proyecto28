@@ -41,8 +41,14 @@ function normalizeStreamingConfig(streaming = {}) {
     : 'shared';
   return {
     enabled: !!streaming.enabled,
+    previewEnabled: !!streaming.previewEnabled,
     mode,
   };
+}
+
+function hasValidStream(project, streaming) {
+  if (!streaming.enabled || !project?.unrealEnabled || !project?.unrealStreamURL) return false;
+  return /^https?:\/\//i.test(project.unrealStreamURL.trim());
 }
 
 function overlayWidthForViewport(width) {
@@ -78,6 +84,12 @@ export function createStreamOverlay({ site, camera }) {
       return;
     }
 
+    if (!streaming.previewEnabled && !hasValidStream(activeProject, streaming)) {
+      root.hidden = true;
+      frame.clear();
+      return;
+    }
+
     root.hidden = false;
     frame.setProject({ project: activeProject, streaming });
     update(camera);
@@ -94,7 +106,7 @@ export function createStreamOverlay({ site, camera }) {
   function setStreamingConfig(nextStreaming) {
     streaming = normalizeStreamingConfig(nextStreaming);
     if (activeProject) {
-      frame.setProject({ project: activeProject, streaming });
+      activateTile(activeTile, activeProject);
     }
   }
 

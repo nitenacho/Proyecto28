@@ -26,6 +26,7 @@ Headless CMS that owns the content shown in the frontend:
       `gameFallDuration` — tweaks del juego de plataformas (Etapas 4–6)
     - `adminButtonVisible` — toggle del botón secreto bajo el logo
     - `pixelStreamingEnabled` — master switch global de streaming
+    - `pixelStreamingPreviewEnabled` — muestra/oculta el preview fallback sobre el cubo
     - `pixelStreamingMode` — `shared` (1 instancia) vs. `per-cube`
 - **Admin Whitelist** (collection, **privado**) — emails autorizados a usar
   el modo admin (Google OAuth + publicar tweaks). Seed: `inconcha@gmail.com`

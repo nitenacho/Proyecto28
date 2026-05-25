@@ -93,6 +93,7 @@ const SITE_SETTING_DEFAULTS = {
   gameFallDuration: 1.0,
   adminButtonVisible: false,
   pixelStreamingEnabled: false,
+  pixelStreamingPreviewEnabled: false,
   pixelStreamingMode: 'shared',
 };
 

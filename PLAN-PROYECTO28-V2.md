@@ -331,6 +331,7 @@ Archivo a crear en raíz, formato Keep-a-Changelog. Cada tag = una sección.
    gameFallDuration       decimal  default 1.0  segundos de caída antes de respawn
    adminButtonVisible     boolean  default false  toggle del botón secreto bajo el logo
    pixelStreamingEnabled  boolean  default false  master switch global
+   pixelStreamingPreviewEnabled boolean default false muestra fallback/preview
    pixelStreamingMode     enumeration ["shared","per-cube"]
    ```
 3. Crear nuevo content type **AdminWhitelist** (collection):

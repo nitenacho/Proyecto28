@@ -77,6 +77,7 @@ async function boot() {
     gameFallDuration: site.game.fallDuration,
     gameShadowSize: site.game.shadowSize ?? 0.45,
     streamingEnabled: site.streaming.enabled,
+    streamingPreviewEnabled: site.streaming.previewEnabled,
     streamingMode: normalizeStreamingMode(site.streaming.mode),
     adminButtonVisible: site.admin.buttonVisible,
   };
@@ -111,6 +112,7 @@ async function boot() {
       site.game.shadowSize       = state.gameShadowSize;
       // Streaming — Etapa 11: iframe sobre el cubo activo o fallback local.
       site.streaming.enabled     = !!state.streamingEnabled;
+      site.streaming.previewEnabled = !!state.streamingPreviewEnabled;
       site.streaming.mode        = normalizeStreamingMode(state.streamingMode);
       streamOverlay.setStreamingConfig(site.streaming);
       // Admin — mutación in place + sincroniza visibilidad del botón en vivo (Etapa 8).
@@ -187,6 +189,7 @@ async function boot() {
         label: 'Streaming',
         items: [
           { type: 'toggle', key: 'streamingEnabled', label: 'Pixel Streaming activo' },
+          { type: 'toggle', key: 'streamingPreviewEnabled', label: 'Preview visible' },
           {
             type: 'select', key: 'streamingMode', label: 'Modo',
             options: [
@@ -272,6 +275,10 @@ async function boot() {
         site.streaming.enabled = !!enabled;
         streamOverlay.setStreamingConfig(site.streaming);
       },
+      setPreviewEnabled(enabled = true) {
+        site.streaming.previewEnabled = !!enabled;
+        streamOverlay.setStreamingConfig(site.streaming);
+      },
       metrics() {
         return {
           activeProject: streamOverlay.activeProject?.id || null,
@@ -294,10 +301,9 @@ async function boot() {
           unrealStreamURL: previewStreamURL,
           unrealLevelName: previewLevelName || `Preview_${previewProjectId.replace('.', '_')}`,
         } : null;
-        if (previewStreamURL) {
-          site.streaming.enabled = true;
-          streamOverlay.setStreamingConfig(site.streaming);
-        }
+        site.streaming.previewEnabled = true;
+        if (previewStreamURL) site.streaming.enabled = true;
+        streamOverlay.setStreamingConfig(site.streaming);
         window.p28StreamDebug.show(previewProjectId, overrides);
       });
     }

@@ -27,9 +27,14 @@ o a un fix puntual entre etapas.
     probar `postMessage` antes de tener Unreal disponible.
   - Mock local `public/dev/pixel-stream-mock.html` para validar que el iframe
     recibe el comando `showProject`.
+  - Nuevo campo Strapi `pixelStreamingPreviewEnabled` en SiteSetting para
+    mostrar u ocultar el preview/fallback desde el CMS.
 
 ### Changed
 - El toggle Streaming del panel de tweaks ahora afecta al overlay en vivo.
+- El nuevo tweak **Preview visible** controla si aparece el fallback del stream
+  cuando no hay URL real o el stream global está apagado. Por defecto queda
+  apagado para producción.
 - `streamingMode` se normaliza a `shared` / `per-cube`; el valor legacy
   `dedicated` se interpreta como `per-cube`.
 
@@ -37,6 +42,7 @@ o a un fix puntual entre etapas.
 - `npm run build` OK.
 - Preview local fallback en `http://127.0.0.1:5174/?streamPreview=028.A`:
   overlay `fallback`, sin `iframe.src`, sin errores de consola.
+- Carga normal local sin `streamPreview`: overlay oculto por default.
 - Preview local iframe con
   `?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:5174/dev/pixel-stream-mock.html`:
   overlay `stream`, iframe cargado y mock recibe `showProject`.

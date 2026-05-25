@@ -40,6 +40,7 @@ export const FALLBACK_SITE = {
   },
   streaming: {
     enabled: false,
+    previewEnabled: false,
     mode: 'shared',
   },
 };

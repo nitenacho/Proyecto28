@@ -113,6 +113,11 @@
       "default": false,
       "description": "Master switch global para Pixel Streaming. Si está OFF, ningún cubo monta stream."
     },
+    "pixelStreamingPreviewEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Muestra el overlay/preview de streaming aunque no exista una URL activa. Si está OFF, no aparece fallback sobre el cubo."
+    },
     "pixelStreamingMode": {
       "type": "enumeration",
       "default": "shared",

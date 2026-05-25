@@ -38,6 +38,9 @@ Trabajo en curso Etapa 11:
   están disponibles, el overlay monta iframe.
 - Si falta infraestructura o el toggle está off, muestra fallback local
   usando `videoLoop`, imagen del proyecto o tarjeta procedural.
+- Nuevo control Strapi/Tweaks: `pixelStreamingPreviewEnabled` / `Preview visible`.
+  Default `false`; permite apagar completamente el preview/fallback en producción
+  hasta que el owner quiera habilitarlo.
 - En dev, `?streamPreview=028.A` fuerza el overlay fallback y
   `?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:5174/dev/pixel-stream-mock.html`
   fuerza iframe contra un mock local que recibe `showProject`.

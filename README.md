@@ -42,9 +42,10 @@ http://127.0.0.1:<vite-port>/?streamPreview=028.A
 http://127.0.0.1:<vite-port>/?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:<vite-port>/dev/pixel-stream-mock.html
 ```
 
-En producción el iframe sólo carga si Strapi entrega `pixelStreamingEnabled`
-activo en SiteSetting y el Project activo tiene `unrealEnabled` + una
-`unrealStreamURL` absoluta (`https://...`).
+En producción el overlay fallback sólo aparece si Strapi entrega
+`pixelStreamingPreviewEnabled` activo en SiteSetting. El iframe real sólo carga
+si además `pixelStreamingEnabled` está activo y el Project activo tiene
+`unrealEnabled` + una `unrealStreamURL` absoluta (`https://...`).
 
 ## Producción
 

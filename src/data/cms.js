@@ -59,6 +59,7 @@ const CMS_URL = (import.meta.env.VITE_CMS_URL || '').replace(/\/$/, '');
  *
  * @property {Object} streaming                  Pixel Streaming (Etapa 11)
  * @property {boolean} streaming.enabled         Master switch global
+ * @property {boolean} streaming.previewEnabled  Muestra fallback/preview sin stream activo
  * @property {'shared'|'per-cube'} streaming.mode
  *
  * @property {Array<{value:string,label:string}>} logoOptions
@@ -142,6 +143,7 @@ function normalizeSite(s) {
     },
     streaming: {
       enabled: a.pixelStreamingEnabled ?? fb.streaming.enabled,
+      previewEnabled: a.pixelStreamingPreviewEnabled ?? fb.streaming.previewEnabled,
       mode: a.pixelStreamingMode || fb.streaming.mode,
     },
     logoOptions: fb.logoOptions,
