@@ -64,6 +64,10 @@ The frontend will start fetching content from Strapi. If the CMS goes down or
 the secret isn't set, the site silently falls back to the static data in
 `src/data/fallback.js`.
 
+Browser CORS is configured in `cms/config/middlewares.js`. Keep
+`proyecto28.com`, `www.proyecto28.com`, `proyecto28.cl`, `www.proyecto28.cl`,
+`nitenacho.github.io`, and localhost/127.0.0.1 QA origins allowed there.
+
 ---
 
 ## 3 · Pixel Streaming (Etapa 11)

@@ -145,3 +145,12 @@ editable from the admin panel (`/admin`):
   first loads the page.
 
 Changes show up on the frontend on the next page load (no cache layer yet).
+
+---
+
+## CORS
+
+`config/middlewares.js` allows browser requests from `proyecto28.com`, `www`,
+`.cl`, GitHub Pages, and localhost/127.0.0.1 QA origins. In Strapi 5, do not
+use `origin: ['*']`: it is treated as a literal allowlist entry and does not
+match real browser origins.

@@ -10,6 +10,10 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+Sin cambios todavía.
+
+## [0.15.0] — 2026-05-25 — Etapa 11: Pixel Streaming iframe/fallback
+
 ### Added
 - **Etapa 11 / Pixel Streaming inicial**:
   - Nuevo módulo `src/streaming/pixelStream.js` para montar un iframe sólo
@@ -38,6 +42,12 @@ o a un fix puntual entre etapas.
 - `streamingMode` se normaliza a `shared` / `per-cube`; el valor legacy
   `dedicated` se interpreta como `per-cube`.
 
+### Fixed
+- Strapi CORS ahora permite explicitamente `proyecto28.com`, variantes `www`,
+  `proyecto28.cl`, GitHub Pages y localhost/127.0.0.1 para QA. Antes la config
+  `origin:['*']` no matcheaba origins reales en Strapi 5 y produccion caia al
+  fallback por bloqueo CORS del navegador.
+
 ### Verified
 - `npm run build` OK.
 - Preview local fallback en `http://127.0.0.1:5174/?streamPreview=028.A`:
@@ -49,6 +59,23 @@ o a un fix puntual entre etapas.
 - Responsive local con overlay activo:
   - phone `390x844`: `html=390`, `body=390`, `canvas=390`.
   - tablet portrait `810x1080`: `html=810`, `body=810`, `canvas=810`.
+- `npm run build` OK y `npm run build` en `cms/` OK.
+- GitHub Actions Pages run `26376864785` OK (`success`) para `68130ee`.
+- `https://proyecto28.com` OK. Producción sirve bundle con overlay creado y
+  oculto por default; `window.p28StreamDebug` no existe en producción.
+- Responsive producción:
+  - phone `390x844`: `html=390`, `body=390`, `canvas=390`, overlay oculto.
+  - tablet portrait `810x1080`: `html=810`, `body=810`, `canvas=810`,
+    overlay oculto.
+- Strapi Cloud:
+  - `/api/projects?populate=*` => `200`
+  - `/api/site-setting` => `200`, incluye `pixelStreamingPreviewEnabled:false`
+  - `/api/admin-whitelists` => `403` público/privado correcto
+  - `/api/auth/check?email=inconcha@gmail.com` => `allowed:true`, `role:owner`
+  - `/api/auth/check?email=yk8arts@gmail.com` => `allowed:true`, `role:editor`
+  - CORS con `Origin: https://proyecto28.com` devuelve
+    `access-control-allow-origin: https://proyecto28.com` despues del redeploy
+    Strapi.
 
 ## [0.14.7] — 2026-05-24 — Docs: handoff completo Google Doc
 

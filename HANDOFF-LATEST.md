@@ -1,118 +1,114 @@
-# HANDOFF — Proyecto 28
+# HANDOFF - Proyecto 28
 
-> **Última actualización:** 2026-05-24 (Etapa 11 en curso — overlay iframe/fallback)
-> **Tag activo:** `v0.14.7` (docs) · último código funcional: `v0.14.6`
-> **Branch de trabajo:** `etapa-11-pixel-streaming` (base `main` / `v0.14.7`)
-> **Owner:** @nitenacho — cnignacioa@gmail.com / Inconcha@gmail.com
+> **Ultima actualizacion:** 2026-05-25 (cierre Etapa 11 - `v0.15.0`)
+> **Tag activo:** `v0.15.0`
+> **Branch:** `main`
+> **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 
-> ✅ **BUG RESPONSIVE iPhone/iPad RESUELTO Y CONFIRMADO POR OWNER.**
-> 🚧 **Etapa 11 en curso:** primer corte de Pixel Streaming con overlay iframe/fallback.
+> Etapas 1-11 cerradas. Pixel Streaming queda integrado en primer corte
+> iframe/overlay/fallback, con preview apagable desde Strapi/Tweaks.
 
 ---
 
 ## 0. Resumen en 30 segundos
 
-Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite).
-CMS Strapi Cloud + Google OAuth + whitelist gating funcionando.
+Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite),
+CMS Strapi Cloud, Google OAuth y whitelist gating funcionando.
 
 Estado actual:
-- Etapas 1-10 cerradas.
-- Hotfix responsive raíz cerrado en `v0.14.6`.
-- Respaldo completo de continuidad cerrado en `v0.14.7` (docs-only).
-- Owner confirmó en device real: "se arreglo muy bien".
-- Etapa 11 (Pixel Streaming Unreal) está en curso en branch
-  `etapa-11-pixel-streaming`.
+- Etapas 1-11 cerradas.
+- Bug responsive iPhone/iPad resuelto en `v0.14.6` y confirmado por owner:
+  "se arreglo muy bien".
+- Respaldo documental completo y regla de subpestanas Google Doc reforzada en
+  `v0.14.7`.
+- Etapa 11 cerrada en `v0.15.0` con overlay Pixel Streaming inicial:
+  iframe real si hay URL valida, fallback visual local si el preview esta
+  habilitado, y estado oculto por default en produccion.
+- No hay endpoint Unreal/Pixel Streaming real conectado todavia. El frontend
+  queda preparado para recibir `unrealStreamURL` por proyecto desde Strapi.
 
-Qué se resolvió:
-- En producción `html.scrollWidth` era mayor que `window.innerWidth`.
-- Causa raíz: `.scene-bg-grid` con `inset: -10%` agrandaba el documento
-  antes de que Three.js corriera.
-- Síntomas eliminados: splash `#boot` corrido/izquierdo, franjas laterales
-  al pinch zoom, grid que no aprovechaba bien el ancho mobile.
-- Se ajustó además el encuadre portrait para usar más ancho sin cortar cubos.
-
-Trabajo en curso Etapa 11:
+Lo mas importante del cierre Etapa 11:
 - Nuevo overlay HTML proyectado desde el cubo activo de la luz.
-- Si `pixelStreamingEnabled` + `unrealEnabled` + `unrealStreamURL` absoluta
-  están disponibles, el overlay monta iframe.
-- Si falta infraestructura o el toggle está off, muestra fallback local
-  usando `videoLoop`, imagen del proyecto o tarjeta procedural.
-- Nuevo control Strapi/Tweaks: `pixelStreamingPreviewEnabled` / `Preview visible`.
-  Default `false`; permite apagar completamente el preview/fallback en producción
-  hasta que el owner quiera habilitarlo.
-- En dev, `?streamPreview=028.A` fuerza el overlay fallback y
-  `?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:5174/dev/pixel-stream-mock.html`
-  fuerza iframe contra un mock local que recibe `showProject`.
-- Verificación local inicial: `npm run build` OK y responsive con overlay activo
-  mantiene `html/body/canvas === innerWidth` en phone `390x844` e iPad portrait
-  `810x1080`.
-- Pendiente antes de cierre `v0.15.0`: validar con URL real de
-  `stream.proyecto28.com` o endpoint equivalente, producción `proyecto28.com`,
-  owner review y respaldo Google Doc.
+- Nuevo iframe shell para Pixel Streaming.
+- Fallback visual local usando `videoLoop`, imagen del proyecto o tarjeta
+  procedural.
+- Nuevo tweak/admin control: `Preview visible`.
+- Nuevo campo Strapi `pixelStreamingPreviewEnabled` en SiteSetting.
+- Default de produccion: `pixelStreamingPreviewEnabled:false`.
+- Si `Preview visible` esta apagado y no hay stream real, no aparece ningun
+  preview. Asi el owner controla cuando mostrarlo.
+- Si existe stream real valido (`pixelStreamingEnabled:true`,
+  `Project.unrealEnabled:true`, `Project.unrealStreamURL:https://...`), el
+  iframe se puede mostrar aunque el preview fallback este apagado.
 
 ---
 
-## 1. Cómo arrancar como nuevo agente IA
+## 1. Como arrancar como nuevo agente IA
 
-### Paso 1 — Identificar el repo
+### Paso 1 - Identificar el repo
 
 ```bash
 cd "C:/Users/incon/OneDrive/Desktop/Proyectos_Claude/Claude_P28/Proyecto28"
+git checkout main
+git pull --ff-only
 git status
-git describe --tags --abbrev=0          # esperado: v0.14.7
-git log --oneline -15
+git describe --tags --abbrev=0
+git log --oneline -12
 ```
 
 Esperado:
 - branch `main`
 - working tree clean
-- último tag `v0.14.7` (docs-only)
-- último código funcional `v0.14.6`
+- ultimo tag `v0.15.0`
+- ultimo codigo funcional Etapa 11: `68130ee feat(streaming): add preview visibility toggle`
 
-### Paso 2 — Leer docs (orden)
+### Paso 2 - Leer docs (orden)
 
 1. `HANDOFF-LATEST.md` (este archivo).
-2. `CHANGELOG.md` — entradas `[0.14.7]` y `[0.14.6]`.
-3. Google Doc oficial — última subpestaña bajo `Handoff`:
-   `2026-05-24 20:40 UTC - v0.14.7 handoff completo`.
-4. `PLAN-PROYECTO28-V2.md` — Etapa 11 es el siguiente bloque.
-5. `DEPLOY.md` si vas a tocar hosting/domains.
+2. `CHANGELOG.md` - entrada `[0.15.0]`.
+3. Google Doc oficial - ultima subpestana bajo `Handoff`:
+   `2026-05-25 00:32 UTC - v0.15.0 etapa 11 pixel streaming`.
+4. `PLAN-PROYECTO28-V2.md` - Etapa 12 queda como siguiente bloque.
+5. `DEPLOY.md` - seccion Pixel Streaming para subdominio/infra.
 
-### Paso 3 — Validar sistema vivo
+### Paso 3 - Validar sistema vivo
 
 ```bash
 curl -s -o /dev/null -w "projects: %{http_code}\n"          "https://honest-candy-800d1e4a92.strapiapp.com/api/projects?populate=*"
 curl -s -o /dev/null -w "admin-whitelists: %{http_code}\n" "https://honest-candy-800d1e4a92.strapiapp.com/api/admin-whitelists"
 curl -s -o /dev/null -w "site-setting: %{http_code}\n"     "https://honest-candy-800d1e4a92.strapiapp.com/api/site-setting"
-curl -s -o /dev/null -w "auth/check: %{http_code}\n"       "https://honest-candy-800d1e4a92.strapiapp.com/api/auth/check?email=yk8arts@gmail.com"
+curl -s -o /dev/null -w "auth inconcha: %{http_code}\n"    "https://honest-candy-800d1e4a92.strapiapp.com/api/auth/check?email=inconcha@gmail.com"
+curl -s -o /dev/null -w "auth yk8arts: %{http_code}\n"     "https://honest-candy-800d1e4a92.strapiapp.com/api/auth/check?email=yk8arts@gmail.com"
 curl -s -o /dev/null -w "proyecto28.com: %{http_code}\n"   "https://proyecto28.com"
 ```
 
-Esperado: `200`, `403`, `200`, `200`, `200`.
+Esperado: `200`, `403`, `200`, `200`, `200`, `200`.
 
-### Paso 4 — Validar responsive antes de Etapa 11
+### Paso 4 - Validar responsive en produccion
 
-El owner pidió explícitamente que las pruebas relevantes se hagan siempre en
-`proyecto28.com`, no sólo en localhost.
+El owner pidio que las pruebas relevantes se hagan siempre en
+`https://proyecto28.com`, no solo localhost.
 
-En consola DevTools de producción:
+En consola DevTools de produccion:
 
 ```js
 ({
   body: document.body.scrollWidth,
   html: document.documentElement.scrollWidth,
   inner: window.innerWidth,
-  visual: window.visualViewport?.width
+  canvas: document.querySelector("#c")?.clientWidth,
+  overlayHidden: document.querySelector(".stream-overlay")?.hidden,
+  hasDebug: typeof window.p28StreamDebug
 })
 ```
 
 Esperado:
 - `body === inner`
 - `html === inner`
-- canvas cubre todo el viewport visible
-- `Luces caídas` queda anclado a la derecha
-- grid visible completo y usando más ancho en mobile
+- `canvas === inner`
+- overlay existe pero queda oculto por default
+- `hasDebug === "undefined"` en produccion
 
 Si reaparece overflow:
 
@@ -124,92 +120,120 @@ Si reaparece overflow:
 
 ---
 
-## 2. Lo último que se hizo
+## 2. Cierre Etapa 11 - Pixel Streaming iframe/fallback
 
-### `v0.14.7` — docs/handoff completo
+### Commits de la etapa
 
-Commit documental:
-- `9609570 docs: aclarar respaldo Google Doc como subpestana`
-- este cierre documental queda bajo el tag `v0.14.7`
+- `a71958a feat(streaming): add pixel streaming overlay fallback`
+- `54cd110 test(streaming): add iframe preview mock`
+- `68130ee feat(streaming): add preview visibility toggle`
 
-Qué corrige:
-- El cierre `v0.14.6` se había respaldado inicialmente en Google Doc como
-  una pestaña raíz. Eso fue corregido: ahora está bajo `Handoff`.
-- Después se detectó que el contenido del Google Doc era demasiado resumido
-  (aprox. 3 páginas) comparado con los cierres anteriores. Eso no era
-  suficiente para que otro agente retomara con seguridad.
-- La subpestaña vigente fue ampliada con un anexo operativo completo:
-  estado actual, comandos de entrada, validaciones de servicios, diagnóstico
-  responsive, evidencia de cierre, plan de Etapa 11, riesgos y reglas de
-  mantención.
+### Archivos principales
 
-Importante:
-- `v0.14.7` no modifica producción.
-- Si hay duda entre tags, usar `v0.14.6` para rollback de código y `v0.14.7`
-  para leer la continuidad más completa.
+- `src/streaming/pixelStream.js`
+  - Crea el shell iframe/fallback.
+  - Carga iframe solo con URL `http(s)` valida y stream habilitado.
+  - Envia `postMessage` al iframe:
+    - `{ command: "showProject", projectId, unrealLevelName, mode }`
+    - `{ type: "p28:pixel-stream", payload }`
+  - Limpia `src` cuando no hay stream para no cargar WebRTC por accidente.
 
-### `v0.14.6` — fix responsive root cause
+- `src/streaming/streamOverlay.js`
+  - Proyecta la posicion 3D del cubo activo a coordenadas 2D.
+  - Usa `visualViewport` para evitar overflow mobile.
+  - Normaliza `streaming.mode` a `shared` / `per-cube`.
+  - Respeta `streaming.previewEnabled`.
+  - Si `previewEnabled:false` y no hay stream real, el overlay permanece oculto.
 
-Commit de código:
-- `b96ddbb fix(ui): root cause responsive viewport framing`
+- `src/main.js`
+  - Conecta overlay a `onActiveTileChange`.
+  - Agrega Tweaks:
+    - `Pixel Streaming activo`
+    - `Preview visible`
+    - `streamingMode`
+  - Agrega helpers solo en `import.meta.env.DEV`:
+    - `?streamPreview=028.A`
+    - `?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:<port>/dev/pixel-stream-mock.html`
 
-Cambios principales:
-- `index.html`
-  - Script temprano sincroniza `window.visualViewport` a CSS vars:
-    `--p28-vv-left`, `--p28-vv-top`, `--p28-vv-width`, `--p28-vv-height`.
-- `src/styles/three-host.css`
-  - `html, body` cierran layout a `100vw` / `max-width:100vw`.
-  - `#c` y `#boot` se dimensionan con visual viewport.
-  - `.scene-bg-grid` dejó de usar `inset:-10%`; ahora es fixed full viewport
-    y mantiene margen visual con `transform: scale(1.2)`.
-  - `.chrome`, `.route-overlay`, `.scene-bg-vignette`, `.scene-bg-scanlines`
-    también quedan ligados al viewport real.
-  - `#popup` base protegido con `box-sizing:border-box` y `max-width`.
-- `src/scene/scene.js`
-  - `getViewportSize()` disponible antes de renderer/cámara/bloom.
-  - `renderer.setSize(w, h, false)` para no escribir estilos inline del canvas.
-  - Cámara portrait ajustada:
-    - phone portrait: `fov 56`, `radius 24`
-    - tablet portrait: `fov 48`, `radius 22`
+- `public/dev/pixel-stream-mock.html`
+  - Mock local same-origin que recibe el payload `showProject`.
 
-### Verificación realizada
+- `src/styles/app.css`
+  - Estilos para `.stream-overlay`, `.stream-card`, iframe/fallback y mobile.
 
-- `npm run build` OK.
-- Push a `main` OK.
-- GitHub Actions Pages run `26371087435` OK (`success`).
-- Producción `https://proyecto28.com` servía HTML actualizado
-  (`last-modified: Sun, 24 May 2026 19:50:03 GMT`).
-- Métricas producción:
-  - phone `390x844`: `html=390`, `body=390`, `canvas=390`
-  - tablet portrait `810x1080`: `html=810`, `canvas=810`
-  - landscape `1024x768`: `html=1024`, `canvas=1024`
-- Owner confirmó después de mirar device real: "se arreglo muy bien".
+- `cms/src/api/site-setting/content-types/site-setting/schema.json`
+  - Nuevo campo `pixelStreamingPreviewEnabled`.
+
+- `cms/src/index.js`
+  - Backfill/default `pixelStreamingPreviewEnabled:false`.
+
+- `cms/config/middlewares.js`
+  - CORS corregido para permitir origins reales:
+    `https://proyecto28.com`, variantes `www`, `.cl`, GitHub Pages y
+    localhost/127.0.0.1 para QA.
+  - Causa: en Strapi 5 `origin:['*']` se interpreta como lista literal; no
+    matchea `https://proyecto28.com`, por lo que el navegador bloqueaba fetch
+    y el sitio caia al fallback CMS.
+
+- `src/data/cms.js` y `src/data/fallback.js`
+  - Mapeo frontend para `streaming.previewEnabled`.
 
 ---
 
-## 3. Estado actual de git
+## 3. Verificacion Etapa 11
 
-Repo: `https://github.com/nitenacho/Proyecto28`
+### Build local
 
-Esperado al entrar:
+- `npm run build` OK.
+- `npm run build` dentro de `cms/` OK.
+  - Strapi admin build completo.
+  - Solo quedo warning deprecado conocido de Node/fs, no bloqueante.
 
-```text
-Branch: main
-Tag:    v0.14.7
-Estado: clean
-```
+### QA local con Vite
 
-Tags recientes:
-- `v0.13.0` — Etapa 9: Google OAuth + whitelist gating
-- `v0.13.1` — docs Etapa 9
-- `v0.14.0` — Etapa 10: popup robusto + mobile + touch
-- `v0.14.1` — docs Etapa 10
-- `v0.14.2` — hotfix mobile UX
-- `v0.14.3` — hotfix viewfinder mobile
-- `v0.14.4` — hotfix camera+canvas adaptive aspect-ratio
-- `v0.14.5` — docs cierre con bug responsive persistente
-- `v0.14.6` — fix responsive root cause confirmado
-- `v0.14.7` — docs-only, respaldo Google Doc completo y regla reforzada
+Servidor usado durante QA:
+- `http://127.0.0.1:5174/` (5173 estaba ocupado).
+
+Casos validados:
+- Carga normal:
+  - overlay oculto por default.
+  - sin errores de consola.
+  - `body/html/inner = 1280`.
+- Preview fallback:
+  - `http://127.0.0.1:5174/?streamPreview=028.A`
+  - overlay visible en fallback.
+- Preview iframe mock:
+  - `http://127.0.0.1:5174/?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:5174/dev/pixel-stream-mock.html`
+  - overlay `stream`, iframe cargado, mock recibe `showProject`.
+- Mobile local:
+  - phone `390x844`: `html=390`, `body=390`, `canvas=390`.
+  - tablet portrait `810x1080`: `html=810`, `body=810`, `canvas=810`.
+
+### GitHub Pages / produccion
+
+- Commit desplegado: `68130ee`.
+- GitHub Actions Pages run: `26376864785`.
+- Estado: `completed / success`.
+- `https://proyecto28.com` responde `200`.
+- HTML produccion `last-modified: Mon, 25 May 2026 00:19:57 GMT`.
+- Bundle de produccion incluye `pixelStreamingPreviewEnabled`.
+
+Smoke production fresh load:
+- desktop `1280`:
+  - `body=1280`
+  - `html=1280`
+  - overlay existe y queda oculto
+  - `window.p28StreamDebug` no existe
+- phone `390x844`:
+  - `body=390`
+  - `html=390`
+  - `canvas=390`
+  - overlay oculto
+- tablet portrait `810x1080`:
+  - `body=810`
+  - `html=810`
+  - `canvas=810`
+  - overlay oculto
 
 ---
 
@@ -217,77 +241,130 @@ Tags recientes:
 
 URL: `https://honest-candy-800d1e4a92.strapiapp.com`
 
-Estado esperado:
-- `GET /api/projects?populate=*`: `200`
-- `GET /api/site-setting`: `200`
-- `GET /api/admin-whitelists`: `403` (privado, correcto)
-- `GET /api/auth/check?email=...`: `200`
-- Whitelist confirmada:
-  - `inconcha` / owner
-  - `cnignacioa` / owner
-  - `yk8arts` / editor
+Validado al cierre:
+- `GET /api/projects?populate=*` => `200`
+- `GET /api/site-setting` => `200`
+- `GET /api/admin-whitelists` => `403` (privado, correcto)
+- `GET /api/auth/check?email=inconcha@gmail.com` =>
+  `{"allowed":true,"role":"owner"}`
+- `GET /api/auth/check?email=yk8arts@gmail.com` =>
+  `{"allowed":true,"role":"editor"}`
+- CORS con `Origin: https://proyecto28.com` =>
+  `access-control-allow-origin: https://proyecto28.com`
 
-Tech debt:
+SiteSetting en produccion incluye:
+- `pixelStreamingEnabled:false`
+- `pixelStreamingMode:"shared"`
+- `pixelStreamingPreviewEnabled:false`
+
+Whitelist/admin:
+- `AdminWhitelist` sigue privado publicamente (`403`).
+- Los emails validados por `/api/auth/check`:
+  - `inconcha@gmail.com` - owner
+  - `yk8arts@gmail.com` - editor
+- El content type `admin-whitelist` tiene:
+  - `pluginOptions.content-manager.visible = true`
+  - `pluginOptions.content-type-builder.visible = true`
+- Por lo tanto los registros se pueden editar desde Strapi Admin con un usuario
+  admin autenticado.
+
+Tech debt activo:
 - `Project.status` enum legacy: al editar proyecto en admin Strapi puede tirar
   "Invalid status". Fix recomendado en Etapa 12: normalizar registros en
   `cms/src/index.js` bootstrap o script puntual.
 - Consent screen GCP sigue en Testing: si se agrega email a whitelist Strapi,
-  agregarlo también como test user en Google Cloud.
+  agregarlo tambien como test user en Google Cloud.
 
 ---
 
 ## 5. Estado de hosting
 
-- GitHub Pages: deploy automático desde `main`.
-- Dominio principal: `https://proyecto28.com`
-- Dominio secundario: `proyecto28.cl` pendiente/verificar según DNS.
-- Workflow: `.github/workflows/deploy.yml`
+- GitHub Pages: deploy automatico desde `main`.
+- Dominio principal/canonico: `https://proyecto28.com`.
+- Dominio secundario: `proyecto28.cl` pendiente.
+  - Ultimo chequeo conocido: HTTPS falla por certificado/wrong principal y
+    HTTP responde 404 de GitHub Pages.
+  - Mantener `.com` como canonico hasta corregir DNS/redirect/certificado `.cl`.
+- Workflow: `.github/workflows/deploy.yml`.
 - CNAME: `public/CNAME` con `proyecto28.com`.
 
-Nota importante:
-- Cloudflare/GitHub pueden cachear HTML/assets durante minutos.
-- Para validar un deploy real, usar query string (`?verify=<timestamp>`) y
-  confirmar que el HTML contiene el script `syncVisualViewport`.
+Nota:
+- GitHub/Cloudflare pueden cachear HTML/assets durante minutos.
+- Para validar deploy real, usar query string (`?verify=<timestamp>`) y
+  confirmar bundle actual.
 
 ---
 
-## 6. Próximo paso recomendado
+## 6. Google Doc backup
 
-### Etapa 11 — Pixel Streaming Unreal (`v0.15.0`)
+Documento:
+`https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/edit`
 
-Ahora sí puede retomarse Etapa 11. Antes de codear:
-1. Confirmar una vez más `proyecto28.com` en iPhone + iPad reales.
-2. Leer `PLAN-PROYECTO28-V2.md` § Pixel Streaming.
-3. Confirmar infraestructura:
-   - instancia GPU compartida
-   - signaling server
-   - URL/endpoint de stream
-   - estrategia de fallback si stream no está disponible
-4. Crear rama:
+Estructura obligatoria:
+- El respaldo debe quedar SIEMPRE como subpestana dentro del tab raiz
+  `Handoff`.
+- Nunca crear cierres como pestanas raiz.
+- El proximo agente debe abrir la ultima subpestana bajo `Handoff`.
+- Formato recomendado de titulo:
+  `YYYY-MM-DD HH:mm UTC - vX.Y.Z <slug>`.
 
-```bash
-git checkout main
-git pull --ff-only
-git checkout -b etapa-11-pixel-streaming
-```
+Estado esperado tras este cierre:
+- Nueva subpestana bajo `Handoff`:
+  `2026-05-25 00:32 UTC - v0.15.0 etapa 11 pixel streaming`.
+- Debe contener este handoff completo y evidencia de:
+  - build local
+  - deploy GitHub Pages
+  - smoke test produccion
+  - Strapi site-setting con `pixelStreamingPreviewEnabled:false`
+  - whitelist `inconcha@gmail.com` / `yk8arts@gmail.com`
 
-No mezclar Etapa 11 con tech debt de Strapi salvo que bloquee.
+Referencia anterior:
+- Padre `Handoff` tenia `tabId` verificado `t.7lpfc5ado1h` en la sesion
+  `v0.14.7`. Verificar de nuevo si el documento se reorganiza.
+
+Gotchas:
+1. `navigator.clipboard.writeText` no propaga bien en Docs.
+2. `type >4KB` puede dar timeout CDP; usar chunks de 3-4 KB.
+3. Google Docs puede autocorregir guiones; aceptable.
+4. Si el respaldo queda como pestana raiz, moverlo bajo `Handoff` antes de
+   entregar.
+5. Un respaldo de 3 paginas no es suficiente; debe ser operativo.
 
 ---
 
-## 7. Stack actual
+## 7. Proximo paso recomendado
+
+### Etapa 12 - Pipeline "Publicar" / Discord Bot
+
+No iniciar hasta que el owner acepte el cierre `v0.15.0` en produccion.
+
+Objetivo previsto:
+- Admin ajusta Tweaks.
+- Boton "Publicar" persiste cambios en Strapi.
+- Discord bot registra/aprueba cambios.
+- GitHub Actions/Strapi quedan sincronizados segun corresponda.
+
+Mantener fuera de Etapa 12 salvo bloqueo:
+- Infra real Pixel Streaming/GPU.
+- Correcciones de `proyecto28.cl`.
+- Refactors no relacionados.
+
+---
+
+## 8. Stack actual
 
 - Frontend: Vite 6 + Three.js 0.176 + vanilla JS.
-- Hosting: GitHub Pages + custom domain.
+- Hosting: GitHub Pages + custom domain `.com`.
 - CMS: Strapi 5.13.1 en Strapi Cloud.
 - Auth: Google Identity Services + endpoint `/api/auth/check`.
-- UI actual: grid WebGL, popup robusto, touch/double-tap, tweaks panel, admin
-  button gated por OAuth/whitelist.
-- Responsive: confirmado OK en `v0.14.6`.
+- UI: grid WebGL, popup robusto, touch/double-tap, tweaks panel, admin button
+  gated por OAuth/whitelist, overlay Pixel Streaming iframe/fallback.
+- Responsive: confirmado OK desde `v0.14.6`; revalidado con overlay en
+  `v0.15.0`.
 
 ---
 
-## 8. Secretos y tokens
+## 9. Secretos y tokens
 
 No guardar secretos en docs.
 
@@ -300,59 +377,11 @@ Ya existen:
 - OAuth Client: "Proyecto 28 Web".
 
 Si aparece un token/API key en chat o logs: tratarlo como comprometido y pedir
-revocación.
+revocacion.
 
 ---
 
-## 9. Google Doc backup
-
-Documento de respaldo:
-`https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/edit`
-
-Estructura obligatoria:
-- El respaldo debe quedar SIEMPRE como subpestaña dentro del tab raíz `Handoff`.
-- Nunca crear el respaldo como pestaña raíz del documento.
-- El próximo agente debe abrir la última subpestaña bajo `Handoff` y continuar
-  desde ahí.
-- Formato recomendado de título: `YYYY-MM-DD HH:mm UTC - vX.Y.Z <slug>`.
-- Si una pestaña queda creada por error en la raíz, moverla bajo `Handoff`
-  antes de cerrar la sesión.
-
-Estado corregido 2026-05-24:
-- La subpestaña correcta y vigente es
-  `2026-05-24 20:40 UTC - v0.14.7 handoff completo`.
-- Está bajo el tab raíz `Handoff`.
-- Si se usa Google Docs API, el `tabId` actual del padre `Handoff` es
-  `t.7lpfc5ado1h` (verificar de nuevo si el documento se reestructura).
-- `tabId` de la subpestaña vigente: `t.l6ij3vk4l1ae`.
-- Verificación por conector: el anexo ampliado empieza cerca del índice `4587`
-  y termina cerca del índice `12934` con el marcador
-  `FIN DEL ANEXO AMPLIADO`.
-
-Nota crítica:
-- Un respaldo de 3 páginas no es suficiente para este proyecto. El Google Doc
-  debe contener un handoff operativo completo, no sólo un resumen. La
-  subpestaña vigente debe permitir a otro agente continuar sin preguntar por
-  estado de repo, tags, producción, validaciones, próximos pasos ni riesgos.
-
-Contenido que debe quedar respaldado:
-- Este handoff `v0.14.7`.
-- Confirmación de que el bug responsive quedó resuelto.
-- Siguiente etapa desbloqueada: Etapa 11 / Pixel Streaming Unreal.
-
-Gotchas ya conocidos:
-1. `navigator.clipboard.writeText` no propaga bien en Docs.
-2. `type >4KB` puede dar timeout CDP; usar chunks de 3-4 KB.
-3. Google Docs puede autocorregir guiones; aceptable.
-4. Subpestañas pueden crearse genéricas; renombrar manualmente si hace falta.
-5. Si el respaldo queda como pestaña raíz, es un error: moverlo bajo `Handoff`
-   antes de entregar.
-6. Si el respaldo queda demasiado corto (por ejemplo 3 páginas cuando el cierre
-   real requiere contexto operativo), ampliarlo antes de entregar.
-
----
-
-## 10. Reglas de mantención
+## 10. Reglas de mantencion
 
 - No trabajar directo en `main` salvo docs-only urgente.
 - Branch por etapa o fix.
@@ -360,11 +389,12 @@ Gotchas ya conocidos:
 - `npm run build` antes de cerrar.
 - Push a `main` dispara deploy.
 - Validar `https://proyecto28.com` para responsive/hosting.
-- Actualizar `CHANGELOG.md`, `README.md`, `HANDOFF-LATEST.md`.
+- Actualizar `CHANGELOG.md`, `README.md`, `PLAN-PROYECTO28-V2.md`,
+  `HANDOFF-LATEST.md` y docs de deploy/CMS si aplica.
 - Tag semver al cierre.
-- Respaldar handoff en Google Doc como subpestaña bajo `Handoff`, nunca como
-  pestaña raíz.
+- Respaldar handoff en Google Doc como subpestana bajo `Handoff`, nunca como
+  pestana raiz.
 
 ---
 
-Fin del handoff `v0.14.7`.
+Fin del handoff `v0.15.0`.

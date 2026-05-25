@@ -1,12 +1,12 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-05-24 — `v0.14.7` docs / `v0.14.6` código
+> **Última actualización operativa:** 2026-05-25 — `v0.15.0` Etapa 11
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-10 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Respaldo completo Google Doc cerrado en `v0.14.7`. Etapa 11 en curso: primer corte overlay iframe/fallback.
+> **Status:** En ejecución — etapas 1-11 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Etapa 11 cerrada en `v0.15.0` con overlay iframe/fallback para Pixel Streaming.
 
-## Estado del plan al 2026-05-24 16:55 America/Santiago
+## Estado del plan al 2026-05-24 20:32 America/Santiago
 
 | Etapa | Estado | Tag | Commit |
 |---|---|---|---|
@@ -26,7 +26,7 @@
 | 10 — Popup mejorado + mobile | ✅ Cerrada | `v0.14.0` | — |
 | 10 hotfix — Responsive root cause | ✅ Cerrada | `v0.14.6` | `b96ddbb` |
 | 10 docs — Handoff completo Google Doc | ✅ Cerrada | `v0.14.7` | — |
-| 11 — Pixel Streaming Unreal | 🚧 En curso | `v0.15.0` | overlay iframe/fallback en branch |
+| 11 — Pixel Streaming Unreal | ✅ Cerrada | `v0.15.0` | `68130ee` + docs cierre |
 | 12 — Pipeline Publicar (Discord) | ⏳ Pendiente | — | — |
 | 13 — Sync Claude Design | ⏳ Pendiente | — | — |
 | 14 — GSAP polish | ⏳ Pendiente | — | — |
@@ -597,6 +597,13 @@ Archivo a crear en raíz, formato Keep-a-Changelog. Cada tag = una sección.
 ### ETAPA 11 — Pixel Streaming: integración inicial (1 instancia compartida)
 **Objetivo:** Cuando la luz está sobre un cubo, mostrar el streaming de Unreal Engine encima del cubo (overlay o iframe en posición 3D).
 
+**Estado cierre `v0.15.0`:** cerrado el primer corte solicitado por owner:
+iframe/overlay/fallback. No se conecto aun un endpoint Unreal real, pero el
+frontend ya queda preparado para cargarlo desde Strapi cuando exista
+`unrealStreamURL` valida. El preview fallback se controla con
+`pixelStreamingPreviewEnabled` / tweak **Preview visible** y queda apagado por
+default en produccion.
+
 **Tareas pre-requisito (infra, requiere user):**
 1. Levantar servidor GPU con Unreal Engine empaquetado en modo Pixel Streaming.
 2. Levantar Signaling Server (Node.js — el oficial de Epic).
@@ -620,10 +627,11 @@ Archivo a crear en raíz, formato Keep-a-Changelog. Cada tag = una sección.
 
 **Archivos nuevos:** `src/streaming/pixelStream.js`, `src/streaming/streamOverlay.js`
 **Criterio de éxito:**
-- Con `pixelStreamingEnabled = true` y URL válida, al pisar un cubo aparece el video stream sobre él
-- Cambiar de cubo → la stream cambia de Level sin recargar conexión
-- Con `pixelStreamingEnabled = false` → no se carga nada de WebRTC, fallback a imagen
-**Dependencias:** Decisión §1.1 resuelta. Servidor GPU disponible.
+- Con `pixelStreamingEnabled = true` y URL válida, al pisar un cubo aparece el iframe sobre él
+- Cambiar de cubo → el iframe recibe `postMessage` con `showProject`
+- Con `pixelStreamingPreviewEnabled = false` y sin URL real → no se carga preview ni WebRTC
+- Con preview habilitado en dev → fallback visible y responsive sin reabrir overflow
+**Dependencias:** Primer corte repo cerrado. Servidor GPU/signaling real queda como dependencia externa para conectar stream verdadero.
 **Riesgo:** **ALTO**. Esta es la etapa más compleja del plan. Latencia, NAT traversal, costos GPU, ancho de banda, autenticación del signaling server. Documentar todo.
 
 ---
@@ -840,7 +848,7 @@ Antes de tag `v1.0.0`:
 - [ ] Funciona en iOS Safari + Chrome Android (test real)
 - [ ] Admin puede ajustar tweaks → publicar → ver reflejado
 - [ ] No-admin no ve botón admin ni rueda de tweaks
-- [ ] Pixel Streaming activable/desactivable sin romper UX
+- [x] Pixel Streaming activable/desactivable sin romper UX en primer corte iframe/fallback
 - [ ] Contador de luces caídas funciona
 - [ ] CHANGELOG.md actualizado con todas las versiones
 - [ ] HANDOFF-V2.md escrito y aprobado por user
@@ -890,8 +898,8 @@ Antes de tag `v1.0.0`:
 - [ ] Responder §1.1 — Pixel Streaming infra y budget
 - [ ] Responder §1.3 — Discord bot detalles
 - [ ] Responder §1.4 — Qué es "Claude Design" en términos operativos
-- [ ] Crear OAuth Client ID en Google Cloud Console (§1.2)
-- [ ] Confirmar emails whitelist correctos: `inconcha@gmail.com` + `yk8arts@gmail.com`
+- [x] Crear OAuth Client ID en Google Cloud Console (§1.2)
+- [x] Confirmar emails whitelist correctos: `inconcha@gmail.com` + `yk8arts@gmail.com`
 - [ ] Crear admin en Strapi Cloud (pendiente del handoff v1)
 - [ ] Confirmar `.cl` propagado y redirigiendo a `.com`
 - [ ] Validar UI actual en browser real (test post-handoff v1)
