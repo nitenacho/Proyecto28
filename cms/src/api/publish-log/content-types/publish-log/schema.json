@@ -1,0 +1,56 @@
+{
+  "kind": "collectionType",
+  "collectionName": "publish_logs",
+  "info": {
+    "singularName": "publish-log",
+    "pluralName": "publish-logs",
+    "displayName": "Publish log",
+    "description": "Auditoria interna de publicaciones del panel Tweaks hacia SiteSetting."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
+  "attributes": {
+    "email": {
+      "type": "email",
+      "required": true
+    },
+    "role": {
+      "type": "enumeration",
+      "default": "editor",
+      "required": true,
+      "enum": ["owner", "editor"]
+    },
+    "status": {
+      "type": "enumeration",
+      "default": "success",
+      "required": true,
+      "enum": ["success", "error"]
+    },
+    "changed": {
+      "type": "json"
+    },
+    "ignored": {
+      "type": "json"
+    },
+    "payload": {
+      "type": "json"
+    },
+    "webhookSent": {
+      "type": "boolean",
+      "default": false
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 200
+    }
+  }
+}

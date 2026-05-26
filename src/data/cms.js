@@ -44,6 +44,7 @@ const CMS_URL = (import.meta.env.VITE_CMS_URL || '').replace(/\/$/, '');
  * @property {boolean} defaults.showGrid
  * @property {boolean} defaults.showScanlines
  * @property {boolean} defaults.showViewfinder
+ * @property {boolean} defaults.gravityEnabled
  *
  * @property {Object} game                       Tweaks del juego (Etapas 4-6)
  * @property {number} game.lightSpeed
@@ -53,6 +54,7 @@ const CMS_URL = (import.meta.env.VITE_CMS_URL || '').replace(/\/$/, '');
  * @property {'linear'|'easeOut'|'easeInOut'|'kirby'} game.velocityCurve
  * @property {number} game.mouseFollowDelay      Segundos sin WASD antes de seguir mouse
  * @property {number} game.fallDuration          Segundos de caída antes del respawn
+ * @property {number} game.shadowSize            Tamaño del anillo de sombra
  *
  * @property {Object} admin                      Toggles admin (Etapas 7-9)
  * @property {boolean} admin.buttonVisible       Botón secreto bajo el logo
@@ -137,6 +139,7 @@ function normalizeSite(s) {
       velocityCurve: a.gameLightVelocityCurve || fb.game.velocityCurve,
       mouseFollowDelay: num(parseFloat(a.gameMouseFollowDelay), fb.game.mouseFollowDelay),
       fallDuration: num(parseFloat(a.gameFallDuration), fb.game.fallDuration),
+      shadowSize: num(parseFloat(a.gameShadowSize), fb.game.shadowSize),
     },
     admin: {
       buttonVisible: a.adminButtonVisible ?? fb.admin.buttonVisible,

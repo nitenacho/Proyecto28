@@ -83,6 +83,7 @@ const SITE_SETTING_DEFAULTS = {
   showGrid: true,
   showScanlines: false,
   showViewfinder: true,
+  defaultGravityEnabled: true,
   // v2 (Etapa 2)
   gameLightSpeed: 8.0,
   gameLightJumpHeight: 3.0,
@@ -91,6 +92,7 @@ const SITE_SETTING_DEFAULTS = {
   gameLightVelocityCurve: 'kirby',
   gameMouseFollowDelay: 1.0,
   gameFallDuration: 1.0,
+  gameShadowSize: 0.3,
   adminButtonVisible: false,
   pixelStreamingEnabled: false,
   pixelStreamingPreviewEnabled: false,

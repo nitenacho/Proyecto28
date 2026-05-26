@@ -60,6 +60,20 @@ const PANEL_STYLE = `
   .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
     background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
   .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+  .twk-actions{display:flex;flex-direction:column;gap:7px;padding-top:10px;
+    border-top:.5px solid rgba(0,0,0,.1)}
+  .twk-action-btn{appearance:none;width:100%;min-height:30px;border:.5px solid rgba(0,0,0,.14);
+    border-radius:8px;background:rgba(41,38,27,.9);color:#fff;
+    font:inherit;font-weight:650;letter-spacing:.03em;cursor:pointer}
+  .twk-action-btn:hover{background:#17150f}
+  .twk-action-btn:disabled{opacity:.58;cursor:progress}
+  .twk-feedback{box-sizing:border-box;width:100%;border-radius:7px;padding:6px 8px;
+    font-size:10.5px;line-height:1.35;color:rgba(41,38,27,.78);
+    background:rgba(255,255,255,.55);border:.5px solid rgba(0,0,0,.08)}
+  .twk-feedback[data-kind="success"]{color:#155b31;background:rgba(52,199,89,.12);
+    border-color:rgba(52,199,89,.28)}
+  .twk-feedback[data-kind="error"]{color:#7a2d16;background:rgba(255,138,77,.14);
+    border-color:rgba(255,138,77,.3)}
   .twk-fab{position:fixed;right:16px;bottom:16px;z-index:2147483645;width:42px;height:42px;
     border-radius:50%;border:1px solid rgba(127,211,203,.4);background:rgba(5,8,16,.7);
     color:#7FD3CB;font-size:18px;cursor:pointer;backdrop-filter:blur(12px);
@@ -104,7 +118,7 @@ function el(tag, props = {}, children = []) {
  * desde localStorage al montar y se escriben en cada cambio. Solo se restauran
  * claves presentes en `defaults` (ignora schema legacy).
  */
-export function mountTweaks({ host, defaults, controls, onChange, title = 'Tweaks', initiallyVisible = false, storageKey = 'p28-tweaks' }) {
+export function mountTweaks({ host, defaults, controls, actions = [], onChange, title = 'Tweaks', initiallyVisible = false, storageKey = 'p28-tweaks' }) {
   injectStyle();
 
   // Hidratar desde localStorage: defaults primero, luego override con valores
@@ -121,10 +135,17 @@ export function mountTweaks({ host, defaults, controls, onChange, title = 'Tweak
       }
     } catch { /* localStorage no disponible o JSON inválido: usar defaults */ }
   }
+  for (const control of controls.flatMap((section) => section.items || [])) {
+    if (!control.options || !Object.prototype.hasOwnProperty.call(state, control.key)) continue;
+    const allowed = new Set(control.options.map((option) => option.value));
+    if (!allowed.has(state[control.key])) state[control.key] = defaults[control.key];
+  }
 
   let panel = null;
   let open = !!initiallyVisible;
   let visible = !!initiallyVisible;     // controla si el panel/FAB están permitidos
+  let busyAction = null;
+  let feedback = null;
 
   function persist() {
     if (!storageKey) return;
@@ -136,6 +157,35 @@ export function mountTweaks({ host, defaults, controls, onChange, title = 'Tweak
     onChange({ ...state });
     persist();
     render();
+  }
+
+  function setFeedback(kind, message) {
+    feedback = message ? { kind, message } : null;
+    render();
+  }
+
+  async function runAction(action) {
+    if (busyAction) return;
+    busyAction = action.key || action.label;
+    feedback = null;
+    render();
+    try {
+      await action.onClick({
+        state: { ...state },
+        getState: () => ({ ...state }),
+        setState(partial) {
+          Object.assign(state, partial);
+          emit();
+        },
+        setFeedback,
+      });
+      if (!feedback) feedback = { kind: 'success', message: 'Listo.' };
+    } catch (err) {
+      feedback = { kind: 'error', message: err?.message || 'No se pudo completar la acción.' };
+    } finally {
+      busyAction = null;
+      render();
+    }
   }
 
   function setKey(key, value) {
@@ -243,6 +293,23 @@ export function mountTweaks({ host, defaults, controls, onChange, title = 'Tweak
     ]);
   }
 
+  function buildActions() {
+    if (!actions.length) return [];
+    return [el('div', { className: 'twk-actions' }, [
+      ...actions.map((action) => {
+        const key = action.key || action.label;
+        const busy = busyAction === key;
+        return el('button', {
+          type: 'button',
+          className: 'twk-action-btn',
+          disabled: !!busyAction,
+          onClick: () => runAction(action),
+        }, busy ? (action.busyLabel || 'Publicando...') : action.label);
+      }),
+      feedback ? el('div', { className: 'twk-feedback', dataset: { kind: feedback.kind || 'info' } }, feedback.message) : null,
+    ])];
+  }
+
   function render() {
     if (panel) { panel.remove(); panel = null; }
     if (!visible) {
@@ -255,7 +322,10 @@ export function mountTweaks({ host, defaults, controls, onChange, title = 'Tweak
       return;
     }
     if (fab) fab.style.display = 'none';
-    const body = el('div', { className: 'twk-body' }, controls.flatMap(buildSection));
+    const body = el('div', { className: 'twk-body' }, [
+      ...controls.flatMap(buildSection),
+      ...buildActions(),
+    ]);
     const close = el('button', { className: 'twk-x', 'aria-label': 'Cerrar tweaks', onClick: () => { open = false; render(); } }, '✕');
     const hd = el('div', { className: 'twk-hd' }, [el('b', {}, title), close]);
     panel = el('div', { className: 'twk-panel' }, [hd, body]);
@@ -295,6 +365,7 @@ export function mountTweaks({ host, defaults, controls, onChange, title = 'Tweak
       emit();
     },
     getState() { return { ...state }; },
+    setFeedback,
     show() { visible = true; open = true; render(); },
     hide() { visible = false; render(); },
     isVisible() { return visible; },

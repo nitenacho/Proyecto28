@@ -15,6 +15,7 @@ import { mountAdminButton } from './ui/adminButton.js';
 import { mountHud } from './ui/hud.js';
 import { initGoogleAuth, signIn, signOut, getCurrentUser } from './auth/google.js';
 import { checkWhitelist } from './auth/whitelist.js';
+import { publishTweaksSnapshot } from './admin/publish.js';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
@@ -81,11 +82,27 @@ async function boot() {
     streamingMode: normalizeStreamingMode(site.streaming.mode),
     adminButtonVisible: site.admin.buttonVisible,
   };
+  let publishedBaseline = { ...tweakDefaults };
 
   const tweaks = mountTweaks({
     host: document.getElementById('tweaks-root'),
     defaults: tweakDefaults,
     initiallyVisible: false,           // v0.10.0: panel oculto por default
+    actions: [
+      {
+        key: 'publish',
+        label: 'PUBLICAR CAMBIOS',
+        busyLabel: 'PUBLICANDO...',
+        async onClick({ state, setFeedback }) {
+          const result = await publishTweaksSnapshot({ state, baseline: publishedBaseline });
+          publishedBaseline = { ...state };
+          const changedCount = Object.keys(result.changed || {}).length;
+          const ignoredCount = Object.keys(result.ignored || {}).length;
+          const suffix = ignoredCount ? ` (${ignoredCount} omitido${ignoredCount === 1 ? '' : 's'})` : '';
+          setFeedback('success', `Publicado en Strapi: ${changedCount} cambio${changedCount === 1 ? '' : 's'}${suffix}.`);
+        },
+      },
+    ],
     onChange(state) {
       // Brand
       brandNameEl.textContent = state.logo;
@@ -177,7 +194,8 @@ async function boot() {
             options: [
               { value: 'kirby',    label: 'Kirby (decreciente)' },
               { value: 'linear',   label: 'Lineal' },
-              { value: 'constant', label: 'Constante' },
+              { value: 'easeOut',  label: 'Ease out' },
+              { value: 'easeInOut', label: 'Ease in-out' },
             ],
           },
           { type: 'slider', key: 'gameMouseFollowDelay', label: 'Delay mouse-follow', min: 0,   max: 3,   step: 0.1, unit: 's' },

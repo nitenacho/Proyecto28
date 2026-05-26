@@ -55,6 +55,11 @@
       "type": "boolean",
       "default": true
     },
+    "defaultGravityEnabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Activa las físicas de gravedad y saltos de la luz controlable por defecto."
+    },
     "gameLightSpeed": {
       "type": "decimal",
       "default": 8.0,
@@ -102,6 +107,13 @@
       "min": 0.2,
       "max": 3,
       "description": "Segundos de caída al vacío antes de respawnear en el cubo central."
+    },
+    "gameShadowSize": {
+      "type": "decimal",
+      "default": 0.3,
+      "min": 0.15,
+      "max": 1.2,
+      "description": "Tamaño base del anillo de sombra bajo la luz controlable."
     },
     "adminButtonVisible": {
       "type": "boolean",
