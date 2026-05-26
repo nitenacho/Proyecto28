@@ -1,12 +1,12 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-05-25 — `v0.15.0` Etapa 11
+> **Última actualización operativa:** 2026-05-25 — `v0.16.0` Etapa 12
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-11 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Etapa 11 cerrada en `v0.15.0` con overlay iframe/fallback para Pixel Streaming.
+> **Status:** En ejecución — etapas 1-12 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Etapa 12 cerrada en `v0.16.0` con pipeline Tweaks → Strapi + audit log.
 
-## Estado del plan al 2026-05-24 20:32 America/Santiago
+## Estado del plan al 2026-05-25 America/Santiago
 
 | Etapa | Estado | Tag | Commit |
 |---|---|---|---|
@@ -27,7 +27,7 @@
 | 10 hotfix — Responsive root cause | ✅ Cerrada | `v0.14.6` | `b96ddbb` |
 | 10 docs — Handoff completo Google Doc | ✅ Cerrada | `v0.14.7` | — |
 | 11 — Pixel Streaming Unreal | ✅ Cerrada | `v0.15.0` | `f5b0c42` |
-| 12 — Pipeline Publicar (Discord) | ⏳ Pendiente | — | — |
+| 12 — Pipeline Publicar | ✅ Cerrada | `v0.16.0` | `c0590e4` |
 | 13 — Sync Claude Design | ⏳ Pendiente | — | — |
 | 14 — GSAP polish | ⏳ Pendiente | — | — |
 | 15 — Performance + a11y | ⏳ Pendiente | — | — |
@@ -40,7 +40,8 @@
   Etapa 11). Budget esperado $50-150/mes.
 - **§1.2 Google OAuth:** ✅ Resuelto en Etapa 9. Google Identity Services +
   whitelist Strapi `/api/auth/check` funcionando en producción.
-- **§1.3 Discord bot:** ⏳ A definir al iniciar Etapa 12.
+- **§1.3 Discord bot:** ✅ Primer corte resuelto como webhook opcional
+  `DISCORD_WEBHOOK_URL`; bot real queda integracion externa si se define.
 - **§1.4 Claude Design:** ⏳ A definir al iniciar Etapa 13.
 - **§1.5 Detalles del juego:** ✅ Defaults documentados en Strapi
   `SiteSetting` y reflejados en `src/data/fallback.js`. Ajustables vía
@@ -344,7 +345,7 @@ Archivo a crear en raíz, formato Keep-a-Changelog. Cada tag = una sección.
 4. Configurar permisos:
    - `Project`, `SiteSetting` → public read (ya está)
    - `AdminWhitelist` → public read **NO** (solo lectura interna o autenticada)
-   - Endpoint custom `/api/publish` (Etapa 12) → autenticado vía JWT Google
+   - Endpoint custom `/api/publish` (Etapa 12) → autenticado via token Google
 5. Actualizar `cms/src/index.js` para seedear los nuevos campos sin sobrescribir datos existentes.
 6. Bumpear versión en `cms/package.json` y documentar en `cms/README.md`.
 
@@ -639,19 +640,24 @@ default en produccion.
 ### ETAPA 12 — Pipeline "Publicar": Tweaks → Discord Bot → Strapi
 **Objetivo:** Que el admin pueda ajustar sliders + clickear "Publicar" y se persistan en Strapi + se redespliegue el sitio.
 
+**Estado 2026-05-25:** CERRADA en `v0.16.0`. Primer corte implementado como
+Tweaks → Strapi + `PublishLog`; Discord queda opcional vía webhook si existe
+`DISCORD_WEBHOOK_URL`.
+
 **Tareas:**
 1. Botón "Publicar" en panel de tweaks (visible solo en admin mode):
    - Texto: "PUBLICAR CAMBIOS"
    - Loading state mientras se procesa
    - Success/error feedback
 2. Frontend → Strapi (`POST /api/publish`):
-   - Headers: `Authorization: Bearer <strapi-jwt>` (del flow de Etapa 9)
+   - Headers: `Authorization: Bearer <google-id-token-or-access-token>` (del
+     flujo Google admin)
    - Body: snapshot completo de tweaks actuales + diff vs SiteSetting actual
 3. Strapi endpoint custom `POST /api/publish`:
-   - Verificar JWT con scope `admin:publish`
+   - Verificar token Google contra Google + `AdminWhitelist`
    - Validar payload (allow-list de campos modificables)
    - Actualizar SiteSetting
-   - Emitir webhook al Discord bot (URL del webhook desde env var `DISCORD_WEBHOOK_URL`)
+   - Emitir webhook Discord opcional (URL desde env var `DISCORD_WEBHOOK_URL`)
    - Devolver 200 con el nuevo estado
 4. Discord bot (modificación externa al repo del frontend):
    - Recibe webhook con payload
@@ -663,18 +669,20 @@ default en produccion.
    - Strapi guarda cada publish en un nuevo content type `PublishLog` con timestamp + email + diff
 
 **Archivos nuevos:**
-- `cms/src/api/site-setting/controllers/publish.js`
-- `cms/src/api/site-setting/routes/publish.js`
-- `cms/src/api/publish-log/` (toda la carpeta, opcional)
+- `cms/src/api/site-setting/routes/01-publish.js`
+- `cms/src/api/publish-log/`
 - `src/admin/publish.js` (lógica frontend)
-**Archivos modificados:** `src/ui/tweaks.js`
+**Archivos modificados:** `src/ui/tweaks.js`, `src/auth/google.js`,
+`src/main.js`, `src/data/cms.js`, `cms/src/api/site-setting/controllers/site-setting.js`,
+`cms/src/api/site-setting/content-types/site-setting/schema.json`,
+`cms/src/index.js`.
 **Criterio de éxito:**
-- Admin clickea "Publicar" → tweaks se guardan en Strapi
-- Discord recibe mensaje en canal
-- Otros usuarios al recargar ven los nuevos valores
-- (Opcional) audit log visible en admin Strapi
+- Admin clickea "Publicar" → tweaks se guardan en Strapi.
+- Otros usuarios al recargar ven los nuevos valores.
+- Audit log visible en admin Strapi.
+- Discord recibe mensaje si `DISCORD_WEBHOOK_URL` está configurado.
 **Dependencias:** Etapa 9, Etapa 7. Discord bot existente accesible.
-**Riesgo:** Medio-alto. La integración con bot existente depende de su arquitectura (§1.3 sin respuesta).
+**Riesgo residual:** Medio. La integración con bot real depende de su arquitectura (§1.3 sin respuesta); el webhook no bloquea publish.
 
 ---
 
@@ -882,7 +890,7 @@ Antes de tag `v1.0.0`:
 - Etapa 11 — Integración Pixel Streaming
 
 **Sprint 6 (pipeline, 2 sesiones):**
-- Etapa 12 — Publicar via Discord
+- Etapa 12 — Publicar via Strapi + webhook opcional
 - Etapa 13 — Sync automatizado
 
 **Sprint 7 (hardening, 2-3 sesiones):**

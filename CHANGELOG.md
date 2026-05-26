@@ -12,6 +12,77 @@ o a un fix puntual entre etapas.
 
 Sin cambios todavía.
 
+## [0.16.0] — 2026-05-25 — Etapa 12: Pipeline Publicar Tweaks → Strapi
+
+### Added
+- **Etapa 12 / Publicar cambios desde Tweaks**:
+  - Nuevo botón `PUBLICAR CAMBIOS` dentro del panel Tweaks, visible cuando el
+    admin abre el panel. Incluye estado de carga y feedback success/error.
+  - Nuevo cliente frontend `src/admin/publish.js`, que envía snapshot +
+    diff de los tweaks actuales a Strapi.
+  - Nuevo endpoint Strapi `POST /api/publish`, con allow-list de campos,
+    validación de rangos/enums y actualización del singleton SiteSetting.
+  - Verificación server-side del token Google contra Google + whitelist
+    `AdminWhitelist`. El endpoint acepta `id_token` y `access_token` del flujo
+    explícito OAuth (`openid email profile`).
+  - Nuevo content type `PublishLog` para auditoría interna de publicaciones:
+    email, rol, diff, campos omitidos, estado y resultado del webhook.
+  - Webhook Discord opcional vía `DISCORD_WEBHOOK_URL`; si no está configurado
+    la publicación no falla.
+
+### Changed
+- El login admin dejó de depender sólo de One Tap/FedCM. El botón Admin usa un
+  flujo OAuth explícito con selector de cuenta, más confiable para clicks reales.
+- El select `Curva de salto` ahora sólo ofrece valores aceptados por Strapi:
+  `kirby`, `linear`, `easeOut`, `easeInOut`.
+- El schema SiteSetting ahora persiste todos los tweaks visibles del juego:
+  `defaultGravityEnabled` y `gameShadowSize` se agregan al CMS.
+- El panel Tweaks limpia valores legacy de selects/radios guardados en
+  `localStorage` si ya no existen en el schema actual.
+- `cms/.env.example` documenta `GOOGLE_CLIENT_ID` y el webhook opcional de
+  Discord.
+
+### Verified
+- `npm run build` OK.
+- `npm run build` en `cms/` OK.
+- Smoke local:
+  - Panel Tweaks abre desde botón Admin sin `VITE_GOOGLE_CLIENT_ID` local.
+  - `PUBLICAR CAMBIOS` aparece.
+  - El select de curva ya no incluye `constant`.
+  - Sin sesión/CMS local configurado, el botón muestra error controlado.
+- Strapi local:
+  - `/api/site-setting` => `200`
+  - `/api/publish` sin token => `401`
+  - `/api/auth/check?email=inconcha@gmail.com` => `allowed:true`, `role:owner`
+  - `/api/auth/check?email=yk8arts@gmail.com` => `allowed:true`, `role:editor`
+  - `/api/publish-logs` => `403` público/privado correcto
+  - `/api/admin-whitelists` => `403` público/privado correcto
+- GitHub Pages:
+  - Run `26425130576` OK para `e8c3f74`.
+  - Run `26425439630` OK para `c0590e4`.
+  - `https://proyecto28.com` sirve bundle con `PUBLICAR CAMBIOS`,
+    `/api/publish`, `Preview visible` e `initTokenClient`.
+- Strapi Cloud:
+  - Rebuild propagado después del push; `/api/publish` cambió de `405` a
+    `401` sin token, confirmando ruta custom activa.
+  - `/api/projects?populate=*` => `200`
+  - `/api/site-setting` => `200`
+  - SiteSetting producción: `pixelStreamingPreviewEnabled:false`,
+    `pixelStreamingEnabled:false`, `defaultGravityEnabled:true`,
+    `gameShadowSize:0.3`, `gameLightVelocityCurve:kirby`
+  - `/api/admin-whitelists` => `403` público/privado correcto
+  - `/api/auth/check?email=inconcha@gmail.com` => `allowed:true`, `role:owner`
+  - `/api/auth/check?email=yk8arts@gmail.com` => `allowed:true`, `role:editor`
+  - `/api/auth/check?email=cnignacioa@gmail.com` => `allowed:true`,
+    `role:owner`
+  - Preflight CORS `OPTIONS /api/publish` con
+    `Origin: https://proyecto28.com` => `204`,
+    `access-control-allow-origin: https://proyecto28.com`
+- Límite de validación: desde Chrome automatizado no se completó el popup
+  OAuth real sin intervención humana. El frontend, backend, CORS, whitelist,
+  schema y estados de producción quedaron verificados; el publish con token
+  real debe confirmarlo el owner con click manual en `proyecto28.com`.
+
 ## [0.15.0] — 2026-05-25 — Etapa 11: Pixel Streaming iframe/fallback
 
 ### Added

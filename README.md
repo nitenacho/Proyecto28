@@ -64,11 +64,16 @@ desde `/admin`:
   flotante, URL de redirección por color.
 - **Ajustes del sitio** — logo (P28 / NEIT / EST), placement por defecto del
   popup, estilo de tiles, inclinación / rotación / drift de cámara, toggles
-  del HUD (grilla, scanlines, viewfinder).
+  del HUD (grilla, scanlines, viewfinder), juego, Admin y Pixel Streaming.
+- **Admin whitelist** — correos autorizados para abrir Tweaks y publicar
+  cambios (`owner` / `editor`). Esta colección queda editable desde Strapi
+  Admin y privada para el público.
+- **Publish log** — auditoría interna de cada publicación del panel Tweaks.
 
 El usuario final puede sobreescribir todos los ajustes en tiempo real desde
-el panel "Tweaks" que aparece en la esquina inferior derecha — esos cambios
-viven sólo en su sesión.
+el panel "Tweaks". Los admins autorizados por Google + whitelist pueden usar
+`PUBLICAR CAMBIOS` para persistir el snapshot en Strapi `SiteSetting`; si no
+publican, los cambios viven sólo en su sesión.
 
 ## Cómo contribuir
 
@@ -125,7 +130,7 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 10 hotfix — Responsive root cause iPhone/iPad | ✅ Cerrado | `v0.14.6` |
 | 10 docs — Handoff completo Google Doc | ✅ Cerrado | `v0.14.7` |
 | 11 — Pixel Streaming Unreal | ✅ Cerrado — overlay iframe/fallback | `v0.15.0` |
-| 12 — Pipeline Publicar | ⏳ Pendiente | — |
+| 12 — Pipeline Publicar | ✅ Cerrado — Tweaks → Strapi + audit log | `v0.16.0` |
 | 13 — Sync Claude Design | ⏳ Pendiente | — |
 | 14 — GSAP polish | ⏳ Pendiente | — |
 | 15 — Performance + a11y | ⏳ Pendiente | — |

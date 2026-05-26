@@ -1,46 +1,48 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-05-25 (cierre Etapa 11 - `v0.15.0`)
-> **Tag activo:** `v0.15.0`
+> **Ultima actualizacion:** 2026-05-25 (cierre Etapa 12 - `v0.16.0`)
+> **Tag activo:** `v0.16.0`
 > **Branch:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 
-> Etapas 1-11 cerradas. Pixel Streaming queda integrado en primer corte
-> iframe/overlay/fallback, con preview apagable desde Strapi/Tweaks.
+> Etapas 1-12 cerradas. Etapa 12 deja operativo el primer pipeline
+> `Tweaks -> Strapi SiteSetting`, con auth Google + whitelist, audit log y
+> webhook Discord opcional.
 
 ---
 
 ## 0. Resumen en 30 segundos
 
 Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite),
-CMS Strapi Cloud, Google OAuth y whitelist gating funcionando.
+CMS Strapi Cloud, Google OAuth, whitelist gating, Pixel Streaming
+iframe/fallback y pipeline de publicacion de Tweaks.
 
 Estado actual:
-- Etapas 1-11 cerradas.
+- Etapas 1-12 cerradas.
 - Bug responsive iPhone/iPad resuelto en `v0.14.6` y confirmado por owner:
   "se arreglo muy bien".
-- Respaldo documental completo y regla de subpestanas Google Doc reforzada en
-  `v0.14.7`.
-- Etapa 11 cerrada en `v0.15.0` con overlay Pixel Streaming inicial:
-  iframe real si hay URL valida, fallback visual local si el preview esta
-  habilitado, y estado oculto por default en produccion.
-- No hay endpoint Unreal/Pixel Streaming real conectado todavia. El frontend
-  queda preparado para recibir `unrealStreamURL` por proyecto desde Strapi.
+- Etapa 11 cerrada en `v0.15.0`: overlay Pixel Streaming inicial con iframe
+  real si hay URL valida y fallback local controlado por `Preview visible`.
+- Etapa 12 cerrada en `v0.16.0`: boton `PUBLICAR CAMBIOS` en Tweaks, endpoint
+  `POST /api/publish`, validacion Google + whitelist, persistencia en
+  SiteSetting y `PublishLog`.
+- Produccion mantiene `pixelStreamingPreviewEnabled:false` y
+  `pixelStreamingEnabled:false`; no se muestra preview/stream hasta que el
+  owner lo active.
 
-Lo mas importante del cierre Etapa 11:
-- Nuevo overlay HTML proyectado desde el cubo activo de la luz.
-- Nuevo iframe shell para Pixel Streaming.
-- Fallback visual local usando `videoLoop`, imagen del proyecto o tarjeta
-  procedural.
-- Nuevo tweak/admin control: `Preview visible`.
-- Nuevo campo Strapi `pixelStreamingPreviewEnabled` en SiteSetting.
-- Default de produccion: `pixelStreamingPreviewEnabled:false`.
-- Si `Preview visible` esta apagado y no hay stream real, no aparece ningun
-  preview. Asi el owner controla cuando mostrarlo.
-- Si existe stream real valido (`pixelStreamingEnabled:true`,
-  `Project.unrealEnabled:true`, `Project.unrealStreamURL:https://...`), el
-  iframe se puede mostrar aunque el preview fallback este apagado.
+Codigos clave:
+- `e8c3f74 feat(admin): publish tweaks to Strapi`
+- `c0590e4 fix(auth): support explicit Google admin publish flow`
+- GitHub Pages run `26425439630` success para `c0590e4`.
+
+Nota honesta de validacion:
+- Frontend, backend, schema, CORS, whitelist y Strapi Cloud quedaron
+  verificados en produccion.
+- Chrome automatizado no pudo completar el popup OAuth real sin intervencion
+  humana. El owner debe hacer un smoke manual: abrir `proyecto28.com`, click
+  `Admin`, seleccionar cuenta Google permitida, click `PUBLICAR CAMBIOS` y
+  confirmar feedback verde.
 
 ---
 
@@ -60,18 +62,17 @@ git log --oneline -12
 Esperado:
 - branch `main`
 - working tree clean
-- ultimo tag `v0.15.0`
-- HEAD de cierre: `f5b0c42 fix(cms): allow production cors for proyecto28`
-- frontend Pixel Streaming: `68130ee feat(streaming): add preview visibility toggle`
+- ultimo tag `v0.16.0`
+- ultimos commits de codigo: `c0590e4`, `e8c3f74`
 
 ### Paso 2 - Leer docs (orden)
 
 1. `HANDOFF-LATEST.md` (este archivo).
-2. `CHANGELOG.md` - entrada `[0.15.0]`.
+2. `CHANGELOG.md` - entrada `[0.16.0]`.
 3. Google Doc oficial - ultima subpestana bajo `Handoff`:
-   `2026-05-25 00:32 UTC - v0.15.0 etapa 11 pixel streaming`.
-4. `PLAN-PROYECTO28-V2.md` - Etapa 12 queda como siguiente bloque.
-5. `DEPLOY.md` - seccion Pixel Streaming para subdominio/infra.
+   `2026-05-26 00:45 UTC - v0.16.0 etapa 12 publicar`.
+4. `PLAN-PROYECTO28-V2.md` - Etapa 13 queda como siguiente bloque.
+5. `DEPLOY.md` y `cms/README.md` si se toca deploy/CMS.
 
 ### Paso 3 - Validar sistema vivo
 
@@ -81,332 +82,235 @@ curl -s -o /dev/null -w "admin-whitelists: %{http_code}\n" "https://honest-candy
 curl -s -o /dev/null -w "site-setting: %{http_code}\n"     "https://honest-candy-800d1e4a92.strapiapp.com/api/site-setting"
 curl -s -o /dev/null -w "auth inconcha: %{http_code}\n"    "https://honest-candy-800d1e4a92.strapiapp.com/api/auth/check?email=inconcha@gmail.com"
 curl -s -o /dev/null -w "auth yk8arts: %{http_code}\n"     "https://honest-candy-800d1e4a92.strapiapp.com/api/auth/check?email=yk8arts@gmail.com"
+curl -s -o /dev/null -w "publish no-token: %{http_code}\n" -X POST -H "content-type: application/json" -d "{\"state\":{\"streamingPreviewEnabled\":false}}" "https://honest-candy-800d1e4a92.strapiapp.com/api/publish"
 curl -s -o /dev/null -w "proyecto28.com: %{http_code}\n"   "https://proyecto28.com"
 ```
 
-Esperado: `200`, `403`, `200`, `200`, `200`, `200`.
+Esperado: `200`, `403`, `200`, `200`, `200`, `401`, `200`.
 
-### Paso 4 - Validar responsive en produccion
+### Paso 4 - Smoke manual admin publish
 
-El owner pidio que las pruebas relevantes se hagan siempre en
-`https://proyecto28.com`, no solo localhost.
+En `https://proyecto28.com`:
+1. Click `Admin`.
+2. Seleccionar Google `inconcha@gmail.com` o `yk8arts@gmail.com`.
+3. Confirmar que abre Tweaks.
+4. Confirmar que existe `PUBLICAR CAMBIOS`.
+5. Dejar `Streaming > Preview visible` apagado si no se quiere mostrar fallback.
+6. Click `PUBLICAR CAMBIOS`.
+7. Esperado: feedback verde y cambios persistidos en Strapi.
 
-En consola DevTools de produccion:
-
-```js
-({
-  body: document.body.scrollWidth,
-  html: document.documentElement.scrollWidth,
-  inner: window.innerWidth,
-  canvas: document.querySelector("#c")?.clientWidth,
-  overlayHidden: document.querySelector(".stream-overlay")?.hidden,
-  hasDebug: typeof window.p28StreamDebug
-})
-```
-
-Esperado:
-- `body === inner`
-- `html === inner`
-- `canvas === inner`
-- overlay existe pero queda oculto por default
-- `hasDebug === "undefined"` en produccion
-
-Si reaparece overflow:
-
-```js
-[...document.querySelectorAll("*")]
-  .filter((el) => el.scrollWidth > window.innerWidth + 1)
-  .map((el) => ({ tag: el.tagName, cls: el.className, w: el.scrollWidth }))
-```
+Si el consent screen Google sigue en modo Testing, los correos deben estar
+tambien como Test users en Google Cloud Console. Esta sesion verifico la
+whitelist server-side en Strapi, pero no tuvo API/permiso directo para leer la
+lista de Test users de GCP.
 
 ---
 
-## 2. Cierre Etapa 11 - Pixel Streaming iframe/fallback
+## 2. Que se implemento en Etapa 12
 
-### Commits de la etapa
+### Frontend
 
-- `a71958a feat(streaming): add pixel streaming overlay fallback`
-- `54cd110 test(streaming): add iframe preview mock`
-- `68130ee feat(streaming): add preview visibility toggle`
-- `f5b0c42 fix(cms): allow production cors for proyecto28`
-
-### Archivos principales
-
-- `src/streaming/pixelStream.js`
-  - Crea el shell iframe/fallback.
-  - Carga iframe solo con URL `http(s)` valida y stream habilitado.
-  - Envia `postMessage` al iframe:
-    - `{ command: "showProject", projectId, unrealLevelName, mode }`
-    - `{ type: "p28:pixel-stream", payload }`
-  - Limpia `src` cuando no hay stream para no cargar WebRTC por accidente.
-
-- `src/streaming/streamOverlay.js`
-  - Proyecta la posicion 3D del cubo activo a coordenadas 2D.
-  - Usa `visualViewport` para evitar overflow mobile.
-  - Normaliza `streaming.mode` a `shared` / `per-cube`.
-  - Respeta `streaming.previewEnabled`.
-  - Si `previewEnabled:false` y no hay stream real, el overlay permanece oculto.
-
+- `src/admin/publish.js`
+  - Construye snapshot publishable de Tweaks.
+  - Calcula diff contra baseline cargado desde SiteSetting.
+  - Envia `POST /api/publish` con `Authorization: Bearer <google-token>`.
+- `src/ui/tweaks.js`
+  - Soporta acciones de footer.
+  - Agrega boton `PUBLICAR CAMBIOS`.
+  - Muestra loading/success/error.
+  - Limpia valores legacy guardados en `localStorage` si ya no estan en las
+    opciones actuales.
+- `src/auth/google.js`
+  - Mantiene soporte para `id_token`.
+  - Agrega flujo explicito OAuth `initTokenClient` con scope
+    `openid email profile`.
+  - Cachea `accessToken` + email para publicar desde el panel.
 - `src/main.js`
-  - Conecta overlay a `onActiveTileChange`.
-  - Agrega Tweaks:
-    - `Pixel Streaming activo`
-    - `Preview visible`
-    - `streamingMode`
-  - Agrega helpers solo en `import.meta.env.DEV`:
-    - `?streamPreview=028.A`
-    - `?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:<port>/dev/pixel-stream-mock.html`
+  - Wirea la accion publish.
+  - Corrige opciones de `gameVelocityCurve`: `kirby`, `linear`, `easeOut`,
+    `easeInOut`.
 
-- `public/dev/pixel-stream-mock.html`
-  - Mock local same-origin que recibe el payload `showProject`.
+### Strapi
 
-- `src/styles/app.css`
-  - Estilos para `.stream-overlay`, `.stream-card`, iframe/fallback y mobile.
-
+- `cms/src/api/site-setting/routes/01-publish.js`
+  - Nueva ruta `POST /api/publish`.
+- `cms/src/api/site-setting/controllers/site-setting.js`
+  - Verifica token Google (`id_token` o `access_token`).
+  - Revisa email contra `AdminWhitelist`.
+  - Sanitiza payload con allow-list y rangos.
+  - Actualiza SiteSetting.
+  - Crea `PublishLog`.
+  - Envia webhook Discord si `DISCORD_WEBHOOK_URL` existe.
+- `cms/src/api/publish-log/`
+  - Nuevo content type editable en Strapi Admin para auditoria.
 - `cms/src/api/site-setting/content-types/site-setting/schema.json`
-  - Nuevo campo `pixelStreamingPreviewEnabled`.
-
+  - Agrega `defaultGravityEnabled` y `gameShadowSize` para que todos los
+    tweaks visibles puedan persistirse.
 - `cms/src/index.js`
-  - Backfill/default `pixelStreamingPreviewEnabled:false`.
-
-- `cms/config/middlewares.js`
-  - CORS corregido para permitir origins reales:
-    `https://proyecto28.com`, variantes `www`, `.cl`, GitHub Pages y
-    localhost/127.0.0.1 para QA.
-  - Causa: en Strapi 5 `origin:['*']` se interpreta como lista literal; no
-    matchea `https://proyecto28.com`, por lo que el navegador bloqueaba fetch
-    y el sitio caia al fallback CMS.
-
-- `src/data/cms.js` y `src/data/fallback.js`
-  - Mapeo frontend para `streaming.previewEnabled`.
+  - Backfill de campos nuevos.
+  - Seed mantiene whitelist:
+    - `inconcha@gmail.com` owner
+    - `cnignacioa@gmail.com` owner
+    - `yk8arts@gmail.com` editor
+- `cms/.env.example`
+  - Documenta `GOOGLE_CLIENT_ID` y `DISCORD_WEBHOOK_URL`.
 
 ---
 
-## 3. Verificacion Etapa 11
+## 3. Validacion realizada
 
 ### Build local
 
 - `npm run build` OK.
-- `npm run build` dentro de `cms/` OK.
-  - Strapi admin build completo.
-  - Solo quedo warning deprecado conocido de Node/fs, no bloqueante.
+- `npm run build` en `cms/` OK.
 
-### QA local con Vite
+### Smoke local frontend
 
-Servidor usado durante QA:
-- `http://127.0.0.1:5174/` (5173 estaba ocupado).
+- Vite local en `http://127.0.0.1:5174`.
+- Admin abre Tweaks sin Google cuando no hay `VITE_GOOGLE_CLIENT_ID` local.
+- `PUBLICAR CAMBIOS` aparece.
+- `Curva de salto` ya no incluye `constant`.
+- Sin CMS local configurado, el boton publish muestra error controlado.
+- `document.body.scrollWidth === window.innerWidth` en desktop local.
 
-Casos validados:
-- Carga normal:
-  - overlay oculto por default.
-  - sin errores de consola.
-  - `body/html/inner = 1280`.
-- Preview fallback:
-  - `http://127.0.0.1:5174/?streamPreview=028.A`
-  - overlay visible en fallback.
-- Preview iframe mock:
-  - `http://127.0.0.1:5174/?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:5174/dev/pixel-stream-mock.html`
-  - overlay `stream`, iframe cargado, mock recibe `showProject`.
-- Mobile local:
-  - phone `390x844`: `html=390`, `body=390`, `canvas=390`.
-  - tablet portrait `810x1080`: `html=810`, `body=810`, `canvas=810`.
+### Smoke local Strapi
 
-### GitHub Pages / produccion
+- `/api/site-setting` => `200`
+- `/api/publish` sin token => `401`
+- `/api/auth/check?email=inconcha@gmail.com` =>
+  `{"allowed":true,"role":"owner"}`
+- `/api/auth/check?email=yk8arts@gmail.com` =>
+  `{"allowed":true,"role":"editor"}`
+- `/api/publish-logs` => `403`
+- `/api/admin-whitelists` => `403`
 
-- Commit desplegado: `68130ee`.
-- GitHub Actions Pages run: `26376864785`.
-- Estado: `completed / success`.
-- `https://proyecto28.com` responde `200`.
-- HTML produccion `last-modified: Mon, 25 May 2026 00:19:57 GMT`.
-- Bundle de produccion incluye `pixelStreamingPreviewEnabled`.
-- `f5b0c42` no disparo nuevo Pages run porque `.github/workflows/deploy.yml`
-  ignora `cms/**` y docs. Esto es esperado: el bundle frontend ya estaba
-  desplegado desde `68130ee`; el cambio critico fue redeploy de Strapi Cloud.
+### Produccion GitHub Pages
 
-Smoke production fresh load:
-- desktop `1280`:
-  - `body=1280`
-  - `html=1280`
-  - overlay existe y queda oculto
-  - `window.p28StreamDebug` no existe
-  - `/api/projects` y `/api/site-setting` responden `200` desde browser
-  - sin errores/warnings de consola
-- phone `390x844`:
-  - `body=390`
-  - `html=390`
-  - `canvas=390`
-  - overlay oculto
-  - `/api/projects` y `/api/site-setting` responden `200` desde browser
-  - sin errores/warnings de consola
-- tablet portrait `810x1080`:
-  - `body=810`
-  - `html=810`
-  - `canvas=810`
-  - overlay oculto
-  - `/api/projects` y `/api/site-setting` responden `200` desde browser
-  - sin errores/warnings de consola
+- Push `e8c3f74` a `main` OK.
+- Pages run `26425130576` success.
+- Push `c0590e4` a `main` OK.
+- Pages run `26425439630` success.
+- `https://proyecto28.com` sirve bundle nuevo con:
+  - `PUBLICAR CAMBIOS`
+  - `/api/publish`
+  - `Preview visible`
+  - `initTokenClient`
+
+### Produccion Strapi Cloud
+
+- Despues del deploy, `/api/publish` cambio de `405` a `401` sin token:
+  confirma ruta custom activa.
+- `/api/projects?populate=*` => `200`
+- `/api/site-setting` => `200`
+- `/api/admin-whitelists` => `403` publico/privado correcto
+- `/api/auth/check?email=inconcha@gmail.com` => `allowed:true`, `role:owner`
+- `/api/auth/check?email=yk8arts@gmail.com` => `allowed:true`, `role:editor`
+- `/api/auth/check?email=cnignacioa@gmail.com` => `allowed:true`, `role:owner`
+- CORS preflight:
+  - `OPTIONS /api/publish`
+  - `Origin: https://proyecto28.com`
+  - Resultado `204`
+  - `access-control-allow-origin: https://proyecto28.com`
+
+Valores SiteSetting produccion tras cierre:
+- `pixelStreamingPreviewEnabled:false`
+- `pixelStreamingEnabled:false`
+- `defaultGravityEnabled:true`
+- `gameShadowSize:0.3`
+- `gameLightVelocityCurve:kirby`
+- `adminButtonVisible:false` en CMS, aunque puede quedar visible por
+  localStorage si el navegador del owner lo tenia activado.
 
 ---
 
-## 4. Estado de Strapi Cloud
+## 4. Estado de GitHub / deploy
+
+- Branch: `main`
+- Codigo Etapa 12:
+  - `e8c3f74 feat(admin): publish tweaks to Strapi`
+  - `c0590e4 fix(auth): support explicit Google admin publish flow`
+- GitHub Pages:
+  - `26425130576` success para `e8c3f74`
+  - `26425439630` success para `c0590e4`
+- Tag esperado al cierre: `v0.16.0`
+
+`gh` local no estaba autenticado en esta maquina; los runs se validaron por la
+API publica de GitHub.
+
+---
+
+## 5. Estado de Strapi Cloud
 
 URL: `https://honest-candy-800d1e4a92.strapiapp.com`
 
-Validado al cierre:
-- `GET /api/projects?populate=*` => `200`
-- `GET /api/site-setting` => `200`
-- `GET /api/admin-whitelists` => `403` (privado, correcto)
-- `GET /api/auth/check?email=inconcha@gmail.com` =>
-  `{"allowed":true,"role":"owner"}`
-- `GET /api/auth/check?email=yk8arts@gmail.com` =>
-  `{"allowed":true,"role":"editor"}`
-- CORS con `Origin: https://proyecto28.com` =>
-  `access-control-allow-origin: https://proyecto28.com`
-  - Propago despues del push `f5b0c42` a Strapi Cloud.
+Content types relevantes:
+- `Project`
+- `SiteSetting`
+- `AdminWhitelist`
+- `PublishLog`
 
-SiteSetting en produccion incluye:
-- `pixelStreamingEnabled:false`
-- `pixelStreamingMode:"shared"`
-- `pixelStreamingPreviewEnabled:false`
+Whitelist verificada por endpoint publico seguro `/api/auth/check`:
+- `inconcha@gmail.com` => owner
+- `cnignacioa@gmail.com` => owner
+- `yk8arts@gmail.com` => editor
 
-Whitelist/admin:
-- `AdminWhitelist` sigue privado publicamente (`403`).
-- Los emails validados por `/api/auth/check`:
-  - `inconcha@gmail.com` - owner
-  - `yk8arts@gmail.com` - editor
-- El content type `admin-whitelist` tiene:
-  - `pluginOptions.content-manager.visible = true`
-  - `pluginOptions.content-type-builder.visible = true`
-- Por lo tanto los registros se pueden editar desde Strapi Admin con un usuario
-  admin autenticado.
+`AdminWhitelist` y `PublishLog` siguen privados para anonimos (`403`) y son
+editables desde Strapi Admin por usuarios con permisos de Content Manager.
 
-Tech debt activo:
-- `Project.status` enum legacy: al editar proyecto en admin Strapi puede tirar
-  "Invalid status". Fix recomendado en Etapa 12: normalizar registros en
-  `cms/src/index.js` bootstrap o script puntual.
-- Consent screen GCP sigue en Testing: si se agrega email a whitelist Strapi,
-  agregarlo tambien como test user en Google Cloud.
+Variables recomendadas en Strapi Cloud:
+- `GOOGLE_CLIENT_ID=644563573486-5pe2jvatetd46oke9ns8gskdt0jgsfi6.apps.googleusercontent.com`
+- `DISCORD_WEBHOOK_URL` opcional. Si falta, publish funciona igual.
 
 ---
 
-## 5. Estado de hosting
+## 6. Pendientes y riesgos
 
-- GitHub Pages: deploy automatico desde `main`.
-- Dominio principal/canonico: `https://proyecto28.com`.
-- Dominio secundario: `proyecto28.cl` pendiente.
-  - Ultimo chequeo conocido: HTTPS falla por certificado/wrong principal y
-    HTTP responde 404 de GitHub Pages.
-  - Mantener `.com` como canonico hasta corregir DNS/redirect/certificado `.cl`.
-- Workflow: `.github/workflows/deploy.yml`.
-- CNAME: `public/CNAME` con `proyecto28.com`.
-
-Nota:
-- GitHub/Cloudflare pueden cachear HTML/assets durante minutos.
-- Para validar deploy real, usar query string (`?verify=<timestamp>`) y
-  confirmar bundle actual.
-
----
-
-## 6. Google Doc backup
-
-Documento:
-`https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/edit`
-
-Estructura obligatoria:
-- El respaldo debe quedar SIEMPRE como subpestana dentro del tab raiz
-  `Handoff`.
-- Nunca crear cierres como pestanas raiz.
-- El proximo agente debe abrir la ultima subpestana bajo `Handoff`.
-- Formato recomendado de titulo:
-  `YYYY-MM-DD HH:mm UTC - vX.Y.Z <slug>`.
-
-Estado esperado tras este cierre:
-- Nueva subpestana bajo `Handoff`:
-  `2026-05-25 00:32 UTC - v0.15.0 etapa 11 pixel streaming`.
-- Debe contener este handoff completo y evidencia de:
-  - build local
-  - deploy GitHub Pages
-  - smoke test produccion
-  - Strapi site-setting con `pixelStreamingPreviewEnabled:false`
-  - whitelist `inconcha@gmail.com` / `yk8arts@gmail.com`
-
-Referencia anterior:
-- Padre `Handoff` tenia `tabId` verificado `t.7lpfc5ado1h` en la sesion
-  `v0.14.7`. Verificar de nuevo si el documento se reorganiza.
-
-Gotchas:
-1. `navigator.clipboard.writeText` no propaga bien en Docs.
-2. `type >4KB` puede dar timeout CDP; usar chunks de 3-4 KB.
-3. Google Docs puede autocorregir guiones; aceptable.
-4. Si el respaldo queda como pestana raiz, moverlo bajo `Handoff` antes de
-   entregar.
-5. Un respaldo de 3 paginas no es suficiente; debe ser operativo.
+- Confirmacion manual owner del publish real con popup Google:
+  - Automatizacion Chrome no pudo completar el popup OAuth sin intervencion.
+  - El flujo fue reforzado con `initTokenClient`; smoke humano requerido.
+- Google Cloud consent screen:
+  - Si sigue en modo Testing, confirmar manualmente en GCP que
+    `inconcha@gmail.com` y `yk8arts@gmail.com` estan como Test users.
+  - Esta sesion no tuvo `gcloud` ni API directa para leer esa lista.
+- Discord:
+  - Webhook opcional implementado, pero no habia `DISCORD_WEBHOOK_URL`
+    validable en esta sesion.
+- Tech debt Strapi:
+  - `Project.status` enum legacy puede seguir mostrando `Invalid status` al
+    editar proyectos antiguos. No bloqueo Etapa 12.
+- `proyecto28.cl`:
+  - Mantener `.com` como canonico hasta corregir certificado/DNS `.cl`.
 
 ---
 
-## 7. Proximo paso recomendado
+## 7. Proximo paso
 
-### Etapa 12 - Pipeline "Publicar" / Discord Bot
+Etapa 13 - Sync automatizado Claude Design + GitHub.
 
-No iniciar hasta que el owner acepte el cierre `v0.15.0` en produccion.
+Antes de codear:
+1. Validar `git status` clean en `main`.
+2. Confirmar `git describe --tags --abbrev=0` => `v0.16.0`.
+3. Hacer smoke manual de `PUBLICAR CAMBIOS` en `proyecto28.com`.
+4. Confirmar si Claude Design es tokens en repo, paquete npm, repo separado o
+   solo nombre interno.
 
-Objetivo previsto:
-- Admin ajusta Tweaks.
-- Boton "Publicar" persiste cambios en Strapi.
-- Discord bot registra/aprueba cambios.
-- GitHub Actions/Strapi quedan sincronizados segun corresponda.
-
-Mantener fuera de Etapa 12 salvo bloqueo:
-- Infra real Pixel Streaming/GPU.
-- Correcciones de `proyecto28.cl`.
-- Refactors no relacionados.
+No mezclar Etapa 13 con el tech debt de `Project.status` salvo que bloquee.
 
 ---
 
-## 8. Stack actual
+## 8. Cierre esperado de futuras etapas
 
-- Frontend: Vite 6 + Three.js 0.176 + vanilla JS.
-- Hosting: GitHub Pages + custom domain `.com`.
-- CMS: Strapi 5.13.1 en Strapi Cloud.
-- Auth: Google Identity Services + endpoint `/api/auth/check`.
-- UI: grid WebGL, popup robusto, touch/double-tap, tweaks panel, admin button
-  gated por OAuth/whitelist, overlay Pixel Streaming iframe/fallback.
-- Responsive: confirmado OK desde `v0.14.6`; revalidado con overlay en
-  `v0.15.0`.
-
----
-
-## 9. Secretos y tokens
-
-No guardar secretos en docs.
-
-Ya existen:
-- GitHub Secrets:
-  - `VITE_CMS_URL = https://honest-candy-800d1e4a92.strapiapp.com`
-  - `VITE_GOOGLE_CLIENT_ID = 644563573486-...apps.googleusercontent.com`
-- Cloudflare zone ID documentado previamente por owner.
-- Google Cloud project: `spartan-grail-401816`.
-- OAuth Client: "Proyecto 28 Web".
-
-Si aparece un token/API key en chat o logs: tratarlo como comprometido y pedir
-revocacion.
-
----
-
-## 10. Reglas de mantencion
-
-- No trabajar directo en `main` salvo docs-only urgente.
-- Branch por etapa o fix.
+- Rama por etapa/fix.
 - Conventional Commits.
-- `npm run build` antes de cerrar.
-- Push a `main` dispara deploy.
-- Validar `https://proyecto28.com` para responsive/hosting.
-- Actualizar `CHANGELOG.md`, `README.md`, `PLAN-PROYECTO28-V2.md`,
-  `HANDOFF-LATEST.md` y docs de deploy/CMS si aplica.
+- `npm run build`.
+- `npm run build` en `cms/` si toca Strapi.
+- Push a `main`.
+- GitHub Pages verde.
+- Strapi Cloud propagado si toca `cms/**`.
+- Smoke test en `https://proyecto28.com`.
+- `CHANGELOG.md`, `README.md`, `PLAN-PROYECTO28-V2.md` y
+  `HANDOFF-LATEST.md` actualizados.
+- Google Doc respaldado como subpestana bajo `Handoff`.
 - Tag semver al cierre.
-- Respaldar handoff en Google Doc como subpestana bajo `Handoff`, nunca como
-  pestana raiz.
 
----
-
-Fin del handoff `v0.15.0`.
+Fin del handoff `v0.16.0`.
