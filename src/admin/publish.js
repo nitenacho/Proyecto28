@@ -68,7 +68,8 @@ export async function publishTweaksSnapshot({ state, baseline }) {
   }
 
   const user = getCurrentUser();
-  if (!user?.idToken) {
+  const bearerToken = user?.idToken || user?.accessToken || '';
+  if (!bearerToken) {
     throw new Error('Inicia sesión con Google antes de publicar.');
   }
 
@@ -78,7 +79,7 @@ export async function publishTweaksSnapshot({ state, baseline }) {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      authorization: `Bearer ${user.idToken}`,
+      authorization: `Bearer ${bearerToken}`,
     },
     body: JSON.stringify({ state: snapshot, diff }),
   });

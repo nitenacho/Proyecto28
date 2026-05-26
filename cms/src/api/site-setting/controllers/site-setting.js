@@ -142,11 +142,29 @@ function diffPatch(current, patch) {
 
 async function verifyGoogleUser(strapi, idToken) {
   if (!idToken) {
-    const err = new Error('Missing Google id_token');
+    const err = new Error('Missing Google token');
     err.status = 401;
     throw err;
   }
 
+  const user = idToken.includes('.')
+    ? await verifyGoogleIdToken(idToken)
+    : await verifyGoogleAccessToken(idToken);
+
+  const record = await strapi.db.query('api::admin-whitelist.admin-whitelist').findOne({
+    where: { email: user.email },
+    select: ['role'],
+  });
+  if (!record) {
+    const err = new Error('Email not allowed');
+    err.status = 403;
+    throw err;
+  }
+
+  return { email: user.email, role: record.role || 'editor' };
+}
+
+async function verifyGoogleIdToken(idToken) {
   const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
   if (!res.ok) {
     const err = new Error('Invalid Google id_token');
@@ -162,17 +180,48 @@ async function verifyGoogleUser(strapi, idToken) {
     throw err;
   }
 
-  const record = await strapi.db.query('api::admin-whitelist.admin-whitelist').findOne({
-    where: { email },
-    select: ['role'],
-  });
-  if (!record) {
-    const err = new Error('Email not allowed');
-    err.status = 403;
+  return { email };
+}
+
+async function verifyGoogleAccessToken(accessToken) {
+  const infoRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`);
+  if (!infoRes.ok) {
+    const err = new Error('Invalid Google access_token');
+    err.status = 401;
     throw err;
   }
 
-  return { email, role: record.role || 'editor' };
+  const tokenInfo = await infoRes.json();
+  const tokenClientId = tokenInfo.aud || tokenInfo.azp || tokenInfo.audience;
+  if (tokenClientId && tokenClientId !== GOOGLE_CLIENT_ID) {
+    const err = new Error('Google access_token rejected');
+    err.status = 401;
+    throw err;
+  }
+  if (tokenInfo.scope && !String(tokenInfo.scope).split(/\s+/).includes('email')) {
+    const err = new Error('Google access_token missing email scope');
+    err.status = 401;
+    throw err;
+  }
+
+  const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { authorization: `Bearer ${accessToken}` },
+  });
+  if (!userRes.ok) {
+    const err = new Error('Google userinfo rejected');
+    err.status = 401;
+    throw err;
+  }
+
+  const profile = await userRes.json();
+  const email = String(profile.email || '').trim().toLowerCase();
+  if (!emailLooksValid(email) || String(profile.email_verified) !== 'true') {
+    const err = new Error('Google profile rejected');
+    err.status = 401;
+    throw err;
+  }
+
+  return { email };
 }
 
 async function sendDiscordWebhook({ user, changed }) {

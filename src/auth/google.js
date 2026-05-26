@@ -13,6 +13,7 @@ const STORAGE_KEY = 'p28-auth';
 let gisLoading = null;
 let clientId = '';
 let initialized = false;
+let tokenClient = null;
 let signInResolvers = [];
 
 function decodeIdToken(idToken) {
@@ -59,6 +60,16 @@ function onCredential(response) {
   resolvers.forEach((r) => r.resolve(user));
 }
 
+async function fetchUserInfo(accessToken) {
+  const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`Google userinfo failed: ${res.status}`);
+  const payload = await res.json();
+  if (!payload?.email) throw new Error('No email in Google userinfo payload');
+  return payload;
+}
+
 /**
  * Inicializa el módulo con el Client ID. Idempotente.
  * @param {{ clientId: string }} opts
@@ -75,6 +86,14 @@ export async function initGoogleAuth({ clientId: cid }) {
     cancel_on_tap_outside: false,
     use_fedcm_for_prompt: true,
   });
+  if (window.google.accounts.oauth2?.initTokenClient) {
+    tokenClient = window.google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: 'openid email profile',
+      prompt: 'select_account',
+      callback: () => {},
+    });
+  }
   initialized = true;
 }
 
@@ -84,7 +103,7 @@ export async function initGoogleAuth({ clientId: cid }) {
  * no soportado), rechaza con un error descriptivo — el caller puede
  * fallback a otro flow.
  */
-export function signIn() {
+function signInWithIdPrompt() {
   if (!clientId) return Promise.reject(new Error('Google auth not initialized'));
   if (!window.google?.accounts?.id) {
     return Promise.reject(new Error('GIS not loaded'));
@@ -106,6 +125,41 @@ export function signIn() {
   });
 }
 
+function signInWithAccessToken() {
+  if (!clientId) return Promise.reject(new Error('Google auth not initialized'));
+  if (!tokenClient) return Promise.reject(new Error('Google OAuth token client not available'));
+
+  return new Promise((resolve, reject) => {
+    tokenClient.callback = async (response) => {
+      if (response?.error) {
+        reject(new Error(response.error_description || response.error));
+        return;
+      }
+      try {
+        const accessToken = response.access_token;
+        const profile = await fetchUserInfo(accessToken);
+        const now = Math.floor(Date.now() / 1000);
+        const user = {
+          email: String(profile.email).toLowerCase(),
+          accessToken,
+          idToken: '',
+          exp: now + Math.max(60, Number(response.expires_in || 3600) - 60),
+        };
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(user)); } catch {}
+        resolve(user);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    tokenClient.requestAccessToken({ prompt: 'select_account' });
+  });
+}
+
+export function signIn() {
+  if (tokenClient) return signInWithAccessToken();
+  return signInWithIdPrompt();
+}
+
 /** Limpia el state local. No revoca el token contra Google. */
 export function signOut() {
   try { localStorage.removeItem(STORAGE_KEY); } catch {}
@@ -125,7 +179,7 @@ export function getCurrentUser() {
   if (!raw) return null;
   let user;
   try { user = JSON.parse(raw); } catch { return null; }
-  if (!user?.email || !user.idToken) return null;
+  if (!user?.email || (!user.idToken && !user.accessToken)) return null;
   const now = Math.floor(Date.now() / 1000);
   if (user.exp && user.exp < now) {
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
