@@ -28,7 +28,7 @@
 | 10 docs — Handoff completo Google Doc | ✅ Cerrada | `v0.14.7` | — |
 | 11 — Pixel Streaming Unreal | ✅ Cerrada | `v0.15.0` | `f5b0c42` |
 | 12 — Pipeline Publicar | ✅ Cerrada | `v0.16.0` | `c0590e4` |
-| 12 hotfix — Publish Google token | ✅ Cerrada | `v0.16.1` | — |
+| 12 hotfix — Publish Google token | ✅ Cerrada | `v0.16.1` | `8465330` |
 | 13 — Sync Claude Design | ⏳ Pendiente | — | — |
 | 14 — GSAP polish | ⏳ Pendiente | — | — |
 | 15 — Performance + a11y | ⏳ Pendiente | — | — |

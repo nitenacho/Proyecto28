@@ -27,6 +27,17 @@ Sin cambios todavía.
 - `npm run build` OK.
 - `npm run build` en `cms/` OK.
 - `cms/src/api/site-setting/controllers/site-setting.js` carga por `require()`.
+- GitHub Pages run `26433985069` OK para `8465330`.
+- `https://proyecto28.com` sirve bundle `assets/index-CSh7zWl1.js` con
+  `/api/publish`, `initTokenClient` y el refresh de token Google.
+- Strapi Cloud `/api/publish` ejecuta la nueva validación: con token falso
+  punteado responde `Invalid Google token (Invalid Google access_token /
+  Invalid Google id_token)`.
+- Whitelist Strapi:
+  - `/api/auth/check?email=inconcha@gmail.com` => `allowed:true`, `role:owner`
+  - `/api/auth/check?email=yk8arts@gmail.com` => `allowed:true`, `role:editor`
+- `Admin whitelist` queda privado por API pública (`403`) y editable desde
+  Strapi Content Manager (`content-manager.visible:true`).
 
 ## [0.16.0] — 2026-05-25 — Etapa 12: Pipeline Publicar Tweaks → Strapi
 

@@ -38,13 +38,15 @@ Estado actual:
 Codigos clave:
 - `e8c3f74 feat(admin): publish tweaks to Strapi`
 - `c0590e4 fix(auth): support explicit Google admin publish flow`
-- `fix(auth): accept publish access tokens` (hash a registrar tras merge)
+- `8465330 fix(auth): accept publish access tokens`
 - GitHub Pages run `26425439630` success para `c0590e4`.
+- GitHub Pages run `26433985069` success para `8465330`.
 
 Nota honesta de validacion:
 - Frontend, backend, schema, CORS, whitelist y Strapi Cloud quedaron
-  verificados en produccion. Para `v0.16.1`, falta solo la confirmacion humana
-  de publish con token Google real despues del deploy.
+  verificados en produccion. Para `v0.16.1`, el backend nuevo se confirmo con
+  token falso punteado; falta solo la confirmacion humana de publish con token
+  Google real desde el navegador del owner.
 - Chrome automatizado no pudo completar el popup OAuth real sin intervencion
   humana. El owner debe hacer un smoke manual: abrir `proyecto28.com`, click
   `Admin`, seleccionar cuenta Google permitida, click `PUBLICAR CAMBIOS` y
@@ -68,16 +70,16 @@ git log --oneline -12
 Esperado:
 - branch `main`
 - working tree clean
-- ultimo tag `v0.16.0`
-- ultimo hotfix esperado `v0.16.1`
-- ultimos commits de codigo: `c0590e4`, `e8c3f74`
+- ultimo tag `v0.16.1`
+- commit hotfix `8465330`
+- ultimos commits de codigo: `8465330`, `c0590e4`, `e8c3f74`
 
 ### Paso 2 - Leer docs (orden)
 
 1. `HANDOFF-LATEST.md` (este archivo).
 2. `CHANGELOG.md` - entradas `[0.16.1]` y `[0.16.0]`.
 3. Google Doc oficial - ultima subpestana bajo `Handoff`:
-   `2026-05-26 00:45 UTC - v0.16.0 etapa 12 publicar`.
+   `2026-05-26 05:45 UTC - v0.16.1 publish token hotfix`.
 4. `PLAN-PROYECTO28-V2.md` - Etapa 13 queda como siguiente bloque.
 5. `DEPLOY.md` y `cms/README.md` si se toca deploy/CMS.
 
@@ -202,11 +204,17 @@ lista de Test users de GCP.
 - Pages run `26425130576` success.
 - Push `c0590e4` a `main` OK.
 - Pages run `26425439630` success.
+- Push `8465330` a `main` OK.
+- Pages run `26433985069` success.
 - `https://proyecto28.com` sirve bundle nuevo con:
   - `PUBLICAR CAMBIOS`
   - `/api/publish`
   - `Preview visible`
   - `initTokenClient`
+- `https://proyecto28.com` sirve bundle hotfix `assets/index-CSh7zWl1.js` con:
+  - refresh de token Google antes de publicar
+  - preferencia por `accessToken`
+  - fallback controlado a `idToken`
 
 ### Produccion Strapi Cloud
 
@@ -223,6 +231,11 @@ lista de Test users de GCP.
   - `Origin: https://proyecto28.com`
   - Resultado `204`
   - `access-control-allow-origin: https://proyecto28.com`
+- Validacion `v0.16.1`:
+  - Token falso `ya29.fake.with.dots` ya no cae como `id_token` por heuristica
+    de puntos.
+  - Respuesta esperada y observada: `Invalid Google token (Invalid Google
+    access_token / Invalid Google id_token)`.
 
 Valores SiteSetting produccion tras cierre:
 - `pixelStreamingPreviewEnabled:false`
@@ -239,12 +252,14 @@ Valores SiteSetting produccion tras cierre:
 
 - Branch: `main`
 - Codigo Etapa 12:
+  - `8465330 fix(auth): accept publish access tokens`
   - `e8c3f74 feat(admin): publish tweaks to Strapi`
   - `c0590e4 fix(auth): support explicit Google admin publish flow`
 - GitHub Pages:
   - `26425130576` success para `e8c3f74`
   - `26425439630` success para `c0590e4`
-- Tag esperado al cierre: `v0.16.0`
+  - `26433985069` success para `8465330`
+- Tag hotfix al cierre: `v0.16.1`
 
 `gh` local no estaba autenticado en esta maquina; los runs se validaron por la
 API publica de GitHub.
@@ -268,6 +283,8 @@ Whitelist verificada por endpoint publico seguro `/api/auth/check`:
 
 `AdminWhitelist` y `PublishLog` siguen privados para anonimos (`403`) y son
 editables desde Strapi Admin por usuarios con permisos de Content Manager.
+El content type `Admin whitelist` tiene `content-manager.visible:true` y campos
+editables `email`, `role`, `note`.
 
 Variables recomendadas en Strapi Cloud:
 - `GOOGLE_CLIENT_ID=644563573486-5pe2jvatetd46oke9ns8gskdt0jgsfi6.apps.googleusercontent.com`
@@ -301,7 +318,7 @@ Etapa 13 - Sync automatizado Claude Design + GitHub.
 
 Antes de codear:
 1. Validar `git status` clean en `main`.
-2. Confirmar `git describe --tags --abbrev=0` => `v0.16.0`.
+2. Confirmar `git describe --tags --abbrev=0` => `v0.16.1`.
 3. Hacer smoke manual de `PUBLICAR CAMBIOS` en `proyecto28.com`.
 4. Confirmar si Claude Design es tokens en repo, paquete npm, repo separado o
    solo nombre interno.
@@ -325,4 +342,4 @@ No mezclar Etapa 13 con el tech debt de `Project.status` salvo que bloquee.
 - Google Doc respaldado como subpestana bajo `Handoff`.
 - Tag semver al cierre.
 
-Fin del handoff `v0.16.0`.
+Fin del handoff `v0.16.1`.
