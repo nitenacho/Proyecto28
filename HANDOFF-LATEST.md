@@ -80,6 +80,7 @@ Esperado:
 2. `CHANGELOG.md` - entradas `[0.16.1]` y `[0.16.0]`.
 3. Google Doc oficial - ultima subpestana bajo `Handoff`:
    `2026-05-26 05:45 UTC v0.16.1 token`.
+   Tab id: `t.9b6slm77ntip` (padre `Handoff`: `t.7lpfc5ado1h`).
 4. `PLAN-PROYECTO28-V2.md` - Etapa 13 queda como siguiente bloque.
 5. `DEPLOY.md` y `cms/README.md` si se toca deploy/CMS.
 
