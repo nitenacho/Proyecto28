@@ -171,7 +171,7 @@ export function signOut() {
 /**
  * Lee user cacheado en localStorage. Si expiró (exp < now), retorna null
  * y limpia el cache. No hace network call.
- * @returns {{email:string, idToken:string, exp:number}|null}
+ * @returns {{email:string, idToken?:string, accessToken?:string, exp:number}|null}
  */
 export function getCurrentUser() {
   let raw;

@@ -1,4 +1,4 @@
-import { getCurrentUser } from '../auth/google.js';
+import { getCurrentUser, signIn } from '../auth/google.js';
 
 const CMS_URL = (import.meta.env.VITE_CMS_URL || '').replace(/\/$/, '');
 
@@ -62,16 +62,36 @@ function errorMessageFromResponse(status, payload) {
   );
 }
 
+async function getPublishBearerToken() {
+  let user = getCurrentUser();
+  if (user?.accessToken) return user.accessToken;
+
+  // v0.16.1: sesiones antiguas podían tener sólo idToken cacheado. Para
+  // publicar, preferimos renovar con el flujo OAuth explícito y mandar accessToken.
+  if (!user?.idToken) {
+    user = await signIn();
+    const token = user?.accessToken || user?.idToken || '';
+    if (token) return token;
+    throw new Error('Inicia sesión con Google antes de publicar.');
+  }
+
+  try {
+    const refreshed = await signIn();
+    const token = refreshed?.accessToken || refreshed?.idToken || '';
+    if (token) return token;
+  } catch (err) {
+    console.warn('[p28 publish] could not refresh Google token:', err.message);
+  }
+
+  return user.idToken;
+}
+
 export async function publishTweaksSnapshot({ state, baseline }) {
   if (!CMS_URL) {
     throw new Error('CMS no configurado: falta VITE_CMS_URL.');
   }
 
-  const user = getCurrentUser();
-  const bearerToken = user?.idToken || user?.accessToken || '';
-  if (!bearerToken) {
-    throw new Error('Inicia sesión con Google antes de publicar.');
-  }
+  const bearerToken = await getPublishBearerToken();
 
   const snapshot = pickPublishable(state);
   const diff = diffStates(snapshot, baseline);

@@ -1,14 +1,15 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-05-25 (cierre Etapa 12 - `v0.16.0`)
-> **Tag activo:** `v0.16.0`
+> **Ultima actualizacion:** 2026-05-26 (hotfix publish Google token - `v0.16.1`)
+> **Tag activo:** `v0.16.1`
 > **Branch:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 
 > Etapas 1-12 cerradas. Etapa 12 deja operativo el primer pipeline
 > `Tweaks -> Strapi SiteSetting`, con auth Google + whitelist, audit log y
-> webhook Discord opcional.
+> webhook Discord opcional. `v0.16.1` corrige el publish real cuando Google
+> entrega `accessToken`/`idToken` en flujos distintos.
 
 ---
 
@@ -27,6 +28,9 @@ Estado actual:
 - Etapa 12 cerrada en `v0.16.0`: boton `PUBLICAR CAMBIOS` en Tweaks, endpoint
   `POST /api/publish`, validacion Google + whitelist, persistencia en
   SiteSetting y `PublishLog`.
+- Hotfix `v0.16.1`: corrige el error `Invalid Google id_token` reportado al
+  apretar `PUBLICAR CAMBIOS`. El frontend ahora prefiere `accessToken` y Strapi
+  valida `id_token`/`access_token` sin heuristica `includes('.')`.
 - Produccion mantiene `pixelStreamingPreviewEnabled:false` y
   `pixelStreamingEnabled:false`; no se muestra preview/stream hasta que el
   owner lo active.
@@ -34,11 +38,13 @@ Estado actual:
 Codigos clave:
 - `e8c3f74 feat(admin): publish tweaks to Strapi`
 - `c0590e4 fix(auth): support explicit Google admin publish flow`
+- `fix(auth): accept publish access tokens` (hash a registrar tras merge)
 - GitHub Pages run `26425439630` success para `c0590e4`.
 
 Nota honesta de validacion:
 - Frontend, backend, schema, CORS, whitelist y Strapi Cloud quedaron
-  verificados en produccion.
+  verificados en produccion. Para `v0.16.1`, falta solo la confirmacion humana
+  de publish con token Google real despues del deploy.
 - Chrome automatizado no pudo completar el popup OAuth real sin intervencion
   humana. El owner debe hacer un smoke manual: abrir `proyecto28.com`, click
   `Admin`, seleccionar cuenta Google permitida, click `PUBLICAR CAMBIOS` y
@@ -63,12 +69,13 @@ Esperado:
 - branch `main`
 - working tree clean
 - ultimo tag `v0.16.0`
+- ultimo hotfix esperado `v0.16.1`
 - ultimos commits de codigo: `c0590e4`, `e8c3f74`
 
 ### Paso 2 - Leer docs (orden)
 
 1. `HANDOFF-LATEST.md` (este archivo).
-2. `CHANGELOG.md` - entrada `[0.16.0]`.
+2. `CHANGELOG.md` - entradas `[0.16.1]` y `[0.16.0]`.
 3. Google Doc oficial - ultima subpestana bajo `Handoff`:
    `2026-05-26 00:45 UTC - v0.16.0 etapa 12 publicar`.
 4. `PLAN-PROYECTO28-V2.md` - Etapa 13 queda como siguiente bloque.
@@ -98,6 +105,11 @@ En `https://proyecto28.com`:
 5. Dejar `Streaming > Preview visible` apagado si no se quiere mostrar fallback.
 6. Click `PUBLICAR CAMBIOS`.
 7. Esperado: feedback verde y cambios persistidos en Strapi.
+
+Si aparece `Invalid Google id_token`, recargar `proyecto28.com` para tomar el
+bundle `v0.16.1` y repetir el flujo Google. El bug conocido era que el frontend
+podía mandar un token legacy y el backend lo clasificaba con una heuristica
+de puntos; ambas rutas quedaron corregidas.
 
 Si el consent screen Google sigue en modo Testing, los correos deben estar
 tambien como Test users en Google Cloud Console. Esta sesion verifico la

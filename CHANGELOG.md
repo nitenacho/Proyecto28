@@ -12,6 +12,22 @@ o a un fix puntual entre etapas.
 
 Sin cambios todavía.
 
+## [0.16.1] — 2026-05-26 — Hotfix: publish Google token
+
+### Fixed
+- `PUBLICAR CAMBIOS` ya no prioriza un `idToken` legacy cuando existe o puede
+  renovarse un `accessToken` del flujo OAuth explícito.
+- Strapi `/api/publish` ya no decide el tipo de token con `includes('.')`;
+  detecta JWT real por header base64url y prueba `id_token`/`access_token` en
+  orden seguro antes de rechazar.
+- Corrige el error reportado en producción por el owner:
+  `Invalid Google id_token` al publicar desde Tweaks.
+
+### Verified
+- `npm run build` OK.
+- `npm run build` en `cms/` OK.
+- `cms/src/api/site-setting/controllers/site-setting.js` carga por `require()`.
+
 ## [0.16.0] — 2026-05-25 — Etapa 12: Pipeline Publicar Tweaks → Strapi
 
 ### Added

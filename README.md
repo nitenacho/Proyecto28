@@ -131,6 +131,7 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 10 docs — Handoff completo Google Doc | ✅ Cerrado | `v0.14.7` |
 | 11 — Pixel Streaming Unreal | ✅ Cerrado — overlay iframe/fallback | `v0.15.0` |
 | 12 — Pipeline Publicar | ✅ Cerrado — Tweaks → Strapi + audit log | `v0.16.0` |
+| 12 hotfix — Publish Google token | ✅ Cerrado — accessToken/idToken robusto | `v0.16.1` |
 | 13 — Sync Claude Design | ⏳ Pendiente | — |
 | 14 — GSAP polish | ⏳ Pendiente | — |
 | 15 — Performance + a11y | ⏳ Pendiente | — |

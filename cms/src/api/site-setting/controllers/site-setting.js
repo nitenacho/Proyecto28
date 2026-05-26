@@ -140,16 +140,50 @@ function diffPatch(current, patch) {
   return changed;
 }
 
-async function verifyGoogleUser(strapi, idToken) {
-  if (!idToken) {
+function decodeBase64UrlJSON(value) {
+  try {
+    const padded = `${value}${'='.repeat((4 - (value.length % 4)) % 4)}`;
+    return JSON.parse(Buffer.from(padded.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function isLikelyJWT(token) {
+  const parts = String(token || '').split('.');
+  if (parts.length !== 3) return false;
+  const header = decodeBase64UrlJSON(parts[0]);
+  return !!header?.alg;
+}
+
+async function verifyGoogleToken(rawToken) {
+  const token = String(rawToken || '').trim();
+  if (!token) {
     const err = new Error('Missing Google token');
     err.status = 401;
     throw err;
   }
 
-  const user = idToken.includes('.')
-    ? await verifyGoogleIdToken(idToken)
-    : await verifyGoogleAccessToken(idToken);
+  const verifiers = isLikelyJWT(token)
+    ? [verifyGoogleIdToken, verifyGoogleAccessToken]
+    : [verifyGoogleAccessToken, verifyGoogleIdToken];
+
+  const failures = [];
+  for (const verify of verifiers) {
+    try {
+      return await verify(token);
+    } catch (err) {
+      failures.push(err.message);
+    }
+  }
+
+  const err = new Error(`Invalid Google token (${failures.join(' / ')})`);
+  err.status = 401;
+  throw err;
+}
+
+async function verifyGoogleUser(strapi, rawToken) {
+  const user = await verifyGoogleToken(rawToken);
 
   const record = await strapi.db.query('api::admin-whitelist.admin-whitelist').findOne({
     where: { email: user.email },

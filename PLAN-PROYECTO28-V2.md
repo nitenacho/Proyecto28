@@ -1,12 +1,12 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-05-25 — `v0.16.0` Etapa 12
+> **Última actualización operativa:** 2026-05-26 — `v0.16.1` hotfix publish Google token
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-12 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Etapa 12 cerrada en `v0.16.0` con pipeline Tweaks → Strapi + audit log.
+> **Status:** En ejecución — etapas 1-12 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Etapa 12 cerrada en `v0.16.0` con pipeline Tweaks → Strapi + audit log; hotfix `v0.16.1` corrige publish con token Google.
 
-## Estado del plan al 2026-05-25 America/Santiago
+## Estado del plan al 2026-05-26 America/Santiago
 
 | Etapa | Estado | Tag | Commit |
 |---|---|---|---|
@@ -28,6 +28,7 @@
 | 10 docs — Handoff completo Google Doc | ✅ Cerrada | `v0.14.7` | — |
 | 11 — Pixel Streaming Unreal | ✅ Cerrada | `v0.15.0` | `f5b0c42` |
 | 12 — Pipeline Publicar | ✅ Cerrada | `v0.16.0` | `c0590e4` |
+| 12 hotfix — Publish Google token | ✅ Cerrada | `v0.16.1` | — |
 | 13 — Sync Claude Design | ⏳ Pendiente | — | — |
 | 14 — GSAP polish | ⏳ Pendiente | — | — |
 | 15 — Performance + a11y | ⏳ Pendiente | — | — |
