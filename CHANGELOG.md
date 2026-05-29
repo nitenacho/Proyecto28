@@ -12,6 +12,13 @@ o a un fix puntual entre etapas.
 
 Sin cambios todavía.
 
+## [0.17.1] — 2026-05-29 — Hotfix CI: release asset en auto-tag
+
+### Fixed
+- `auto-tag.yml` ahora genera el paquete `claude-design-export.zip` y lo adjunta
+  a la GitHub Release que crea junto al tag automático. Esto evita depender de
+  un segundo workflow disparado por el tag creado con `GITHUB_TOKEN`.
+
 ## [0.17.0] — 2026-05-29 — Etapa 13: Sync Claude Design + GitHub
 
 ### Added

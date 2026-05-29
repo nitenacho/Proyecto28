@@ -19,6 +19,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Compute next semver
         id: semver
         env:
@@ -74,3 +78,20 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "$TAG" -m "$TAG - automated Proyecto28 release"
           git push origin "$TAG"
+
+      - name: Attach Claude Design export to release
+        if: steps.semver.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REF_NAME: ${{ steps.semver.outputs.tag }}
+          TAG: ${{ steps.semver.outputs.tag }}
+        run: |
+          node scripts/export-claude-design.mjs
+          zip -r claude-design-export.zip claude-design-export
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" claude-design-export.zip --clobber
+          else
+            gh release create "$TAG" claude-design-export.zip \
+              --title "$TAG" \
+              --notes "Proyecto28 automated release with Claude Design token export."
+          fi
