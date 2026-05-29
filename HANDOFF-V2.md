@@ -1,8 +1,8 @@
 # HANDOFF V2 - Proyecto 28
 
-> Ultima actualizacion: 2026-05-29 (cierre Etapa 16 - `v0.20.0`)
+> Ultima actualizacion: 2026-05-29 (fix hover estable + URLs - `v0.20.1`)
 > Branch esperado: `main`
-> Tag activo esperado tras cierre: `v0.20.0`
+> Tag activo esperado tras cierre: `v0.20.1`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
 
@@ -22,10 +22,11 @@ Etapas 1-16 cerradas. Proyecto28 queda como web 3D interactiva con:
 - Pixel Streaming iframe/fallback sobre cubos, con preview controlable.
 - Sync Claude Design y release assets en GitHub.
 - Performance/a11y hardening y documentacion final.
+- Fix anti-parpadeo de hover en bordes de cubos y `ADMIN-URLS.md`.
 
-Ultimo codigo funcional antes de documentacion final:
+Ultimo codigo funcional:
 
-- `v0.19.0` - Etapa 15 performance/a11y.
+- `v0.20.1` - hover estable en bordes + URLs operativas.
 
 Cierre documental final:
 
@@ -49,10 +50,17 @@ Esperado:
 
 - branch `main`
 - working tree clean
-- tag `v0.20.0`
+- tag `v0.20.1`
 - build Vite OK
 
-Validacion local previa al cierre:
+Validacion local previa al cierre `v0.20.1`:
+
+- `npm run build` OK.
+- `vite preview` + Chrome headless/CDP: popup visible sobre tile, se mantiene
+  a `80ms` tras salir del tile y queda oculto luego de `400ms`.
+- Strapi/auth check: `inconcha@gmail.com` owner, `yk8arts@gmail.com` editor.
+
+Validacion de cierre `v0.20.0`:
 
 - `npm run build` OK.
 - `node scripts/export-claude-design.mjs` OK (`96` tokens).
@@ -86,13 +94,15 @@ Esperado:
 - inconcha owner permitido
 - yk8arts editor permitido
 
-Estos checks fueron verificados antes de pushear el cierre `v0.20.0`.
+Estos checks fueron verificados antes de pushear el cierre `v0.20.1`.
 
 ---
 
 ## 4. Archivos fuente de verdad
 
 - `README.md` - vision general, dev local, contenido, etapas.
+- `ADMIN-URLS.md` - URLs para administrar sitio, CMS, GitHub, Google, DNS y
+  Pixel Streaming.
 - `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
 - `DEPLOY.md` - GitHub Pages, Strapi Cloud, OAuth, streaming, releases.
 - `PLAN-PROYECTO28-V2.md` - plan completo y estado de etapas.
@@ -156,14 +166,17 @@ El respaldo final debe quedar como subpestana bajo `Handoff` en:
 
 https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/edit
 
-Titulo recomendado:
+Titulo creado:
 
 ```text
-2026-05-29 19:00 UTC - v0.20.0 documentacion-final
+2026-05-29 21:30 UTC - v0.20.1 hover-estable-urls
 ```
 
-Tab id creado y verificado en el cierre: `t.yau0g6g371sa` bajo padre
-`Handoff` (`t.7lpfc5ado1h`).
+Tab id creado y verificado: `t.rox2yd4prf1o` bajo padre `Handoff`
+(`t.7lpfc5ado1h`).
+
+Respaldo anterior: `2026-05-29 19:00 UTC - v0.20.0 documentacion-final`, tab id
+`t.yau0g6g371sa` bajo padre `Handoff` (`t.7lpfc5ado1h`).
 
 Regla absoluta: nunca crear cierres como pestanas raiz junto a `MISION`,
 `Aprender` o `Handoff`.

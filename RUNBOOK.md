@@ -9,6 +9,8 @@ Este runbook es la guia de operacion diaria y respuesta a incidentes de
 Proyecto 28. Debe leerse junto a `README.md`, `DEPLOY.md`, `VERSIONING.md` y
 `HANDOFF-LATEST.md`.
 
+URLs de consola y administracion rapida: `ADMIN-URLS.md`.
+
 ---
 
 ## 1. Smoke test rapido

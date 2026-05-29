@@ -350,12 +350,80 @@ async function boot() {
   const pointerPx = { x: 0, y: 0 };
   let hovered = null;
   let keyboardHovered = null;
+  let pointerInsideViewport = false;
+  let lastPointerHitAt = -Infinity;
+  let hoverCandidate = null;
+  let hoverCandidateSince = 0;
+
+  const HOVER_EXIT_GRACE_MS = 180;
+  const HOVER_SWITCH_GRACE_MS = 90;
+
+  function clearHoverCandidate() {
+    hoverCandidate = null;
+    hoverCandidateSince = 0;
+  }
 
   function setPointerFromEvent(e) {
+    pointerInsideViewport = true;
     pointerPx.x = e.clientX;
     pointerPx.y = e.clientY;
     pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
     pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  }
+
+  function applyHoverTarget(nextHover, { force = false, immediateHide = false } = {}) {
+    if (!force && nextHover === hovered) return;
+    hovered = nextHover;
+    if (hovered && hovered.userData.isProject) {
+      popup.show(hovered.userData.project);
+      sceneCtx.hoverModel.setHovered(hovered, hovered.userData.project);
+      canvas.style.cursor = 'pointer';
+    } else {
+      canvas.style.cursor = 'default';
+      sceneCtx.hoverModel.setHovered(null, null);
+      if (immediateHide) popup.hideNow();
+      else popup.scheduleHide();
+    }
+  }
+
+  function resolveHoverTarget(pointerHit, nowMs) {
+    if (keyboardHovered) {
+      clearHoverCandidate();
+      return keyboardHovered;
+    }
+
+    const projectHit = pointerHit?.userData?.isProject ? pointerHit : null;
+    if (!pointerInsideViewport) {
+      clearHoverCandidate();
+      return null;
+    }
+
+    if (projectHit) {
+      lastPointerHitAt = nowMs;
+      if (!hovered || projectHit === hovered) {
+        clearHoverCandidate();
+        return projectHit;
+      }
+
+      if (hoverCandidate !== projectHit) {
+        hoverCandidate = projectHit;
+        hoverCandidateSince = nowMs;
+        return hovered;
+      }
+
+      if (nowMs - hoverCandidateSince >= HOVER_SWITCH_GRACE_MS) {
+        clearHoverCandidate();
+        return projectHit;
+      }
+
+      return hovered;
+    }
+
+    clearHoverCandidate();
+    if (hovered?.userData?.isProject && nowMs - lastPointerHitAt < HOVER_EXIT_GRACE_MS) {
+      return hovered;
+    }
+    return null;
   }
 
   window.addEventListener('pointermove', (e) => {
@@ -391,7 +459,9 @@ async function boot() {
       // Tap fuera de un cubo en mobile cierra el popup.
       if (downXY.type === 'touch') {
         keyboardHovered = null;
-        popup.hideNow();
+        lastPointerHitAt = -Infinity;
+        clearHoverCandidate();
+        applyHoverTarget(null, { force: true, immediateHide: true });
       }
       return;
     }
@@ -403,9 +473,9 @@ async function boot() {
         lastTap = { tileId: null, t: 0 };
       } else {
         // Primer tap: muestra popup como hover.
-        popup.show(tile.userData.project);
-        sceneCtx.hoverModel.setHovered(tile, tile.userData.project);
-        hovered = tile;
+        lastPointerHitAt = now;
+        clearHoverCandidate();
+        applyHoverTarget(tile, { force: true });
         lastTap = { tileId: tile.id, t: now };
       }
     } else {
@@ -414,7 +484,13 @@ async function boot() {
     }
   });
 
-  window.addEventListener('pointerleave', () => { pointer.x = pointer.y = -10; });
+  window.addEventListener('pointerleave', () => {
+    pointerInsideViewport = false;
+    lastPointerHitAt = -Infinity;
+    clearHoverCandidate();
+    pointer.x = pointer.y = -10;
+    applyHoverTarget(null);
+  });
 
   window.addEventListener('keydown', controlLight.onKeyDown);
   window.addEventListener('keyup', controlLight.onKeyUp);
@@ -439,10 +515,8 @@ async function boot() {
   function focusTileForKeyboard(tile, focusPopup = false) {
     if (!tile?.userData?.isProject) return;
     keyboardHovered = tile;
-    const project = tile.userData.project;
-    popup.show(project);
-    sceneCtx.hoverModel.setHovered(tile, project);
-    canvas.style.cursor = 'pointer';
+    clearHoverCandidate();
+    applyHoverTarget(tile, { force: true });
     if (focusPopup) popup.focus();
   }
 
@@ -458,9 +532,8 @@ async function boot() {
     },
     onClear() {
       keyboardHovered = null;
-      popup.hideNow();
-      sceneCtx.hoverModel.setHovered(null, null);
-      canvas.style.cursor = 'default';
+      clearHoverCandidate();
+      applyHoverTarget(null, { immediateHide: true });
     },
   });
 
@@ -471,7 +544,8 @@ async function boot() {
       return;
     }
     keyboardHovered = null;
-    popup.hideNow();
+    clearHoverCandidate();
+    applyHoverTarget(null, { immediateHide: true });
   });
 
   function navigateTo(project) {
@@ -504,20 +578,8 @@ async function boot() {
     controlLight.update(dt, now, raycaster);
     const hits = raycaster.intersectObjects(sceneCtx.tiles, false);
     const pointerHit = hits.length ? hits[0].object : null;
-    const hit = keyboardHovered || pointerHit;
-
-    if (hit !== hovered) {
-      hovered = hit;
-      if (hit && hit.userData.isProject) {
-        popup.show(hit.userData.project);
-        sceneCtx.hoverModel.setHovered(hit, hit.userData.project);
-        canvas.style.cursor = 'pointer';
-      } else {
-        canvas.style.cursor = 'default';
-        sceneCtx.hoverModel.setHovered(null, null);
-        popup.scheduleHide();
-      }
-    }
+    const hit = resolveHoverTarget(pointerHit, now);
+    applyHoverTarget(hit);
 
     for (const tile of sceneCtx.tiles) {
       const ud = tile.userData;

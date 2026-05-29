@@ -12,6 +12,47 @@ o a un fix puntual entre etapas.
 
 Sin cambios todavía.
 
+## [0.20.1] — 2026-05-29 — Fix hover estable + URLs operativas
+
+### Added
+- `ADMIN-URLS.md` con URLs de administracion para sitio publico, Strapi Cloud,
+  GitHub, Google Cloud/OAuth, Google Doc, Cloudflare/NIC, Pixel Streaming y
+  desarrollo local.
+- Referencias a `ADMIN-URLS.md` en `README.md` y `RUNBOOK.md`.
+
+### Fixed
+- `src/main.js` agrega histeresis de hover para evitar la batalla entre
+  popup/modelo 3D visible y estado vacio cuando el mouse queda justo en la
+  orilla de un cubo.
+- El hover ahora conserva el ultimo cubo activo durante una ventana breve si
+  el raycast pierde el tile por uno o pocos frames, y exige estabilidad antes
+  de cambiar a otro cubo. Esto evita parpadeos sin dejar el cursor pegado.
+- Cierre inmediato de hover por teclado/Escape mantiene el comportamiento
+  accesible previo.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB, ya aislado.
+- `vite preview` + Chrome headless/CDP:
+  - detecto hover en `Atlas Móvil`.
+  - popup visible sobre tile.
+  - tras salir del tile, popup sigue visible a `80ms` y queda oculto luego
+    de `400ms`, validando el grace period anti-parpadeo.
+  - viewport local `html/body/canvas = innerWidth = 1440`.
+- Produccion/Strapi:
+  - `https://proyecto28.com` => `200`
+  - `https://proyecto28.com/robots.txt` => `200`
+  - `https://proyecto28.com/sitemap.xml` => `200`
+  - `/api/projects?populate=*` => `200`
+  - `/api/site-setting` => `200`
+  - `/api/admin-whitelists` => `403`
+  - `/api/auth/check?email=inconcha@gmail.com` =>
+    `{ allowed:true, role:"owner" }`
+  - `/api/auth/check?email=yk8arts@gmail.com` =>
+    `{ allowed:true, role:"editor" }`
+- Google Doc respaldado como subpestana bajo `Handoff`:
+  `2026-05-29 21:30 UTC - v0.20.1 hover-estable-urls`
+  (`t.rox2yd4prf1o`).
+
 ## [0.20.0] — 2026-05-29 — Etapa 16: Documentación final + runbook
 
 ### Added

@@ -11,6 +11,7 @@ proyecto28/
 ├── cms/                Strapi v5 — content types + bootstrap
 ├── docs/               Diagrama de arquitectura + guion/demo release
 ├── .github/workflows/  CI: build + deploy a GitHub Pages
+├── ADMIN-URLS.md       URLs para administrar sitio, CMS, GitHub, Google y DNS
 ├── RUNBOOK.md          Operacion, incidentes, rollback y rotacion
 └── DEPLOY.md           Pasos para .com / .cl + Strapi Cloud
 ```
@@ -114,6 +115,8 @@ Ver [`DEPLOY.md`](DEPLOY.md), [`RUNBOOK.md`](RUNBOOK.md) y
 
 - [`RUNBOOK.md`](RUNBOOK.md) — smoke tests, incidentes, OAuth, Strapi,
   Pixel Streaming, secretos y rollback.
+- [`ADMIN-URLS.md`](ADMIN-URLS.md) — URLs de administracion para sitio, CMS,
+  GitHub, Google, DNS y Pixel Streaming.
 - [`DEPLOY.md`](DEPLOY.md) — GitHub Pages, Strapi Cloud, OAuth, subdominio
   `stream`, release assets y dominios.
 - [`HANDOFF-LATEST.md`](HANDOFF-LATEST.md) — continuidad vigente.
