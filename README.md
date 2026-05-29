@@ -9,7 +9,9 @@ proyecto28/
 ├── src/                Frontend Vite + Three.js (raíz del sitio)
 ├── public/CNAME        Dominio principal (proyecto28.com)
 ├── cms/                Strapi v5 — content types + bootstrap
+├── docs/               Diagrama de arquitectura + guion/demo release
 ├── .github/workflows/  CI: build + deploy a GitHub Pages
+├── RUNBOOK.md          Operacion, incidentes, rollback y rotacion
 └── DEPLOY.md           Pasos para .com / .cl + Strapi Cloud
 ```
 
@@ -103,8 +105,23 @@ Medición de cierre sobre `vite preview`:
 - Frontend → GitHub Pages (custom domains `proyecto28.com` + `proyecto28.cl`)
 - CMS → Strapi Cloud (`cms/` como base directory)
 - Build automático en cada push a `main`
+- Pixel Streaming → infraestructura GPU externa, referenciada desde Strapi
 
-Ver [`DEPLOY.md`](DEPLOY.md) y [`cms/README.md`](cms/README.md) para el detalle.
+Ver [`DEPLOY.md`](DEPLOY.md), [`RUNBOOK.md`](RUNBOOK.md) y
+[`cms/README.md`](cms/README.md) para el detalle.
+
+## Documentación operativa
+
+- [`RUNBOOK.md`](RUNBOOK.md) — smoke tests, incidentes, OAuth, Strapi,
+  Pixel Streaming, secretos y rollback.
+- [`DEPLOY.md`](DEPLOY.md) — GitHub Pages, Strapi Cloud, OAuth, subdominio
+  `stream`, release assets y dominios.
+- [`HANDOFF-LATEST.md`](HANDOFF-LATEST.md) — continuidad vigente.
+- [`HANDOFF-V2.md`](HANDOFF-V2.md) — handoff final compacto para nuevos agentes.
+- [`docs/architecture.png`](docs/architecture.png) — diagrama de arquitectura.
+- [`docs/demo-script.md`](docs/demo-script.md) — guion de video/release demo.
+- [`docs/proyecto28-demo.webm`](docs/proyecto28-demo.webm) — captura tecnica
+  reproducible del canvas WebGL.
 
 ## Editar contenido
 
@@ -125,6 +142,21 @@ El usuario final puede sobreescribir todos los ajustes en tiempo real desde
 el panel "Tweaks". Los admins autorizados por Google + whitelist pueden usar
 `PUBLICAR CAMBIOS` para persistir el snapshot en Strapi `SiteSetting`; si no
 publican, los cambios viven sólo en su sesión.
+
+## Agregar un proyecto nuevo
+
+1. En Strapi, crear o duplicar un registro en **Project**.
+2. Completar `slot`, `projectId`, `title`, `status`, `description`, `tags`,
+   `redirectURL`, imagen del popup y/o modelo `.glb`.
+3. Si usa Unreal, completar `unrealEnabled`, `unrealStreamURL` y
+   `unrealLevelName`.
+4. Publicar el registro.
+5. Si el stream usa instancia compartida, preparar en Unreal el Level/SubLevel
+   que coincida con `unrealLevelName`.
+6. Probar en `https://proyecto28.com` y en mobile que no aparezca overflow
+   horizontal.
+
+El procedimiento detallado vive en [`RUNBOOK.md`](RUNBOOK.md#3-agregar-un-proyecto-nuevo).
 
 ## Cómo contribuir
 
@@ -187,4 +219,4 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 13 hotfix — Release asset auto-tag | ✅ Cerrado — export zip en GitHub Release | `v0.17.1` |
 | 14 — GSAP polish | ✅ Cerrado — timelines + polish premium | `v0.18.0` |
 | 15 — Performance + a11y | ✅ Cerrado — Lighthouse + responsive + teclado | `v0.19.0` |
-| 16 — Documentación final | ⏳ Pendiente | — |
+| 16 — Documentación final | ✅ Cerrado — runbook + handoff V2 + assets | `v0.20.0` |

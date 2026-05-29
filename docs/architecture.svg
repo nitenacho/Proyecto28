@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">Proyecto 28 architecture</title>
+  <desc id="desc">Architecture diagram for Proyecto 28: users enter proyecto28.com, GitHub Pages serves the Vite Three.js frontend, Strapi owns content and settings, Google OAuth protects admin publishing, and Pixel Streaming is hosted on separate GPU infrastructure.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#061b1c"/>
+      <stop offset="0.52" stop-color="#102b2d"/>
+      <stop offset="1" stop-color="#251c13"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#000" flood-opacity="0.28"/>
+    </filter>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="11" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,5 L0,10 Z" fill="#8ee6dc"/>
+    </marker>
+    <style>
+      .title { font: 700 36px Arial, sans-serif; fill: #f2f7f5; }
+      .sub { font: 400 18px Arial, sans-serif; fill: #b9cfca; }
+      .box { fill: #f7fbf8; stroke: #8ee6dc; stroke-width: 3; rx: 16; filter: url(#shadow); }
+      .box2 { fill: #fff8ed; stroke: #d89a52; stroke-width: 3; rx: 16; filter: url(#shadow); }
+      .box3 { fill: #edf5ff; stroke: #84aef5; stroke-width: 3; rx: 16; filter: url(#shadow); }
+      .box4 { fill: #f5f0ff; stroke: #b59cff; stroke-width: 3; rx: 16; filter: url(#shadow); }
+      .h { font: 700 22px Arial, sans-serif; fill: #0f2426; }
+      .p { font: 400 16px Arial, sans-serif; fill: #253235; }
+      .small { font: 400 13px Arial, sans-serif; fill: #405052; }
+      .line { stroke: #8ee6dc; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .line2 { stroke: #d89a52; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .tag { font: 700 13px Arial, sans-serif; fill: #e9fbf8; }
+      .tagbox { fill: #18484a; stroke: #8ee6dc; stroke-width: 1; rx: 8; }
+    </style>
+  </defs>
+  <rect width="1400" height="900" fill="url(#bg)"/>
+  <text class="title" x="60" y="74">Proyecto 28 - arquitectura operativa</text>
+  <text class="sub" x="60" y="105">GitHub Pages + Vite/Three.js + Strapi Cloud + Google OAuth + Pixel Streaming externo</text>
+
+  <rect class="box" x="70" y="180" width="260" height="160"/>
+  <text class="h" x="100" y="225">Usuarios</text>
+  <text class="p" x="100" y="260">Desktop, iPhone, iPad</text>
+  <text class="p" x="100" y="287">Teclado, mouse, touch</text>
+  <text class="small" x="100" y="318">Dominio canonico: proyecto28.com</text>
+
+  <rect class="box3" x="455" y="150" width="360" height="220"/>
+  <text class="h" x="490" y="195">Frontend estatico</text>
+  <text class="p" x="490" y="230">GitHub Pages sirve Vite</text>
+  <text class="p" x="490" y="257">Three.js grid + luz controlable</text>
+  <text class="p" x="490" y="284">GSAP polish + a11y DOM mirror</text>
+  <text class="p" x="490" y="311">Lazy Pixel Streaming overlay</text>
+  <text class="small" x="490" y="340">Build: .github/workflows/deploy.yml</text>
+
+  <rect class="box2" x="1000" y="150" width="320" height="220"/>
+  <text class="h" x="1035" y="195">Strapi Cloud</text>
+  <text class="p" x="1035" y="230">Projects + SiteSetting</text>
+  <text class="p" x="1035" y="257">Admin Whitelist privada</text>
+  <text class="p" x="1035" y="284">Publish logs</text>
+  <text class="small" x="1035" y="317">Public read: projects/site-setting</text>
+  <text class="small" x="1035" y="340">Private: admin-whitelists</text>
+
+  <rect class="box4" x="455" y="520" width="360" height="170"/>
+  <text class="h" x="490" y="565">Admin / Tweaks</text>
+  <text class="p" x="490" y="600">Google OAuth + whitelist</text>
+  <text class="p" x="490" y="627">PUBLICAR CAMBIOS</text>
+  <text class="small" x="490" y="657">Persiste SiteSetting via /api/publish</text>
+
+  <rect class="box2" x="1000" y="520" width="320" height="170"/>
+  <text class="h" x="1035" y="565">Pixel Streaming GPU</text>
+  <text class="p" x="1035" y="600">Unreal packaged app</text>
+  <text class="p" x="1035" y="627">Epic Signaling Server</text>
+  <text class="small" x="1035" y="657">Subdominio sugerido: stream.proyecto28.com</text>
+
+  <rect class="tagbox" x="85" y="780" width="180" height="38"/>
+  <text class="tag" x="108" y="804">Fallback CMS estatico</text>
+  <rect class="tagbox" x="292" y="780" width="190" height="38"/>
+  <text class="tag" x="315" y="804">Preview streaming OFF/ON</text>
+  <rect class="tagbox" x="512" y="780" width="160" height="38"/>
+  <text class="tag" x="535" y="804">OAuth test users</text>
+  <rect class="tagbox" x="700" y="780" width="185" height="38"/>
+  <text class="tag" x="723" y="804">Release assets en tag</text>
+
+  <path class="line" d="M330 260 C380 260 400 260 455 260"/>
+  <path class="line" d="M815 240 C900 220 920 220 1000 230"/>
+  <path class="line" d="M1000 295 C920 318 900 325 815 320"/>
+  <path class="line2" d="M635 370 L635 520"/>
+  <path class="line2" d="M815 605 C900 605 920 605 1000 605"/>
+  <path class="line2" d="M1000 560 C910 500 875 415 815 325"/>
+  <path class="line" d="M635 150 C635 132 735 132 870 132 C1040 132 1160 135 1160 150"/>
+
+  <text class="small" x="360" y="246">HTML/CSS/JS</text>
+  <text class="small" x="855" y="212">fetch REST</text>
+  <text class="small" x="845" y="342">contenido + ajustes</text>
+  <text class="small" x="648" y="450">Admin button</text>
+  <text class="small" x="858" y="590">Bearer Google token</text>
+  <text class="small" x="872" y="502">unrealStreamURL + postMessage</text>
+  <text class="small" x="748" y="125">GitHub Actions deploy</text>
+</svg>

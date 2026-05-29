@@ -52,3 +52,11 @@ jobs:
               --title "${GITHUB_REF_NAME}" \
               --notes "Proyecto28 Claude Design token export for ${GITHUB_REF_NAME}."
           fi
+
+          assets=()
+          [ -f docs/architecture.png ] && assets+=(docs/architecture.png)
+          [ -f docs/proyecto28-demo.webm ] && assets+=(docs/proyecto28-demo.webm)
+
+          if [ "${#assets[@]}" -gt 0 ]; then
+            gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber
+          fi

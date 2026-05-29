@@ -10,7 +10,10 @@ on:
       - 'CHANGELOG.md'
       - 'VERSIONING.md'
       - 'HANDOFF-LATEST.md'
+      - 'HANDOFF-V2.md'
       - 'PLAN-PROYECTO28-V2.md'
+      - 'RUNBOOK.md'
+      - 'docs/**'
       - 'scripts/**'
   workflow_dispatch:
 

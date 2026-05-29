@@ -1,0 +1,10 @@
+flowchart LR
+  user["Usuarios<br/>desktop / iPhone / iPad"] --> pages["GitHub Pages<br/>Vite + Three.js + GSAP<br/>proyecto28.com"]
+  pages --> strapi["Strapi Cloud<br/>Projects + SiteSetting"]
+  strapi --> pages
+  admin["Admin / Tweaks<br/>Google OAuth + whitelist"] --> publish["/api/publish<br/>SiteSetting + Publish log"]
+  publish --> strapi
+  pages --> stream["Pixel Streaming GPU externo<br/>Unreal + Epic Signaling Server"]
+  stream --> pages
+  pages -. fallback .-> fallback["src/data/fallback.js<br/>si CMS cae"]
+  tag["Tag v*"] --> release["GitHub Release assets<br/>Claude Design + docs/demo"]

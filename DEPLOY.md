@@ -68,6 +68,42 @@ Browser CORS is configured in `cms/config/middlewares.js`. Keep
 `proyecto28.com`, `www.proyecto28.com`, `proyecto28.cl`, `www.proyecto28.cl`,
 `nitenacho.github.io`, and localhost/127.0.0.1 QA origins allowed there.
 
+### Required production variables
+
+Frontend GitHub Actions secrets:
+
+| Name | Purpose |
+|---|---|
+| `VITE_CMS_URL` | Public Strapi Cloud URL embedded in the Vite build. |
+| `VITE_GOOGLE_CLIENT_ID` | Public Google Web OAuth client id used by GIS. |
+
+Strapi Cloud variables:
+
+| Name | Purpose |
+|---|---|
+| `APP_KEYS`, salts and JWT/encryption secrets | Strapi signing/encryption. Rotate from Strapi Cloud. |
+| `GOOGLE_CLIENT_ID` or `VITE_GOOGLE_CLIENT_ID` | Client id accepted by `/api/publish` token verification. |
+| `DISCORD_WEBHOOK_URL` | Optional webhook used when Tweaks publish changes. |
+
+Never commit real secret values. Rotation procedure lives in `RUNBOOK.md`.
+
+### Google OAuth
+
+OAuth client type: **Web application**.
+
+Authorized JavaScript origins should include:
+
+- `https://proyecto28.com`
+- `https://www.proyecto28.com`
+- `http://localhost:5173`
+- `http://127.0.0.1:5173`
+
+If Google consent screen remains in Testing, keep these test users in Google
+Cloud as well as Strapi whitelist:
+
+- `inconcha@gmail.com`
+- `yk8arts@gmail.com`
+
 ---
 
 ## 3 · Pixel Streaming (Etapa 11)
@@ -122,4 +158,28 @@ QA local:
 ```text
 http://127.0.0.1:<vite-port>/?streamPreview=028.A
 http://127.0.0.1:<vite-port>/?streamPreview=028.A&streamPreviewUrl=http://127.0.0.1:<vite-port>/dev/pixel-stream-mock.html
+```
+
+---
+
+## 4 · Release assets
+
+On tags `v*`, `.github/workflows/sync-design.yml` creates or updates the
+GitHub Release and uploads:
+
+- `claude-design-export.zip`
+- `docs/architecture.png`, if present
+- `docs/proyecto28-demo.webm`, if present
+
+The demo video can be generated locally:
+
+```powershell
+node scripts/record-demo.mjs "https://proyecto28.com" "docs/proyecto28-demo.webm"
+```
+
+If the video is recorded manually after the tag, upload it with an authenticated
+GitHub CLI session:
+
+```powershell
+gh release upload vX.Y.Z docs/proyecto28-demo.webm docs/architecture.png --clobber
 ```

@@ -1,269 +1,183 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-05-29 (cierre Etapa 15 - `v0.19.0`)
-> **Tag activo:** `v0.19.0`
+> **Ultima actualizacion:** 2026-05-29 (cierre Etapa 16 - `v0.20.0`)
+> **Tag activo esperado tras cierre:** `v0.20.0`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
+> **Produccion canonica:** https://proyecto28.com
 
-Etapas 1-15 cerradas. Etapa 15 deja el sitio endurecido en performance,
-responsive, accesibilidad, SEO basico y manejo de errores antes de la
-documentacion final de Etapa 16.
+Etapas 1-16 cerradas. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
+Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
+sync Claude Design, hardening performance/a11y y documentacion final.
 
 ---
 
 ## 0. Resumen en 30 segundos
 
-Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite),
-CMS Strapi Cloud, Google OAuth, whitelist gating, Pixel Streaming
-iframe/fallback, pipeline `Tweaks -> Strapi SiteSetting`, Claude Design export,
-GSAP polish y hardening final de performance/accesibilidad.
+Estado vigente:
 
-Estado actual:
-- Etapas 1-15 cerradas.
-- Responsive root cause iPhone/iPad resuelto en `v0.14.6` y confirmado por
-  owner.
-- Pixel Streaming inicial cerrado en `v0.15.0`: iframe real si hay URL valida y
-  fallback local controlado por `Streaming > Preview visible`.
-- Pipeline publicar cerrado en `v0.16.0` y hotfix `v0.16.1`: Strapi acepta
-  `access_token`/`id_token` Google y valida contra whitelist.
-- Etapa 15 `v0.19.0`:
-  - code splitting `three`, `three-addons`, `gsap`, `streaming`;
-  - lazy overlay streaming;
-  - mobile/reduced-motion con geometria simple, sin sombras caras ni bloom;
-  - navegacion por teclado de cubos;
-  - SEO: canonical, OG/Twitter, `robots.txt`, `sitemap.xml`;
-  - retry de `PUBLICAR CAMBIOS` con token Google fresco si Strapi rechaza token
-    vencido/legacy.
+- `v0.19.0`: ultimo codigo funcional de performance/a11y.
+- `v0.20.0`: cierre documental final con `RUNBOOK.md`, `HANDOFF-V2.md`,
+  diagrama, guion/demo y release assets.
+- Dominio canonico: `https://proyecto28.com`.
+- CMS: `https://honest-candy-800d1e4a92.strapiapp.com`.
+- `.cl` sigue secundario/pending segun DNS/certificado; no bloquear continuidad
+  si `.com` esta sano.
 
 ---
 
 ## 1. Como arrancar como nuevo agente IA
 
-```bash
+```powershell
 cd "C:/Users/incon/OneDrive/Desktop/Proyectos_Claude/Claude_P28/Proyecto28"
 git checkout main
 git pull --ff-only
 git status
 git describe --tags --abbrev=0
 git log --oneline -12
-```
-
-Esperado despues del cierre:
-- branch `main`
-- working tree clean
-- ultimo tag `v0.19.0`
-- `CHANGELOG.md`, `README.md`, `PLAN-PROYECTO28-V2.md` y este handoff
-  actualizados.
-
-Lectura recomendada:
-1. `HANDOFF-LATEST.md`
-2. `CHANGELOG.md` - `[0.19.0]`
-3. `PLAN-PROYECTO28-V2.md` - Etapa 15 cerrada, Etapa 16 pendiente
-4. Google Doc oficial - ultima subpestana bajo `Handoff`:
-   `2026-05-29 10:08 UTC v0.19.0 performance-a11y`
-   Tab id: `t.p174shum7lw` (padre `Handoff`: `t.7lpfc5ado1h`)
-
----
-
-## 2. Cambios de Etapa 15
-
-### Performance
-
-- `vite.config.js` ahora separa chunks:
-  - `three`
-  - `three-addons`
-  - `gsap`
-  - `streaming`
-- Se filtra `modulepreload` para no precargar `streaming-*` ni `three-addons-*`
-  durante el boot normal.
-- `src/streaming/lazyStreamOverlay.js` evita importar el overlay/iframe de
-  Pixel Streaming hasta que exista un stream valido o el preview este activo.
-- `src/scene/scene.js` aplica modo ligero en mobile/reduced-motion:
-  - `BoxGeometry` simple en vez de `RoundedBoxGeometry`;
-  - pixel ratio max `1.25`;
-  - sombras caras desactivadas;
-  - render directo sin `EffectComposer`/Bloom.
-- Desktop conserva rounded cubes + bloom/post-processing.
-
-### Streaming preview
-
-- El tweak `Streaming > Preview visible` queda como control efectivo para
-  prender/apagar el fallback/preview.
-- Si `Preview visible=false` y no hay stream valido, no se monta overlay y no se
-  descarga `assets/streaming-*.js`.
-- Si un iframe de streaming falla o no responde, se muestra placeholder; si
-  carga tarde, vuelve a estado `Live`.
-
-### Publicar Cambios / Google token
-
-- `src/admin/publish.js` reintenta una vez con sesion Google fresca cuando el
-  backend responde token invalido.
-- Errores de publish se muestran en espanol:
-  - sesion Google rechazada/vencida;
-  - cuenta no autorizada en whitelist.
-
-### Accesibilidad
-
-- Nuevo `src/ui/cubeA11y.js`: controles DOM espejo para los 6 cubos.
-- `Tab` recorre cubos, `Enter` abre popup, `Escape` cierra.
-- Canvas, popup, route overlay y Tweaks tienen roles/labels ARIA.
-- `prefers-reduced-motion` respeta animaciones reducidas CSS + modo ligero 3D.
-
-### SEO
-
-- `index.html`: canonical, OG, Twitter cards.
-- `public/robots.txt`
-- `public/sitemap.xml`
-
----
-
-## 3. Validacion local de cierre
-
-Build:
-
-```bash
 npm run build
 ```
 
-Resultado OK. Chunks finales:
-- `assets/index-DzLC3Syc.js` `54.19 kB` / `19.64 kB` gzip
-- `assets/streaming-DWwWXc9J.js` `6.16 kB` / `2.54 kB` gzip
-- `assets/three-addons-hfx1tmN4.js` `65.32 kB` / `17.93 kB` gzip
-- `assets/gsap-CzGW6FVa.js` `70.46 kB` / `27.81 kB` gzip
-- `assets/three-CdxnkpeF.js` `530.20 kB` / `134.12 kB` gzip
+Esperado despues del cierre:
 
-Lighthouse sobre `vite preview`:
-- Mobile: Performance `80`, Accessibility `100`
-- Desktop: Performance `98`, Accessibility `100`
+- branch `main`
+- working tree clean
+- ultimo tag `v0.20.0`
+- build Vite OK
 
-Responsive CDP sobre build produccion:
-- `320x568`, `375x812`, `414x896`, `768x1024`, `1024x768`, `1440x900`,
-  `1920x1080`
-- En todos: `body == html == canvas == innerWidth`
-- En `320/375/414`: `streamingChunkLoaded=false`, `addonsChunkLoaded=false`
-- `cubeButtons=6`, `popupRole=dialog`
+Lectura obligatoria:
 
-Browser local:
-- sin preview: `streamOverlayLoaded=false`
-- `?streamPreview=028.A`: fallback visible, sin overflow
-- `Enter` en cubo accesible abre popup `Holograma`; `Escape` lo cierra
+1. `HANDOFF-V2.md` - handoff final compacto.
+2. `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
+3. `DEPLOY.md` - GitHub Pages, Strapi, OAuth, Pixel Streaming, releases.
+4. `CHANGELOG.md` - `[0.20.0]`.
+5. `PLAN-PROYECTO28-V2.md` - Etapa 16 cerrada.
 
 ---
 
-## 4. Validacion Strapi / OAuth / whitelist
+## 2. Cambios de Etapa 16
 
-Servicios verificados el 2026-05-29:
+Archivos principales:
 
-```bash
-GET /api/projects?populate=*                         => 200
-GET /api/admin-whitelists                            => 403
-GET /api/site-setting                                => 200
-GET /api/auth/check?email=inconcha@gmail.com         => 200 { allowed:true, role:"owner" }
-GET /api/auth/check?email=yk8arts@gmail.com          => 200 { allowed:true, role:"editor" }
-POST /api/publish sin token                          => 401
-GET https://proyecto28.com                           => 200
+- `RUNBOOK.md`: smoke tests, operacion normal, agregar proyecto, incidentes,
+  rotacion de secretos y rollback.
+- `HANDOFF-V2.md`: handoff final para agentes nuevos.
+- `README.md`: stack final, docs operativas, flujo para agregar proyectos.
+- `DEPLOY.md`: variables productivas, OAuth, `stream.proyecto28.com`,
+  webhook Discord opcional y release assets.
+- `PLAN-PROYECTO28-V2.md`: Etapa 16 marcada como cerrada.
+- `docs/architecture.svg` y `docs/architecture.png`: diagrama operativo.
+- `docs/demo-script.md`: guion para video demo.
+- `scripts/record-demo.mjs`: helper para generar WebM tecnico desde el canvas.
+- `.github/workflows/sync-design.yml`: adjunta assets documentales al release
+  en tags `v*` cuando existen.
+- `.github/workflows/deploy.yml`: ignora docs/runbook/handoff/assets para
+  evitar deploys Pages por cambios puramente documentales.
+
+---
+
+## 3. Validacion viva esperada
+
+```powershell
+curl.exe -L -s -o NUL -w "site: %{http_code}`n" "https://proyecto28.com"
+curl.exe -L -s -o NUL -w "robots: %{http_code}`n" "https://proyecto28.com/robots.txt"
+curl.exe -L -s -o NUL -w "sitemap: %{http_code}`n" "https://proyecto28.com/sitemap.xml"
+
+$base="https://honest-candy-800d1e4a92.strapiapp.com"
+curl.exe -s -o NUL -w "projects: %{http_code}`n" "$base/api/projects?populate=*"
+curl.exe -s -o NUL -w "site-setting: %{http_code}`n" "$base/api/site-setting"
+curl.exe -s -o NUL -w "admin-whitelists: %{http_code}`n" "$base/api/admin-whitelists"
+curl.exe -s "$base/api/auth/check?email=inconcha@gmail.com"
+curl.exe -s "$base/api/auth/check?email=yk8arts@gmail.com"
 ```
 
-`Admin whitelist` en schema Strapi:
-- `content-manager.visible: true`
-- `content-type-builder.visible: true`
-- campos editables: `email`, `role`, `note`
-- API publica core privada (`/api/admin-whitelists => 403`)
+Esperado:
 
-Estado vivo de SiteSetting antes del deploy `v0.19.0`:
+- site/robots/sitemap `200`
+- projects `200`
+- site-setting `200`
+- admin-whitelists `403`
+- `inconcha@gmail.com` permitido como `owner`
+- `yk8arts@gmail.com` permitido como `editor`
 
-```json
-{
-  "pixelStreamingEnabled": true,
-  "pixelStreamingPreviewEnabled": true,
-  "pixelStreamingMode": "shared",
-  "adminButtonVisible": true,
-  "defaultPopupPlacement": "side",
-  "showGrid": true,
-  "showScanlines": false,
-  "showViewfinder": false
-}
+Verificado localmente antes del cierre:
+
+- `npm run build` OK.
+- `node scripts/export-claude-design.mjs` OK (`96` tokens).
+- `node scripts/record-demo.mjs` genero `docs/proyecto28-demo.webm`
+  (`923482` bytes).
+- `docs/architecture.png` generado y revisado.
+- `https://proyecto28.com`, `robots.txt`, `sitemap.xml`: `200`.
+- Strapi: projects `200`, site-setting `200`, admin-whitelists `403`.
+- Auth check: `inconcha@gmail.com` owner, `yk8arts@gmail.com` editor.
+
+---
+
+## 4. Operacion clave
+
+### Admin / Tweaks / publicar
+
+El boton `Admin` abre Google OAuth. Strapi whitelist permite:
+
+- `inconcha@gmail.com` - owner
+- `yk8arts@gmail.com` - editor
+
+`PUBLICAR CAMBIOS` persiste snapshots al singleton `SiteSetting` via
+`/api/publish`. Si el token Google vence, el frontend reintenta una vez con
+sesion fresca.
+
+### Pixel Streaming
+
+GitHub Pages no ejecuta Unreal. El stream vive en infraestructura GPU externa y
+el frontend solo monta iframe si Strapi entrega configuracion valida.
+
+Para apagar el preview/fallback:
+
+```text
+Admin -> Tweaks -> Streaming -> Preview visible OFF -> PUBLICAR CAMBIOS
 ```
 
-Nota importante:
-- El repo confirma whitelist Strapi para `inconcha@gmail.com` y
-  `yk8arts@gmail.com`.
-- La consola Google Cloud / OAuth consent screen no se pudo leer desde CLI
-  porque `gcloud` no esta instalado y no hay API/browser autenticado disponible
-  en esta sesion. Si el OAuth prompt rechazara un correo pese a estar permitido
-  por Strapi, revisar manualmente que ambos correos sigan como Test users en
-  Google Cloud project `spartan-grail-401816`.
-- Para apagar el preview en produccion: abrir `proyecto28.com` -> `Admin` ->
-  cuenta permitida -> Tweaks -> `Streaming > Preview visible` OFF ->
-  `PUBLICAR CAMBIOS`.
+### Agregar proyecto
+
+Crear/duplicar Project en Strapi, completar contenido/popup/modelo/redirect y,
+si aplica, `unrealStreamURL` + `unrealLevelName`. Procedimiento completo:
+`RUNBOOK.md` seccion "Agregar un proyecto nuevo".
 
 ---
 
-## 5. Validacion hosting/GitHub
+## 5. Riesgos y pendientes
 
-Commit de etapa:
-- `18515bb feat(perf): harden performance and a11y [skip-tag]`
-
-GitHub Actions:
-- `Build and deploy frontend to GitHub Pages` run `26631677133` => `success`
-- `Auto tag semantic releases` run `26631677112` => `success` / skip por
-  `[skip-tag]`; tag `v0.19.0` se dejo manual al cierre.
-- `gh` CLI local no tiene sesion (`gh auth login` pendiente), por lo que la
-  validacion de Actions se hizo con GitHub API publica.
-
-Produccion despues del deploy:
-- `https://proyecto28.com` => `200`
-- `https://proyecto28.com/robots.txt` => `200`
-- `https://proyecto28.com/sitemap.xml` => `200`
-- HTML de produccion sirve bundle `assets/index-CD085i8n.js` junto a
-  `three-CdxnkpeF.js`, `gsap-CzGW6FVa.js` y CSS `index-Dj54e5kw.css`.
-
-Smoke Chrome headless/CDP sobre `https://proyecto28.com`:
-- phone `390x844`: `html=390`, `body=390`, `canvas=390`,
-  `streamingChunkLoaded=false`, `addonsChunkLoaded=false`.
-- iPad portrait `810x1080`: `html=810`, `body=810`, `canvas=810`,
-  `streamingChunkLoaded=false`, `addonsChunkLoaded=false`.
-- desktop `1440x900`: `html=1440`, `body=1440`, `canvas=1440`,
-  `streamingChunkLoaded=false`, `addonsChunkLoaded=true`.
-- `cubeButtons=6`, `popupRole=dialog`.
+- `proyecto28.cl` no es canonico hasta cerrar DNS/certificado/redirect.
+- Google OAuth consent screen puede seguir en Testing; al agregar emails a
+  Strapi, tambien agregarlos como test users en Google Cloud.
+- Tech debt Strapi: si aparece `Invalid status` al editar Project, normalizar
+  valores legacy de `Project.status`.
+- Pixel Streaming real depende de servidor GPU externo, TLS, costos y
+  auto-suspend.
+- `gh` CLI local no estaba autenticado en cierres previos; usar API publica o
+  GitHub UI para validar Actions si sigue asi.
 
 ---
 
-## 6. Proximo paso
+## 6. Google Doc
 
-Etapa 16 - Documentacion final, runbook y handoff:
-- actualizar README final de operacion;
-- crear `RUNBOOK.md`;
-- documentar caida de Pixel Streaming, Strapi quota, OAuth y rollback;
-- dejar flujo para agregar proyecto nuevo (Strapi + UE Level + assets).
+Respaldo final esperado como subpestana bajo `Handoff` en:
 
-No mezclar con tech debt Strapi salvo que bloquee.
+https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/edit
 
----
+Titulo:
 
-## 7. Riesgos y pendientes
+```text
+2026-05-29 19:00 UTC - v0.20.0 documentacion-final
+```
 
-- `three` core sigue siendo un chunk grande (`530.20 kB`, `134.12 kB` gzip),
-  pero queda aislado. Lighthouse mobile cumple target tras modo ligero.
-- `proyecto28.cl` seguia pendiente de DNS/certificado en handoffs previos.
-- Tech debt Strapi: enum legacy `Project.status` puede bloquear edicion de
-  proyectos en admin. Resolver formalmente en Etapa 16/17 si sigue vigente.
-- Google OAuth consent screen sigue en Testing segun handoffs previos; si se
-  agrega email a Strapi, tambien agregarlo como Test user en GCP.
+Tab id creado y verificado: `t.yau0g6g371sa` bajo padre `Handoff`
+(`t.7lpfc5ado1h`).
+
+Regla: nunca crear cierres como pestanas raiz. El siguiente agente debe tomar
+la ultima subpestana bajo `Handoff`.
 
 ---
 
-## 8. Reglas de continuidad
-
-- No trabajar directo en `main` salvo docs-only urgente.
-- Branch por etapa/fix.
-- Conventional Commits.
-- `npm run build` antes de cerrar.
-- Push a `main` dispara GitHub Pages.
-- Validar siempre `https://proyecto28.com` tras deploy.
-- Actualizar `CHANGELOG.md`, `README.md`, `PLAN-PROYECTO28-V2.md` y
-  `HANDOFF-LATEST.md`.
-- Respaldar Google Doc como subpestana bajo `Handoff`, nunca como pestana raiz.
-
-Fin del handoff `v0.19.0`.
+Fin del handoff `v0.20.0`.

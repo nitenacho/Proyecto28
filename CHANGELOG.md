@@ -12,6 +12,48 @@ o a un fix puntual entre etapas.
 
 Sin cambios todavía.
 
+## [0.20.0] — 2026-05-29 — Etapa 16: Documentación final + runbook
+
+### Added
+- `RUNBOOK.md` con operacion diaria, smoke tests, incidentes, OAuth, Strapi,
+  Pixel Streaming, rotacion de secretos y rollback.
+- `HANDOFF-V2.md` como handoff final compacto para futuros agentes.
+- `docs/architecture.svg` + `docs/architecture.png` como diagrama de
+  arquitectura operativo.
+- `docs/demo-script.md` con guion para video de release.
+- `scripts/record-demo.mjs` para generar un WebM tecnico desde el canvas
+  WebGL en Chrome headless.
+
+### Changed
+- `README.md` documenta el stack final, artefactos operativos y flujo para
+  agregar un proyecto nuevo.
+- `DEPLOY.md` agrega variables productivas, OAuth client, webhook Discord,
+  subdominio `stream.proyecto28.com` y release assets.
+- `PLAN-PROYECTO28-V2.md` marca Etapa 16 como cerrada.
+- `.github/workflows/sync-design.yml` adjunta assets documentales al GitHub
+  Release en tags `v*` si existen.
+- `.github/workflows/deploy.yml` ignora docs/runbook/handoff/assets para evitar
+  deploys Pages innecesarios por cambios puramente documentales.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB, ya aislado.
+- `node scripts/export-claude-design.mjs` OK: exporta `96` tokens.
+- `node scripts/record-demo.mjs "https://proyecto28.com" "docs/proyecto28-demo.webm"` OK:
+  genera WebM `923482` bytes.
+- `docs/architecture.png` generado desde `docs/architecture.svg` y verificado.
+- Produccion:
+  - `https://proyecto28.com` => `200`
+  - `https://proyecto28.com/robots.txt` => `200`
+  - `https://proyecto28.com/sitemap.xml` => `200`
+- Strapi:
+  - `/api/projects?populate=*` => `200`
+  - `/api/admin-whitelists` => `403`
+  - `/api/site-setting` => `200`
+  - `/api/auth/check?email=inconcha@gmail.com` =>
+    `{ allowed:true, role:"owner" }`
+  - `/api/auth/check?email=yk8arts@gmail.com` =>
+    `{ allowed:true, role:"editor" }`
+
 ## [0.19.0] — 2026-05-29 — Etapa 15: Performance + responsive + a11y
 
 ### Added

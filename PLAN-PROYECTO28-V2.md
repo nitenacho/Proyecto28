@@ -33,7 +33,7 @@
 | 13 hotfix — Release asset auto-tag | ✅ Cerrada | `v0.17.1` | `fcb488a` |
 | 14 — GSAP polish | ✅ Cerrada | `v0.18.0` | `f84a391` |
 | 15 — Performance + a11y | ✅ Cerrada | `v0.19.0` | — |
-| 16 — Documentación final | ⏳ Pendiente | — | — |
+| 16 — Documentación final | ✅ Cerrada | `v0.20.0` | — |
 
 ## Decisiones tomadas durante la ejecución (resoluciones al §1)
 
@@ -840,6 +840,8 @@ Tweaks → Strapi + `PublishLog`; Discord queda opcional vía webhook si existe
 ---
 
 ### ETAPA 16 — Documentación, runbook y handoff
+**Estado:** ✅ Cerrada en `v0.20.0`.
+
 **Objetivo:** Que cualquier futuro agente o desarrollador pueda continuar.
 
 **Tareas:**
@@ -860,6 +862,22 @@ Tweaks → Strapi + `PublishLog`; Discord queda opcional vía webhook si existe
 **Criterio de éxito:** Otro agente IA puede leer el handoff y continuar sin preguntas básicas.
 **Dependencias:** Todas las etapas.
 **Riesgo:** Bajo.
+
+**Resultado v0.20.0:**
+- `RUNBOOK.md` creado con smoke tests, operacion normal, incidentes,
+  OAuth/Strapi/Pixel Streaming, rotacion de secretos y rollback.
+- `DEPLOY.md` actualizado con variables productivas, OAuth, webhook Discord,
+  subdominio `stream` y release assets.
+- `README.md` actualizado con stack final, docs operativas y flujo para agregar
+  proyectos nuevos.
+- `HANDOFF-V2.md` creado como handoff final compacto; `HANDOFF-LATEST.md`
+  apunta al cierre vigente.
+- Diagrama de arquitectura versionado en `docs/architecture.svg` y
+  `docs/architecture.png`.
+- Guion de demo en `docs/demo-script.md`, script auxiliar
+  `scripts/record-demo.mjs` y asset tecnico `docs/proyecto28-demo.webm`.
+- Workflow `sync-design.yml` sube assets documentales (`architecture.png`,
+  `proyecto28-demo.webm` si existe) al GitHub Release en tags `v*`.
 
 ---
 
