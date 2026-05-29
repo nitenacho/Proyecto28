@@ -2,3 +2,5 @@ node_modules/
 dist/
 .env
 *.local
+claude-design-export/
+claude-design-export.zip

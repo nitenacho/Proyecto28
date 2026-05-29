@@ -193,8 +193,15 @@ curl -I https://proyecto28.com
 |---|---|---|
 | GitHub Pages | Push a `main` que toque frontend | `.github/workflows/deploy.yml` |
 | Strapi Cloud | Push a `main` que toque `cms/**` | Strapi Cloud "Deploy on commit" |
-| Claude Design | Push a `main` que toque `src/styles/**` | `.github/workflows/sync-claude-design.yml` (placeholder, se activa en Etapa 13) |
+| Claude Design | Push a `main` que toque `src/styles/tokens.css` o tag `v*` | `.github/workflows/sync-design.yml` exporta `claude-design-export` |
 | Discord bot | "Publicar" desde panel admin | Endpoint Strapi `/api/publish` → webhook → bot (Etapa 12) |
+
+### Auto-tag desde Etapa 13
+
+`.github/workflows/auto-tag.yml` complementa el cierre manual: en `main`, un
+commit `feat:` crea el siguiente `v0.(minor+1).0` y un commit `fix:` crea el
+siguiente patch. Commits `docs:`, `chore:` y commits con `[skip-tag]` no crean
+tags. Si el `HEAD` ya tiene un tag semver, el workflow no hace nada.
 
 **Si alguno de estos sync no se ejecutó después de un push, es un bug del
 workflow, no falta tuya.** Diagnosticar en GitHub Actions logs.

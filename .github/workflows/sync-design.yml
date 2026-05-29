@@ -1,0 +1,54 @@
+name: Sync Claude Design tokens
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths:
+      - 'src/styles/tokens.css'
+      - 'scripts/export-claude-design.mjs'
+      - '.github/workflows/sync-design.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    name: Export design tokens
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Export Claude Design package
+        run: node scripts/export-claude-design.mjs
+
+      - name: Archive export
+        run: zip -r claude-design-export.zip claude-design-export
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-design-export
+          path: |
+            claude-design-export
+            claude-design-export.zip
+
+      - name: Attach export to GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" claude-design-export.zip --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" claude-design-export.zip \
+              --title "${GITHUB_REF_NAME}" \
+              --notes "Proyecto28 Claude Design token export for ${GITHUB_REF_NAME}."
+          fi

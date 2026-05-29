@@ -12,6 +12,31 @@ o a un fix puntual entre etapas.
 
 Sin cambios todavía.
 
+## [0.17.0] — 2026-05-29 — Etapa 13: Sync Claude Design + GitHub
+
+### Added
+- Nuevo workflow `.github/workflows/sync-design.yml` para exportar el paquete
+  portable `claude-design-export` cuando cambian los tokens de diseño o cuando
+  se publica un tag `v*`.
+- Nuevo script `scripts/export-claude-design.mjs`:
+  - lee `src/styles/tokens.css`;
+  - extrae 96 custom properties desde `:root`;
+  - genera `tokens.css`, `tokens.json`, `manifest.json` y `README.md`;
+  - no requiere dependencias externas.
+- Nuevo workflow `.github/workflows/auto-tag.yml`:
+  - en `main`, commits `feat:` crean el siguiente minor `v0.X.0`;
+  - commits `fix:` crean el siguiente patch;
+  - commits `docs:`/`chore:` y commits con `[skip-tag]` no taguean.
+
+### Changed
+- `deploy.yml` elimina el job placeholder `sync-claude-design`; la sincronización
+  real vive ahora en `sync-design.yml`.
+- `VERSIONING.md` documenta el nuevo flujo de export de Claude Design y auto-tag.
+
+### Verified
+- `node scripts/export-claude-design.mjs` OK; export local con 96 tokens.
+- `tokens.json` parsea correctamente y conserva `bg-0` → `bg-radial-copper`.
+
 ## [0.16.1] — 2026-05-26 — Hotfix: publish Google token
 
 ### Fixed

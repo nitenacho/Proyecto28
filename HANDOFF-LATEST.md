@@ -1,15 +1,16 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-05-26 (hotfix publish Google token - `v0.16.1`)
-> **Tag activo:** `v0.16.1`
+> **Ultima actualizacion:** 2026-05-29 (cierre Etapa 13 - `v0.17.0`)
+> **Tag activo:** `v0.17.0`
 > **Branch:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 
-> Etapas 1-12 cerradas. Etapa 12 deja operativo el primer pipeline
+> Etapas 1-13 cerradas. Etapa 12 deja operativo el primer pipeline
 > `Tweaks -> Strapi SiteSetting`, con auth Google + whitelist, audit log y
 > webhook Discord opcional. `v0.16.1` corrige el publish real cuando Google
-> entrega `accessToken`/`idToken` en flujos distintos.
+> entrega `accessToken`/`idToken` en flujos distintos. Etapa 13 agrega export
+> Claude Design desde tokens CSS y auto-tag semver en GitHub Actions.
 
 ---
 
@@ -20,7 +21,7 @@ CMS Strapi Cloud, Google OAuth, whitelist gating, Pixel Streaming
 iframe/fallback y pipeline de publicacion de Tweaks.
 
 Estado actual:
-- Etapas 1-12 cerradas.
+- Etapas 1-13 cerradas.
 - Bug responsive iPhone/iPad resuelto en `v0.14.6` y confirmado por owner:
   "se arreglo muy bien".
 - Etapa 11 cerrada en `v0.15.0`: overlay Pixel Streaming inicial con iframe
@@ -34,11 +35,15 @@ Estado actual:
 - Produccion mantiene `pixelStreamingPreviewEnabled:false` y
   `pixelStreamingEnabled:false`; no se muestra preview/stream hasta que el
   owner lo active.
+- Etapa 13 cerrada en `v0.17.0`: `src/styles/tokens.css` queda como fuente de
+  verdad Claude Design; `sync-design.yml` exporta `claude-design-export` y
+  `auto-tag.yml` crea tags semver para commits `feat:`/`fix:` en `main`.
 
 Codigos clave:
 - `e8c3f74 feat(admin): publish tweaks to Strapi`
 - `c0590e4 fix(auth): support explicit Google admin publish flow`
 - `8465330 fix(auth): accept publish access tokens`
+- `TBD feat(ci): sync Claude Design tokens`
 - GitHub Pages run `26425439630` success para `c0590e4`.
 - GitHub Pages run `26433985069` success para `8465330`.
 
@@ -70,18 +75,18 @@ git log --oneline -12
 Esperado:
 - branch `main`
 - working tree clean
-- ultimo tag `v0.16.1`
+- ultimo tag esperado `v0.17.0`
 - commit hotfix `8465330`
 - ultimos commits de codigo: `8465330`, `c0590e4`, `e8c3f74`
 
 ### Paso 2 - Leer docs (orden)
 
 1. `HANDOFF-LATEST.md` (este archivo).
-2. `CHANGELOG.md` - entradas `[0.16.1]` y `[0.16.0]`.
+2. `CHANGELOG.md` - entradas `[0.17.0]`, `[0.16.1]` y `[0.16.0]`.
 3. Google Doc oficial - ultima subpestana bajo `Handoff`:
    `2026-05-26 05:45 UTC v0.16.1 token`.
    Tab id: `t.9b6slm77ntip` (padre `Handoff`: `t.7lpfc5ado1h`).
-4. `PLAN-PROYECTO28-V2.md` - Etapa 13 queda como siguiente bloque.
+4. `PLAN-PROYECTO28-V2.md` - Etapa 14 queda como siguiente bloque.
 5. `DEPLOY.md` y `cms/README.md` si se toca deploy/CMS.
 
 ### Paso 3 - Validar sistema vivo

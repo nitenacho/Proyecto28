@@ -1,12 +1,12 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-05-26 — `v0.16.1` hotfix publish Google token
+> **Última actualización operativa:** 2026-05-29 — `v0.17.0` Etapa 13
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-12 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Etapa 12 cerrada en `v0.16.0` con pipeline Tweaks → Strapi + audit log; hotfix `v0.16.1` corrige publish con token Google.
+> **Status:** En ejecución — etapas 1-13 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Etapa 13 cerrada en `v0.17.0` con export Claude Design desde tokens CSS + auto-tag semver.
 
-## Estado del plan al 2026-05-26 America/Santiago
+## Estado del plan al 2026-05-29 America/Santiago
 
 | Etapa | Estado | Tag | Commit |
 |---|---|---|---|
@@ -29,7 +29,7 @@
 | 11 — Pixel Streaming Unreal | ✅ Cerrada | `v0.15.0` | `f5b0c42` |
 | 12 — Pipeline Publicar | ✅ Cerrada | `v0.16.0` | `c0590e4` |
 | 12 hotfix — Publish Google token | ✅ Cerrada | `v0.16.1` | `8465330` |
-| 13 — Sync Claude Design | ⏳ Pendiente | — | — |
+| 13 — Sync Claude Design | ✅ Cerrada | `v0.17.0` | — |
 | 14 — GSAP polish | ⏳ Pendiente | — | — |
 | 15 — Performance + a11y | ⏳ Pendiente | — | — |
 | 16 — Documentación final | ⏳ Pendiente | — | — |
@@ -43,7 +43,9 @@
   whitelist Strapi `/api/auth/check` funcionando en producción.
 - **§1.3 Discord bot:** ✅ Primer corte resuelto como webhook opcional
   `DISCORD_WEBHOOK_URL`; bot real queda integracion externa si se define.
-- **§1.4 Claude Design:** ⏳ A definir al iniciar Etapa 13.
+- **§1.4 Claude Design:** ✅ Resuelto para el primer corte como tokens CSS en
+  repo. `src/styles/tokens.css` es fuente de verdad; `sync-design.yml` exporta
+  `claude-design-export` como artifact y como release asset en tags `v*`.
 - **§1.5 Detalles del juego:** ✅ Defaults documentados en Strapi
   `SiteSetting` y reflejados en `src/data/fallback.js`. Ajustables vía
   panel de tweaks una vez exista (Etapas 7+).
@@ -690,13 +692,18 @@ Tweaks → Strapi + `PublishLog`; Discord queda opcional vía webhook si existe
 ### ETAPA 13 — Sync automatizado Claude Design + GitHub
 **Objetivo:** Cerrar el ciclo de "actualizar Claude Design y Strapi después de cada push".
 
+**Estado 2026-05-29:** CERRADA en `v0.17.0` usando la opcion segura
+`Claude Design = tokens CSS en repo`.
+
 **Tareas (depende de respuesta §1.4):**
 
 **Si Claude Design = tokens CSS en repo:**
 1. Workflow `.github/workflows/sync-design.yml`:
    - On push to main que toque `src/styles/tokens.css`
-   - Copia el archivo a un repo separado `claude-design` (si existe) vía `peter-evans/create-pull-request` action
-   - O publica como release asset en GH Releases del propio repo
+   - Exporta `claude-design-export` con `tokens.css`, `tokens.json`,
+     `manifest.json` y `README.md`
+   - Publica como workflow artifact y como release asset en GH Releases del
+     propio repo para tags `v*`
 
 **Si Claude Design = paquete npm:**
 1. Workflow que en push a main bumpa version, publica a npm registry, y triggers downstream consumers via repository_dispatch.
@@ -714,7 +721,7 @@ Tweaks → Strapi + `PublishLog`; Discord queda opcional vía webhook si existe
    - Reemplaza o complementa el script manual de Etapa 1
 
 **Criterio de éxito:**
-- Push de feature dispara: GH Pages deploy + Strapi rebuild + Claude Design sync (lo que aplique) + tag automático
+- Push de feature dispara: GH Pages deploy + Claude Design sync (si toca tokens/workflow/script) + tag automático. Strapi Cloud sigue como deploy-on-commit para cambios `cms/**`.
 **Dependencias:** §1.4 resuelto, Etapa 1.
 **Riesgo:** Bajo si §1.4 es claro. Alto si hay sistemas externos sin acceso.
 

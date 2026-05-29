@@ -47,6 +47,20 @@ En producción el overlay fallback sólo aparece si Strapi entrega
 si además `pixelStreamingEnabled` está activo y el Project activo tiene
 `unrealEnabled` + una `unrealStreamURL` absoluta (`https://...`).
 
+### Export Claude Design
+
+Los tokens de diseño viven en `src/styles/tokens.css`. Etapa 13 agrega un
+export reproducible para Claude Design:
+
+```bash
+node scripts/export-claude-design.mjs
+```
+
+El comando genera `claude-design-export/` con `tokens.css`, `tokens.json`,
+`manifest.json` y `README.md`. GitHub Actions ejecuta el mismo export cuando
+cambian los tokens y lo adjunta como artifact; en tags `v*` también lo publica
+como asset de GitHub Release.
+
 ## Producción
 
 - Frontend → GitHub Pages (custom domains `proyecto28.com` + `proyecto28.cl`)
@@ -132,7 +146,7 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 11 — Pixel Streaming Unreal | ✅ Cerrado — overlay iframe/fallback | `v0.15.0` |
 | 12 — Pipeline Publicar | ✅ Cerrado — Tweaks → Strapi + audit log | `v0.16.0` |
 | 12 hotfix — Publish Google token | ✅ Cerrado — accessToken/idToken robusto | `v0.16.1` |
-| 13 — Sync Claude Design | ⏳ Pendiente | — |
+| 13 — Sync Claude Design | ✅ Cerrado — export tokens + auto-tag | `v0.17.0` |
 | 14 — GSAP polish | ⏳ Pendiente | — |
 | 15 — Performance + a11y | ⏳ Pendiente | — |
 | 16 — Documentación final | ⏳ Pendiente | — |
