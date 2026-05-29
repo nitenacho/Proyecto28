@@ -147,6 +147,7 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 12 — Pipeline Publicar | ✅ Cerrado — Tweaks → Strapi + audit log | `v0.16.0` |
 | 12 hotfix — Publish Google token | ✅ Cerrado — accessToken/idToken robusto | `v0.16.1` |
 | 13 — Sync Claude Design | ✅ Cerrado — export tokens + auto-tag | `v0.17.0` |
+| 13 hotfix — Release asset auto-tag | ✅ Cerrado — export zip en GitHub Release | `v0.17.1` |
 | 14 — GSAP polish | ⏳ Pendiente | — |
 | 15 — Performance + a11y | ⏳ Pendiente | — |
 | 16 — Documentación final | ⏳ Pendiente | — |

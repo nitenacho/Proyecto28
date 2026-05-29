@@ -1,7 +1,7 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-05-29 (cierre Etapa 13 - `v0.17.0`)
-> **Tag activo:** `v0.17.0`
+> **Ultima actualizacion:** 2026-05-29 (cierre Etapa 13 - `v0.17.1`)
+> **Tag activo:** `v0.17.1`
 > **Branch:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
@@ -10,7 +10,8 @@
 > `Tweaks -> Strapi SiteSetting`, con auth Google + whitelist, audit log y
 > webhook Discord opcional. `v0.16.1` corrige el publish real cuando Google
 > entrega `accessToken`/`idToken` en flujos distintos. Etapa 13 agrega export
-> Claude Design desde tokens CSS y auto-tag semver en GitHub Actions.
+> Claude Design desde tokens CSS y auto-tag semver en GitHub Actions. `v0.17.1`
+> corrige el auto-tag para adjuntar el export zip a la GitHub Release.
 
 ---
 
@@ -38,14 +39,22 @@ Estado actual:
 - Etapa 13 cerrada en `v0.17.0`: `src/styles/tokens.css` queda como fuente de
   verdad Claude Design; `sync-design.yml` exporta `claude-design-export` y
   `auto-tag.yml` crea tags semver para commits `feat:`/`fix:` en `main`.
+- Hotfix `v0.17.1`: `auto-tag.yml` ahora genera `claude-design-export.zip` y
+  lo adjunta a la GitHub Release del tag automatico.
 
 Codigos clave:
 - `e8c3f74 feat(admin): publish tweaks to Strapi`
 - `c0590e4 fix(auth): support explicit Google admin publish flow`
 - `8465330 fix(auth): accept publish access tokens`
-- `TBD feat(ci): sync Claude Design tokens`
+- `ec9355d feat(ci): sync Claude Design tokens`
+- `fcb488a fix(ci): attach design export to auto tags`
 - GitHub Pages run `26425439630` success para `c0590e4`.
 - GitHub Pages run `26433985069` success para `8465330`.
+- GitHub Pages run `26626392593` success para `ec9355d`.
+- Sync Claude Design run `26626392558` success para `ec9355d`.
+- Auto-tag run `26626392562` success: creo `v0.17.0`.
+- Auto-tag run `26626485820` success: creo `v0.17.1` y Release asset.
+- GitHub Pages run `26626485864` success para `fcb488a`.
 
 Nota honesta de validacion:
 - Frontend, backend, schema, CORS, whitelist y Strapi Cloud quedaron
@@ -75,17 +84,17 @@ git log --oneline -12
 Esperado:
 - branch `main`
 - working tree clean
-- ultimo tag esperado `v0.17.0`
+- ultimo tag `v0.17.1`
 - commit hotfix `8465330`
-- ultimos commits de codigo: `8465330`, `c0590e4`, `e8c3f74`
+- ultimos commits de codigo/CI: `fcb488a`, `ec9355d`, `8465330`
 
 ### Paso 2 - Leer docs (orden)
 
 1. `HANDOFF-LATEST.md` (este archivo).
-2. `CHANGELOG.md` - entradas `[0.17.0]`, `[0.16.1]` y `[0.16.0]`.
+2. `CHANGELOG.md` - entradas `[0.17.1]`, `[0.17.0]`, `[0.16.1]` y `[0.16.0]`.
 3. Google Doc oficial - ultima subpestana bajo `Handoff`:
-   `2026-05-26 05:45 UTC v0.16.1 token`.
-   Tab id: `t.9b6slm77ntip` (padre `Handoff`: `t.7lpfc5ado1h`).
+   `2026-05-29 08:30 UTC v0.17.1 design`.
+   Tab id: `t.l9sl79q157hl` (padre `Handoff`: `t.7lpfc5ado1h`).
 4. `PLAN-PROYECTO28-V2.md` - Etapa 14 queda como siguiente bloque.
 5. `DEPLOY.md` y `cms/README.md` si se toca deploy/CMS.
 
@@ -206,6 +215,10 @@ lista de Test users de GCP.
 
 ### Produccion GitHub Pages
 
+- Push `ec9355d` a `main` OK.
+- Pages run `26626392593` success.
+- Push `fcb488a` a `main` OK.
+- Pages run `26626485864` success.
 - Push `e8c3f74` a `main` OK.
 - Pages run `26425130576` success.
 - Push `c0590e4` a `main` OK.
@@ -221,6 +234,22 @@ lista de Test users de GCP.
   - refresh de token Google antes de publicar
   - preferencia por `accessToken`
   - fallback controlado a `idToken`
+- Etapa 13 no cambia bundle funcional del sitio; `proyecto28.com` responde
+  `200` y mantiene el asset `assets/index-CSh7zWl1.js`.
+
+### GitHub Actions Etapa 13
+
+- `sync-design.yml` run `26626392558` success:
+  - genero artifact `claude-design-export`
+  - artifact id `7286242271`
+  - export local y CI: 96 tokens desde `src/styles/tokens.css`
+- `auto-tag.yml` run `26626392562` success:
+  - creo tag automatico `v0.17.0` desde commit `ec9355d`
+- `auto-tag.yml` run `26626485820` success:
+  - creo tag automatico `v0.17.1` desde commit `fcb488a`
+  - creo GitHub Release `v0.17.1`
+  - adjunto `claude-design-export.zip`
+  - descarga: `https://github.com/nitenacho/Proyecto28/releases/download/v0.17.1/claude-design-export.zip`
 
 ### Produccion Strapi Cloud
 
@@ -258,14 +287,20 @@ Valores SiteSetting produccion tras cierre:
 
 - Branch: `main`
 - Codigo Etapa 12:
+  - `fcb488a fix(ci): attach design export to auto tags`
+  - `ec9355d feat(ci): sync Claude Design tokens`
   - `8465330 fix(auth): accept publish access tokens`
   - `e8c3f74 feat(admin): publish tweaks to Strapi`
   - `c0590e4 fix(auth): support explicit Google admin publish flow`
 - GitHub Pages:
+  - `26626485864` success para `fcb488a`
+  - `26626392593` success para `ec9355d`
   - `26425130576` success para `e8c3f74`
   - `26425439630` success para `c0590e4`
   - `26433985069` success para `8465330`
-- Tag hotfix al cierre: `v0.16.1`
+- Tags Etapa 13:
+  - `v0.17.0` auto-tag para `ec9355d`
+  - `v0.17.1` auto-tag para `fcb488a`, con Release asset
 
 `gh` local no estaba autenticado en esta maquina; los runs se validaron por la
 API publica de GitHub.
@@ -320,16 +355,15 @@ Variables recomendadas en Strapi Cloud:
 
 ## 7. Proximo paso
 
-Etapa 13 - Sync automatizado Claude Design + GitHub.
+Etapa 14 - GSAP polish + animaciones premium.
 
 Antes de codear:
 1. Validar `git status` clean en `main`.
-2. Confirmar `git describe --tags --abbrev=0` => `v0.16.1`.
+2. Confirmar `git describe --tags --abbrev=0` => `v0.17.1`.
 3. Hacer smoke manual de `PUBLICAR CAMBIOS` en `proyecto28.com`.
-4. Confirmar si Claude Design es tokens en repo, paquete npm, repo separado o
-   solo nombre interno.
+4. Leer `CHANGELOG.md` entradas `[0.17.1]` y `[0.17.0]`.
 
-No mezclar Etapa 13 con el tech debt de `Project.status` salvo que bloquee.
+No mezclar Etapa 14 con el tech debt de `Project.status` salvo que bloquee.
 
 ---
 
@@ -348,4 +382,4 @@ No mezclar Etapa 13 con el tech debt de `Project.status` salvo que bloquee.
 - Google Doc respaldado como subpestana bajo `Handoff`.
 - Tag semver al cierre.
 
-Fin del handoff `v0.16.1`.
+Fin del handoff `v0.17.1`.

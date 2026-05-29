@@ -1,10 +1,10 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-05-29 — `v0.17.0` Etapa 13
+> **Última actualización operativa:** 2026-05-29 — `v0.17.1` hotfix CI Etapa 13
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-13 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Etapa 13 cerrada en `v0.17.0` con export Claude Design desde tokens CSS + auto-tag semver.
+> **Status:** En ejecución — etapas 1-13 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Etapa 13 cerrada en `v0.17.0` con export Claude Design desde tokens CSS + auto-tag semver; `v0.17.1` adjunta el export zip a la GitHub Release creada por auto-tag.
 
 ## Estado del plan al 2026-05-29 America/Santiago
 
@@ -29,7 +29,8 @@
 | 11 — Pixel Streaming Unreal | ✅ Cerrada | `v0.15.0` | `f5b0c42` |
 | 12 — Pipeline Publicar | ✅ Cerrada | `v0.16.0` | `c0590e4` |
 | 12 hotfix — Publish Google token | ✅ Cerrada | `v0.16.1` | `8465330` |
-| 13 — Sync Claude Design | ✅ Cerrada | `v0.17.0` | — |
+| 13 — Sync Claude Design | ✅ Cerrada | `v0.17.0` | `ec9355d` |
+| 13 hotfix — Release asset auto-tag | ✅ Cerrada | `v0.17.1` | `fcb488a` |
 | 14 — GSAP polish | ⏳ Pendiente | — | — |
 | 15 — Performance + a11y | ⏳ Pendiente | — | — |
 | 16 — Documentación final | ⏳ Pendiente | — | — |

@@ -19,6 +19,11 @@ Sin cambios todavía.
   a la GitHub Release que crea junto al tag automático. Esto evita depender de
   un segundo workflow disparado por el tag creado con `GITHUB_TOKEN`.
 
+### Verified
+- Auto-tag run `26626485820` OK para `fcb488a`; creó `v0.17.1`.
+- GitHub Release `v0.17.1` contiene `claude-design-export.zip`.
+- GitHub Pages run `26626485864` OK para `fcb488a`.
+
 ## [0.17.0] — 2026-05-29 — Etapa 13: Sync Claude Design + GitHub
 
 ### Added
@@ -43,6 +48,10 @@ Sin cambios todavía.
 ### Verified
 - `node scripts/export-claude-design.mjs` OK; export local con 96 tokens.
 - `tokens.json` parsea correctamente y conserva `bg-0` → `bg-radial-copper`.
+- Sync Claude Design run `26626392558` OK; artifact `claude-design-export`
+  creado con id `7286242271`.
+- Auto-tag run `26626392562` OK; creó `v0.17.0` desde `ec9355d`.
+- GitHub Pages run `26626392593` OK para `ec9355d`.
 
 ## [0.16.1] — 2026-05-26 — Hotfix: publish Google token
 
