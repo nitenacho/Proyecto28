@@ -33,9 +33,11 @@ Estado actual:
 - Hotfix `v0.16.1`: corrige el error `Invalid Google id_token` reportado al
   apretar `PUBLICAR CAMBIOS`. El frontend ahora prefiere `accessToken` y Strapi
   valida `id_token`/`access_token` sin heuristica `includes('.')`.
-- Produccion mantiene `pixelStreamingPreviewEnabled:false` y
-  `pixelStreamingEnabled:false`; no se muestra preview/stream hasta que el
-  owner lo active.
+- Validacion Strapi 2026-05-29 post-cierre: produccion reporta
+  `pixelStreamingPreviewEnabled:true`, `pixelStreamingEnabled:true`,
+  `adminButtonVisible:true`, `pixelStreamingMode:shared`. Esto refleja el
+  estado vivo del CMS tras uso del panel; el tweak **Preview visible** ya
+  permite apagar/encender el fallback desde Tweaks.
 - Etapa 13 cerrada en `v0.17.0`: `src/styles/tokens.css` queda como fuente de
   verdad Claude Design; `sync-design.yml` exporta `claude-design-export` y
   `auto-tag.yml` crea tags semver para commits `feat:`/`fix:` en `main`.
@@ -272,14 +274,13 @@ lista de Test users de GCP.
   - Respuesta esperada y observada: `Invalid Google token (Invalid Google
     access_token / Invalid Google id_token)`.
 
-Valores SiteSetting produccion tras cierre:
-- `pixelStreamingPreviewEnabled:false`
-- `pixelStreamingEnabled:false`
-- `defaultGravityEnabled:true`
-- `gameShadowSize:0.3`
+Valores SiteSetting produccion validados 2026-05-29:
+- `pixelStreamingPreviewEnabled:true`
+- `pixelStreamingEnabled:true`
+- `pixelStreamingMode:shared`
+- `gameShadowSize:0.25`
 - `gameLightVelocityCurve:kirby`
-- `adminButtonVisible:false` en CMS, aunque puede quedar visible por
-  localStorage si el navegador del owner lo tenia activado.
+- `adminButtonVisible:true`
 
 ---
 

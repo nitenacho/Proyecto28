@@ -10,7 +10,15 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
-Sin cambios todavía.
+### Verified
+- Validacion Strapi post-cierre 2026-05-29: `/api/projects?populate=*`,
+  `/api/site-setting`, `/api/auth/check?email=inconcha@gmail.com` y
+  `/api/auth/check?email=yk8arts@gmail.com` responden `200`; whitelist permite
+  `inconcha@gmail.com` como `owner` y `yk8arts@gmail.com` como `editor`.
+- SiteSetting produccion reporta `pixelStreamingEnabled:true`,
+  `pixelStreamingPreviewEnabled:true`, `pixelStreamingMode:shared`,
+  `adminButtonVisible:true`, `gameLightVelocityCurve:kirby` y
+  `gameShadowSize:0.25`.
 
 ## [0.17.1] — 2026-05-29 — Hotfix CI: release asset en auto-tag
 
