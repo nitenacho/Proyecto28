@@ -6,6 +6,7 @@
 
 import * as THREE from 'three';
 import { createPixelStreamFrame } from './pixelStream.js';
+import { streamOverlayEnterTimeline } from '../animations/timelines.js';
 
 const ANCHOR_Y = 1.08;
 const EDGE_GAP = 16;
@@ -90,9 +91,11 @@ export function createStreamOverlay({ site, camera }) {
       return;
     }
 
+    const wasHidden = root.hidden;
     root.hidden = false;
     frame.setProject({ project: activeProject, streaming });
     update(camera);
+    if (wasHidden) streamOverlayEnterTimeline(root);
   }
 
   function setActiveTile(tile) {

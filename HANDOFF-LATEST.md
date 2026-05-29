@@ -1,17 +1,19 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-05-29 (cierre Etapa 13 - `v0.17.1`)
-> **Tag activo:** `v0.17.1`
+> **Ultima actualizacion:** 2026-05-29 (cierre Etapa 14 - `v0.18.0`)
+> **Tag activo:** `v0.18.0`
 > **Branch:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 
-> Etapas 1-13 cerradas. Etapa 12 deja operativo el primer pipeline
+> Etapas 1-14 cerradas. Etapa 12 deja operativo el primer pipeline
 > `Tweaks -> Strapi SiteSetting`, con auth Google + whitelist, audit log y
 > webhook Discord opcional. `v0.16.1` corrige el publish real cuando Google
 > entrega `accessToken`/`idToken` en flujos distintos. Etapa 13 agrega export
 > Claude Design desde tokens CSS y auto-tag semver en GitHub Actions. `v0.17.1`
-> corrige el auto-tag para adjuntar el export zip a la GitHub Release.
+> corrige el auto-tag para adjuntar el export zip a la GitHub Release. Etapa
+> 14 agrega polish GSAP con timelines reutilizables para cubos, popup, luz,
+> HUD y overlay Pixel Streaming.
 
 ---
 
@@ -19,10 +21,10 @@
 
 Web 3D interactiva en `proyecto28.com` con grid de cubos (Three.js + Vite),
 CMS Strapi Cloud, Google OAuth, whitelist gating, Pixel Streaming
-iframe/fallback y pipeline de publicacion de Tweaks.
+iframe/fallback, pipeline de publicacion de Tweaks y animaciones GSAP.
 
 Estado actual:
-- Etapas 1-13 cerradas.
+- Etapas 1-14 cerradas.
 - Bug responsive iPhone/iPad resuelto en `v0.14.6` y confirmado por owner:
   "se arreglo muy bien".
 - Etapa 11 cerrada en `v0.15.0`: overlay Pixel Streaming inicial con iframe
@@ -43,6 +45,10 @@ Estado actual:
   `auto-tag.yml` crea tags semver para commits `feat:`/`fix:` en `main`.
 - Hotfix `v0.17.1`: `auto-tag.yml` ahora genera `claude-design-export.zip` y
   lo adjunta a la GitHub Release del tag automatico.
+- Etapa 14 cerrada en `v0.18.0`: `gsap@3.15.0`, timelines reutilizables en
+  `src/animations/timelines.js`, entrada secuencial de cubos, activacion con
+  lift/scale/glow, popup fade + slide-up, squash/stretch de la luz, rebote HUD
+  y micro-entrada del overlay streaming/fallback.
 
 Codigos clave:
 - `e8c3f74 feat(admin): publish tweaks to Strapi`
@@ -50,6 +56,7 @@ Codigos clave:
 - `8465330 fix(auth): accept publish access tokens`
 - `ec9355d feat(ci): sync Claude Design tokens`
 - `fcb488a fix(ci): attach design export to auto tags`
+- `pendiente feat(anim): add GSAP polish timelines`
 - GitHub Pages run `26425439630` success para `c0590e4`.
 - GitHub Pages run `26433985069` success para `8465330`.
 - GitHub Pages run `26626392593` success para `ec9355d`.
@@ -86,18 +93,20 @@ git log --oneline -12
 Esperado:
 - branch `main`
 - working tree clean
-- ultimo tag `v0.17.1`
+- ultimo tag `v0.18.0`
 - commit hotfix `8465330`
-- ultimos commits de codigo/CI: `fcb488a`, `ec9355d`, `8465330`
+- ultimos commits de codigo/CI: `feat(anim): add GSAP polish timelines`,
+  `fcb488a`, `ec9355d`, `8465330`
 
 ### Paso 2 - Leer docs (orden)
 
 1. `HANDOFF-LATEST.md` (este archivo).
-2. `CHANGELOG.md` - entradas `[0.17.1]`, `[0.17.0]`, `[0.16.1]` y `[0.16.0]`.
+2. `CHANGELOG.md` - entradas `[0.18.0]`, `[0.17.1]`, `[0.17.0]`,
+   `[0.16.1]` y `[0.16.0]`.
 3. Google Doc oficial - ultima subpestana bajo `Handoff`:
    `2026-05-29 08:30 UTC v0.17.1 design`.
    Tab id: `t.l9sl79q157hl` (padre `Handoff`: `t.7lpfc5ado1h`).
-4. `PLAN-PROYECTO28-V2.md` - Etapa 14 queda como siguiente bloque.
+4. `PLAN-PROYECTO28-V2.md` - Etapa 15 queda como siguiente bloque.
 5. `DEPLOY.md` y `cms/README.md` si se toca deploy/CMS.
 
 ### Paso 3 - Validar sistema vivo
@@ -253,6 +262,42 @@ lista de Test users de GCP.
   - adjunto `claude-design-export.zip`
   - descarga: `https://github.com/nitenacho/Proyecto28/releases/download/v0.17.1/claude-design-export.zip`
 
+### Etapa 14 - GSAP polish
+
+Implementado:
+- `gsap@3.15.0` instalado.
+- `src/animations/timelines.js` creado con:
+  - `entranceTimeline`
+  - `cubeActivateTimeline`
+  - `cubeDeactivateTimeline`
+  - `popupEnterTimeline`
+  - `popupExitTimeline`
+  - `lightSquashTimeline`
+  - `lightFallTimeline`
+  - `hudCounterTimeline`
+  - `streamOverlayEnterTimeline`
+- `main.js` usa GSAP para entrada del grid y cambios de estado lit/unlit de
+  cubos.
+- `popup.js` anima el contenido sin romper placements `side`/`cursor`/`corner`.
+- `light.js` anima salto, aterrizaje y respawn sin tocar la fisica base.
+- `hud.js` reemplaza el pulse CSS del contador por timeline GSAP.
+- `streamOverlay.js` agrega micro-entrada del iframe/fallback.
+- `vite.config.js` separa GSAP en chunk propio `assets/gsap-*.js`.
+
+Validacion local:
+- Baseline pre-GSAP: `assets/index-D1o2Ydeg.js` `643.59 kB` / `169.43 kB`
+  gzip.
+- Build cierre: `assets/index-Cii4NAQW.js` `646.63 kB` / `170.33 kB` gzip.
+- Chunk GSAP: `assets/gsap-CzGW6FVa.js` `70.46 kB` / `27.81 kB` gzip.
+- Crecimiento del chunk principal: `+3.04 kB` bruto / `+0.90 kB` gzip.
+- Browser local `http://127.0.0.1:5173/?stage14=1` sin errores/warnings de
+  consola.
+- Desktop local: hover en cubo `028.C`, popup `Saturno Engine` visible,
+  `body/html/canvas = 1280`, sin overflow.
+- Responsive local:
+  - phone `390x844`: `body=390`, `html=390`, `canvas=390`.
+  - tablet portrait `810x1080`: `body=810`, `html=810`, `canvas=810`.
+
 ### Produccion Strapi Cloud
 
 - Despues del deploy, `/api/publish` cambio de `405` a `401` sin token:
@@ -288,6 +333,7 @@ Valores SiteSetting produccion validados 2026-05-29:
 
 - Branch: `main`
 - Codigo Etapa 12:
+  - pendiente `feat(anim): add GSAP polish timelines`
   - `fcb488a fix(ci): attach design export to auto tags`
   - `ec9355d feat(ci): sync Claude Design tokens`
   - `8465330 fix(auth): accept publish access tokens`
@@ -302,6 +348,9 @@ Valores SiteSetting produccion validados 2026-05-29:
 - Tags Etapa 13:
   - `v0.17.0` auto-tag para `ec9355d`
   - `v0.17.1` auto-tag para `fcb488a`, con Release asset
+- Tag Etapa 14:
+  - `v0.18.0` esperado por auto-tag tras merge del commit `feat(anim): add GSAP
+    polish timelines`
 
 `gh` local no estaba autenticado en esta maquina; los runs se validaron por la
 API publica de GitHub.
@@ -356,15 +405,17 @@ Variables recomendadas en Strapi Cloud:
 
 ## 7. Proximo paso
 
-Etapa 14 - GSAP polish + animaciones premium.
+Etapa 15 - Performance, responsive deep-dive y accesibilidad.
 
 Antes de codear:
 1. Validar `git status` clean en `main`.
-2. Confirmar `git describe --tags --abbrev=0` => `v0.17.1`.
+2. Confirmar `git describe --tags --abbrev=0` => `v0.18.0`.
 3. Hacer smoke manual de `PUBLICAR CAMBIOS` en `proyecto28.com`.
-4. Leer `CHANGELOG.md` entradas `[0.17.1]` y `[0.17.0]`.
+4. Leer `CHANGELOG.md` entradas `[0.18.0]`, `[0.17.1]` y `[0.17.0]`.
+5. Revisar el warning Vite de chunk `>500 kB`: queda como tema natural para
+   Etapa 15.
 
-No mezclar Etapa 14 con el tech debt de `Project.status` salvo que bloquee.
+No mezclar Etapa 15 con el tech debt de `Project.status` salvo que bloquee.
 
 ---
 
@@ -383,4 +434,4 @@ No mezclar Etapa 14 con el tech debt de `Project.status` salvo que bloquee.
 - Google Doc respaldado como subpestana bajo `Handoff`.
 - Tag semver al cierre.
 
-Fin del handoff `v0.17.1`.
+Fin del handoff `v0.18.0`.

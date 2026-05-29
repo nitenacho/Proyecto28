@@ -16,6 +16,7 @@ import { mountHud } from './ui/hud.js';
 import { initGoogleAuth, signIn, signOut, getCurrentUser } from './auth/google.js';
 import { checkWhitelist } from './auth/whitelist.js';
 import { publishTweaksSnapshot } from './admin/publish.js';
+import { cubeActivateTimeline, cubeDeactivateTimeline, entranceTimeline } from './animations/timelines.js';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
@@ -42,6 +43,7 @@ async function boot() {
   console.log(`[p28] content source: ${source}`);
 
   const sceneCtx = createScene({ canvas, grid, projects });
+  entranceTimeline(sceneCtx.tiles);
   const defaults = site.defaults;
   const hud = mountHud();
   const streamOverlay = createStreamOverlay({ site, camera: sceneCtx.camera });
@@ -463,13 +465,17 @@ async function boot() {
     for (const tile of sceneCtx.tiles) {
       const ud = tile.userData;
       const isLit = (tile === hovered || tile === activeTile) && ud.isProject;
-      const targetY = isLit ? ud.hoverY : ud.restY;
-      tile.position.y += (targetY - tile.position.y) * Math.min(dt * 8, 1);
+      if (ud.isProject && ud.isLit !== isLit) {
+        ud.isLit = isLit;
+        if (isLit) cubeActivateTimeline(tile);
+        else cubeDeactivateTimeline(tile);
+      }
       if (ud.isProject) {
         const breath = 0.5 + 0.5 * Math.sin(t * 1.4 + ud.breathPhase);
         const baseGlow = ud.baseEmissive * (0.85 + 0.3 * breath);
-        const targetGlow = isLit ? ud.hoverEmissive : baseGlow;
-        tile.material.emissiveIntensity += (targetGlow - tile.material.emissiveIntensity) * Math.min(dt * 6, 1);
+        if (!isLit && !ud.gsapAnimating) {
+          tile.material.emissiveIntensity = baseGlow;
+        }
       }
     }
 

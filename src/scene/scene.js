@@ -174,6 +174,7 @@ export function createScene({ canvas, grid, projects }) {
       mesh.position.set(startX + c * (TILE_SIZE + TILE_GAP), 0, startZ + r * (TILE_SIZE + TILE_GAP));
       mesh.userData = {
         slot, row: r, col: c, project, isProject,
+        isLit: false,
         restY: 0, hoverY: 0.65,
         baseEmissive: isProject ? 0.35 : 0.0,
         hoverEmissive: isProject ? 1.4 : 0.6,

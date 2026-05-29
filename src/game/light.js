@@ -13,6 +13,7 @@
    ========================================================= */
 
 import * as THREE from 'three';
+import { lightFallTimeline, lightSquashTimeline } from '../animations/timelines.js';
 
 const LIGHT_Y = 1.0;
 const RESPAWN_HEIGHT = 4.0;
@@ -175,6 +176,7 @@ export function createControllableLight({
     vy = Math.sqrt(2 * config.gravity * config.jumpHeight) * mult;
     jumpsUsed++;
     grounded = false;
+    lightSquashTimeline(mesh, 'jump');
   }
 
   function handleMoveKey(k) {
@@ -344,6 +346,7 @@ export function createControllableLight({
       if (!grounded) {
         grounded = true;
         jumpsUsed = 0;
+        lightSquashTimeline(mesh, 'land');
       }
       setActiveTile(landedTile && landedTile.userData.isProject ? landedTile : null);
     } else {
@@ -359,6 +362,7 @@ export function createControllableLight({
     respawnPhase = 'fadingOut';
     respawnT = 0;
     setActiveTile(null);
+    lightFallTimeline(mesh);
   }
 
   function updateRespawn(dt) {
@@ -374,6 +378,7 @@ export function createControllableLight({
         respawnPhase = 'fadingIn';
         respawnT = 0;
         setOpacity(0);
+        lightSquashTimeline(mesh, 'jump');
       } else {
         setOpacity(1 - respawnT);
       }

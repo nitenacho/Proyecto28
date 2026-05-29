@@ -3,6 +3,8 @@
    talks directly to the live three-scene's hover events.
    ========================================================= */
 
+import { popupEnterTimeline, popupExitTimeline } from '../animations/timelines.js';
+
 export function createPopup() {
   const root        = document.getElementById('popup');
   const titleEl     = document.getElementById('popup-title');
@@ -61,12 +63,14 @@ export function createPopup() {
     btnEl.target = project.redirectURL && project.redirectURL.startsWith('http') ? '_blank' : '_self';
     root.classList.toggle('cyan-accent', project.color === 'cyan');
     root.classList.add('visible');
+    popupEnterTimeline(root);
     if (coordModule) coordModule.textContent = project.id;
   }
 
   function scheduleHide() {
     if (closeTimer) clearTimeout(closeTimer);
     closeTimer = setTimeout(() => {
+      popupExitTimeline(root);
       root.classList.remove('visible');
       activeProject = null;
       if (coordModule) coordModule.textContent = '—';
@@ -75,6 +79,7 @@ export function createPopup() {
 
   function hideNow() {
     if (closeTimer) clearTimeout(closeTimer);
+    popupExitTimeline(root);
     root.classList.remove('visible');
     activeProject = null;
     if (coordModule) coordModule.textContent = '—';

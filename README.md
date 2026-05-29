@@ -1,7 +1,7 @@
 # PROYECTO 28
 
-Sitio interactivo 3D — Tiles WebGL/Three.js + popup HUD + tweaks live,
-contenido editable desde un Strapi headless.
+Sitio interactivo 3D — Tiles WebGL/Three.js + polish GSAP + popup HUD +
+tweaks live, contenido editable desde un Strapi headless.
 
 ```
 proyecto28/
@@ -60,6 +60,21 @@ El comando genera `claude-design-export/` con `tokens.css`, `tokens.json`,
 `manifest.json` y `README.md`. GitHub Actions ejecuta el mismo export cuando
 cambian los tokens y lo adjunta como artifact; en tags `v*` también lo publica
 como asset de GitHub Release.
+
+### Animaciones GSAP
+
+Etapa 14 agrega `gsap` para micro-interacciones del grid 3D:
+
+- entrada secuencial de cubos;
+- activación/desactivación con scale + glow;
+- popup con contenido fade + slide-up;
+- squash/stretch de la luz al saltar, aterrizar y respawnear;
+- rebote del contador HUD;
+- micro-entrada del preview Pixel Streaming/fallback.
+
+Vite separa GSAP en `assets/gsap-*.js` para que el chunk principal del sitio no
+absorba ese peso. El build local de cierre dejó el chunk GSAP en `27.81 kB`
+gzip.
 
 ## Producción
 
@@ -148,6 +163,6 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 12 hotfix — Publish Google token | ✅ Cerrado — accessToken/idToken robusto | `v0.16.1` |
 | 13 — Sync Claude Design | ✅ Cerrado — export tokens + auto-tag | `v0.17.0` |
 | 13 hotfix — Release asset auto-tag | ✅ Cerrado — export zip en GitHub Release | `v0.17.1` |
-| 14 — GSAP polish | ⏳ Pendiente | — |
+| 14 — GSAP polish | ✅ Cerrado — timelines + polish premium | `v0.18.0` |
 | 15 — Performance + a11y | ⏳ Pendiente | — |
 | 16 — Documentación final | ⏳ Pendiente | — |

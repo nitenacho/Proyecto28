@@ -10,15 +10,48 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+Sin cambios todavía.
+
+## [0.18.0] — 2026-05-29 — Etapa 14: GSAP polish + animaciones premium
+
+### Added
+- Nueva dependencia `gsap@3.15.0`.
+- Nuevo módulo `src/animations/timelines.js` con timelines reutilizables:
+  `entranceTimeline`, `cubeActivateTimeline`, `cubeDeactivateTimeline`,
+  `popupEnterTimeline`, `popupExitTimeline`, `lightSquashTimeline`,
+  `lightFallTimeline`, `hudCounterTimeline` y `streamOverlayEnterTimeline`.
+- Entrada secuencial del grid al cargar la escena.
+- Feedback GSAP de activación/desactivación de cubos: elevación, escala y glow.
+- Feedback de salto/aterrizaje/respawn de la luz controlable con squash &
+  stretch.
+- Rebote GSAP del contador `Luces caídas`.
+- Micro-entrada del overlay Pixel Streaming/fallback cuando aparece sobre un
+  cubo activo.
+
+### Changed
+- El popup mantiene sus placements existentes, pero su contenido ahora entra y
+  sale con fade + slide-up orquestado por GSAP.
+- El loop principal deja de hacer `lerp` manual para lift/glow de cubos activos
+  y delega esos cambios a timelines por transición de estado.
+- `vite.config.js` separa GSAP en chunk propio (`assets/gsap-*.js`) para
+  mantener el bundle principal estable.
+
 ### Verified
-- Validacion Strapi post-cierre 2026-05-29: `/api/projects?populate=*`,
-  `/api/site-setting`, `/api/auth/check?email=inconcha@gmail.com` y
-  `/api/auth/check?email=yk8arts@gmail.com` responden `200`; whitelist permite
-  `inconcha@gmail.com` como `owner` y `yk8arts@gmail.com` como `editor`.
-- SiteSetting produccion reporta `pixelStreamingEnabled:true`,
-  `pixelStreamingPreviewEnabled:true`, `pixelStreamingMode:shared`,
-  `adminButtonVisible:true`, `gameLightVelocityCurve:kirby` y
-  `gameShadowSize:0.25`.
+- `npm run build` OK.
+- Baseline pre-GSAP: `assets/index-D1o2Ydeg.js` `643.59 kB` / `169.43 kB`
+  gzip.
+- Build con GSAP separado: `assets/index-Cii4NAQW.js` `646.63 kB` /
+  `170.33 kB` gzip y `assets/gsap-CzGW6FVa.js` `70.46 kB` / `27.81 kB` gzip.
+- Crecimiento del chunk principal: `+3.04 kB` bruto / `+0.90 kB` gzip.
+  Carga GSAP aislada: `27.81 kB` gzip, bajo el margen de 50KB gzip definido en
+  la etapa.
+- Browser local `http://127.0.0.1:5173/?stage14=1`: sin errores/warnings de
+  consola.
+- Smoke hover desktop: popup visible en cubo `028.C`, `body/html/canvas =
+  1280`, sin overflow horizontal.
+- Smoke responsive local:
+  - phone `390x844`: `body=390`, `html=390`, `canvas=390`.
+  - tablet portrait `810x1080`: `body=810`, `html=810`, `canvas=810`.
 
 ## [0.17.1] — 2026-05-29 — Hotfix CI: release asset en auto-tag
 

@@ -1,10 +1,10 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-05-29 — `v0.17.1` hotfix CI Etapa 13
+> **Última actualización operativa:** 2026-05-29 — `v0.18.0` Etapa 14 GSAP polish
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-13 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Etapa 13 cerrada en `v0.17.0` con export Claude Design desde tokens CSS + auto-tag semver; `v0.17.1` adjunta el export zip a la GitHub Release creada por auto-tag.
+> **Status:** En ejecución — etapas 1-14 cerradas. Responsive iPhone/iPad resuelto y confirmado en `v0.14.6`. Etapa 14 cerrada en `v0.18.0` con GSAP para timelines reutilizables, polish de cubos/popup/luz/HUD/stream y chunk separado `gsap`.
 
 ## Estado del plan al 2026-05-29 America/Santiago
 
@@ -31,7 +31,7 @@
 | 12 hotfix — Publish Google token | ✅ Cerrada | `v0.16.1` | `8465330` |
 | 13 — Sync Claude Design | ✅ Cerrada | `v0.17.0` | `ec9355d` |
 | 13 hotfix — Release asset auto-tag | ✅ Cerrada | `v0.17.1` | `fcb488a` |
-| 14 — GSAP polish | ⏳ Pendiente | — | — |
+| 14 — GSAP polish | ✅ Cerrada | `v0.18.0` | pendiente auto-tag |
 | 15 — Performance + a11y | ⏳ Pendiente | — | — |
 | 16 — Documentación final | ⏳ Pendiente | — | — |
 
@@ -730,6 +730,30 @@ Tweaks → Strapi + `PublishLog`; Discord queda opcional vía webhook si existe
 
 ### ETAPA 14 — GSAP polish + animaciones premium
 **Objetivo:** Elevar la sensación de calidad con animaciones bien orquestadas.
+
+**Estado:** ✅ Cerrada en `v0.18.0` (2026-05-29).
+
+**Resultado implementado:**
+- `gsap@3.15.0` instalado.
+- `src/animations/timelines.js` creado con timelines reutilizables para grid,
+  cubos, popup, luz, HUD y overlay Pixel Streaming.
+- Entrada secuencial de cubos con stagger `80ms`.
+- Activación/desactivación de cubos con lift, scale y glow via GSAP.
+- Popup mantiene placements `side`/`cursor`/`corner`, pero anima contenido con
+  fade + slide-up.
+- Luz controlable recibe squash/stretch al saltar, aterrizar y respawnear.
+- HUD `Luces caídas` rebota con timeline GSAP.
+- Overlay Pixel Streaming/fallback entra con scale + blur sutil.
+- `vite.config.js` separa GSAP en chunk `assets/gsap-*.js`.
+
+**Validación local cierre:**
+- `npm run build` OK.
+- Chunk principal post-GSAP: `646.63 kB` / `170.33 kB` gzip.
+- Chunk GSAP separado: `70.46 kB` / `27.81 kB` gzip.
+- Desktop local: hover cubo `028.C`, popup visible, sin errores de consola.
+- Responsive local:
+  - phone `390x844`: `body=390`, `html=390`, `canvas=390`.
+  - tablet portrait `810x1080`: `body=810`, `html=810`, `canvas=810`.
 
 **Tareas:**
 1. Instalar GSAP (`npm i gsap`) — desde 2024 es 100% gratuito incluyendo SplitText y MorphSVG.

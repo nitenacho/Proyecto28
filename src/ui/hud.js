@@ -4,6 +4,8 @@
    Estado en memoria — se resetea al recargar.
    ========================================================= */
 
+import { hudCounterTimeline } from '../animations/timelines.js';
+
 const STYLE_ID = 'p28-hud-style';
 const HUD_CSS = `
 .p28-hud {
@@ -35,13 +37,8 @@ const HUD_CSS = `
 .p28-hud-value {
   color: var(--cyan);
   font-weight: 600;
-}
-.p28-hud-value.p28-hud-pulse {
-  animation: p28-hud-pulse 480ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-@keyframes p28-hud-pulse {
-  0%   { color: var(--copper-bright); text-shadow: 0 0 12px rgba(255,138,77,0.6); }
-  100% { color: var(--cyan); text-shadow: none; }
+  display: inline-block;
+  transform-origin: 50% 60%;
 }
 @media (max-width: 1024px), (pointer: coarse), (max-aspect-ratio: 1/1) {
   .p28-hud {
@@ -90,15 +87,9 @@ export function mountHud() {
 
   document.body.appendChild(root);
 
-  let pulseTimer = 0;
   function setFallCount(n) {
     value.textContent = pad3(n);
-    value.classList.remove('p28-hud-pulse');
-    // force reflow para reiniciar la animación
-    void value.offsetWidth;
-    value.classList.add('p28-hud-pulse');
-    clearTimeout(pulseTimer);
-    pulseTimer = setTimeout(() => value.classList.remove('p28-hud-pulse'), 600);
+    hudCounterTimeline(value);
   }
 
   return { setFallCount, element: root };
