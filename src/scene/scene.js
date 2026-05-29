@@ -5,11 +5,6 @@
    ========================================================= */
 
 import * as THREE from 'three';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { createHoverModel } from './hoverModel.js';
 
 const TILE_SIZE   = 1.6;
@@ -49,7 +44,63 @@ function makeGridTexture() {
   return tex;
 }
 
-export function createScene({ canvas, grid, projects }) {
+function prefersReducedMotion() {
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+}
+
+function isConstrainedViewport({ w, h }) {
+  const aspect = w / Math.max(h, 1);
+  return (
+    prefersReducedMotion() ||
+    w < 768 ||
+    aspect < 0.75 ||
+    window.matchMedia?.('(pointer: coarse)').matches
+  );
+}
+
+async function createTileGeometry(constrained) {
+  if (constrained) {
+    return new THREE.BoxGeometry(TILE_SIZE, TILE_HEIGHT, TILE_SIZE);
+  }
+  const { RoundedBoxGeometry } = await import('three/addons/geometries/RoundedBoxGeometry.js');
+  return new RoundedBoxGeometry(TILE_SIZE, TILE_HEIGHT, TILE_SIZE, 4, 0.18);
+}
+
+async function createRendererPipeline({ constrained, renderer, scene, camera, size }) {
+  if (constrained) {
+    return {
+      composer: {
+        render() { renderer.render(scene, camera); },
+        setSize() {},
+      },
+      bloom: null,
+    };
+  }
+
+  const [
+    { EffectComposer },
+    { RenderPass },
+    { UnrealBloomPass },
+    { OutputPass },
+  ] = await Promise.all([
+    import('three/addons/postprocessing/EffectComposer.js'),
+    import('three/addons/postprocessing/RenderPass.js'),
+    import('three/addons/postprocessing/UnrealBloomPass.js'),
+    import('three/addons/postprocessing/OutputPass.js'),
+  ]);
+
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  const bloom = new UnrealBloomPass(
+    new THREE.Vector2(size.w, size.h),
+    0.55, 0.85, 0.15,
+  );
+  composer.addPass(bloom);
+  composer.addPass(new OutputPass());
+  return { composer, bloom };
+}
+
+export async function createScene({ canvas, grid, projects }) {
   // Index projects by slot
   const projectBySlot = new Map();
   for (const p of projects) projectBySlot.set(p.slot, p);
@@ -61,12 +112,13 @@ export function createScene({ canvas, grid, projects }) {
   }
 
   const renderer = new THREE.WebGLRenderer({
-    canvas, antialias: true, alpha: false, powerPreference: 'high-performance',
+    canvas, antialias: !isConstrainedViewport(getViewportSize()), alpha: false, powerPreference: 'high-performance',
   });
   const initialViewport = getViewportSize();
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const constrained = isConstrainedViewport(initialViewport);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, constrained ? 1.25 : 2));
   renderer.setSize(initialViewport.w, initialViewport.h, false);
-  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.enabled = !constrained;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
@@ -115,16 +167,18 @@ export function createScene({ canvas, grid, projects }) {
   scene.add(new THREE.AmbientLight(0x1a2438, 0.4));
   const keyLight = new THREE.DirectionalLight(0xc7e6e0, 1.6);
   keyLight.position.set(-6, 12, 4);
-  keyLight.castShadow = true;
-  keyLight.shadow.mapSize.set(2048, 2048);
-  keyLight.shadow.camera.near = 1;
-  keyLight.shadow.camera.far = 30;
-  keyLight.shadow.camera.left = -10;
-  keyLight.shadow.camera.right = 10;
-  keyLight.shadow.camera.top = 10;
-  keyLight.shadow.camera.bottom = -10;
-  keyLight.shadow.bias = -0.0005;
-  keyLight.shadow.radius = 6;
+  keyLight.castShadow = !constrained;
+  if (keyLight.castShadow) {
+    keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.shadow.camera.near = 1;
+    keyLight.shadow.camera.far = 30;
+    keyLight.shadow.camera.left = -10;
+    keyLight.shadow.camera.right = 10;
+    keyLight.shadow.camera.top = 10;
+    keyLight.shadow.camera.bottom = -10;
+    keyLight.shadow.bias = -0.0005;
+    keyLight.shadow.radius = 6;
+  }
   scene.add(keyLight);
   const rimLight = new THREE.DirectionalLight(0xff8a4d, 0.4);
   rimLight.position.set(8, 4, -6);
@@ -140,11 +194,11 @@ export function createScene({ canvas, grid, projects }) {
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -TILE_HEIGHT / 2 - 0.01;
-  floor.receiveShadow = true;
+  floor.receiveShadow = !constrained;
   scene.add(floor);
 
   // Tiles
-  const tileGeom = new RoundedBoxGeometry(TILE_SIZE, TILE_HEIGHT, TILE_SIZE, 4, 0.18);
+  const tileGeom = await createTileGeometry(constrained);
   const tilesGroup = new THREE.Group();
   scene.add(tilesGroup);
 
@@ -169,8 +223,8 @@ export function createScene({ canvas, grid, projects }) {
         metalness: isProject ? 0.18 : 0.05,
       });
       const mesh = new THREE.Mesh(tileGeom, mat);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
+      mesh.castShadow = !constrained;
+      mesh.receiveShadow = !constrained;
       mesh.position.set(startX + c * (TILE_SIZE + TILE_GAP), 0, startZ + r * (TILE_SIZE + TILE_GAP));
       mesh.userData = {
         slot, row: r, col: c, project, isProject,
@@ -218,15 +272,14 @@ export function createScene({ canvas, grid, projects }) {
     }
   }
 
-  // Post-processing
-  const composer = new EffectComposer(renderer);
-  composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(
-    new THREE.Vector2(initialViewport.w, initialViewport.h),
-    0.55, 0.85, 0.15,
-  );
-  composer.addPass(bloom);
-  composer.addPass(new OutputPass());
+  // Post-processing: full bloom desktop, direct renderer on constrained mobile.
+  const { composer, bloom } = await createRendererPipeline({
+    constrained,
+    renderer,
+    scene,
+    camera,
+    size: initialViewport,
+  });
 
   // Hover model
   const hoverModel = createHoverModel(scene);
@@ -241,7 +294,7 @@ export function createScene({ canvas, grid, projects }) {
     setCameraFromState(camState.tilt, camState.yaw);
     renderer.setSize(w, h, false);
     composer.setSize(w, h);
-    bloom.setSize(w, h);
+    if (bloom) bloom.setSize(w, h);
   }
   window.addEventListener('resize', handleResize);
   window.addEventListener('orientationchange', handleResize);

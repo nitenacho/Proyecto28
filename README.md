@@ -1,7 +1,8 @@
 # PROYECTO 28
 
 Sitio interactivo 3D — Tiles WebGL/Three.js + polish GSAP + popup HUD +
-tweaks live, contenido editable desde un Strapi headless.
+tweaks live, accesibilidad por teclado, lazy Pixel Streaming y contenido
+editable desde un Strapi headless.
 
 ```
 proyecto28/
@@ -75,6 +76,27 @@ Etapa 14 agrega `gsap` para micro-interacciones del grid 3D:
 Vite separa GSAP en `assets/gsap-*.js` para que el chunk principal del sitio no
 absorba ese peso. El build local de cierre dejó el chunk GSAP en `27.81 kB`
 gzip.
+
+### Performance y accesibilidad
+
+Etapa 15 endurece el boot final antes de v1:
+
+- `vite.config.js` separa `three`, `three-addons`, `gsap` y `streaming`.
+- Pixel Streaming usa `createLazyStreamOverlay`: el chunk `streaming-*` no se
+  descarga si `Preview visible` está apagado y no hay stream válido.
+- Mobile/reduced-motion usa modo ligero: geometría simple, pixel ratio acotado,
+  sin sombras caras y sin bloom/post-processing.
+- Los cubos tienen navegación por teclado: `Tab` recorre proyectos, `Enter`
+  abre el popup y `Escape` cierra.
+- El panel Tweaks publica `Streaming > Preview visible`, que permite controlar
+  cuándo se muestra el fallback/preview del streaming.
+
+Medición de cierre sobre `vite preview`:
+
+- Lighthouse mobile: Performance `80`, Accessibility `100`.
+- Lighthouse desktop: Performance `98`, Accessibility `100`.
+- Responsive smoke: `320`, `375`, `414`, `768`, `1024`, `1440`, `1920` px sin
+  overflow horizontal (`body/html/canvas == innerWidth`).
 
 ## Producción
 
@@ -164,5 +186,5 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 13 — Sync Claude Design | ✅ Cerrado — export tokens + auto-tag | `v0.17.0` |
 | 13 hotfix — Release asset auto-tag | ✅ Cerrado — export zip en GitHub Release | `v0.17.1` |
 | 14 — GSAP polish | ✅ Cerrado — timelines + polish premium | `v0.18.0` |
-| 15 — Performance + a11y | ⏳ Pendiente | — |
+| 15 — Performance + a11y | ✅ Cerrado — Lighthouse + responsive + teclado | `v0.19.0` |
 | 16 — Documentación final | ⏳ Pendiente | — |

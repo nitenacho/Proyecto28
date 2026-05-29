@@ -122,6 +122,24 @@ export function createPixelStreamFrame({ root }) {
   let currentProject = null;
   let currentStreaming = null;
   let currentSrc = '';
+  let loadTimer = null;
+
+  function clearLoadTimer() {
+    if (loadTimer) {
+      clearTimeout(loadTimer);
+      loadTimer = null;
+    }
+  }
+
+  function showFallback(status = 'Fallback') {
+    clearLoadTimer();
+    root.classList.remove('is-loading');
+    root.dataset.state = 'fallback';
+    root.dataset.interactive = 'false';
+    headStatus.textContent = status;
+    frame.hidden = true;
+    fallback.hidden = false;
+  }
 
   function postProjectCommand() {
     if (!currentSrc || !frame.contentWindow || !currentProject) return;
@@ -136,9 +154,18 @@ export function createPixelStreamFrame({ root }) {
   }
 
   frame.addEventListener('load', () => {
+    clearLoadTimer();
     root.classList.remove('is-loading');
+    if (currentSrc && streamURLForProject(currentProject, currentStreaming)) {
+      root.dataset.state = 'stream';
+      root.dataset.interactive = 'true';
+      headStatus.textContent = 'Live';
+      frame.hidden = false;
+      fallback.hidden = true;
+    }
     postProjectCommand();
   });
+  frame.addEventListener('error', () => showFallback('Sin respuesta'));
 
   function setProject({ project, streaming }) {
     currentProject = project || null;
@@ -167,7 +194,7 @@ export function createPixelStreamFrame({ root }) {
     if (!hasStream) {
       if (currentSrc) frame.removeAttribute('src');
       currentSrc = '';
-      root.classList.remove('is-loading');
+      showFallback(fallbackStatus(currentProject, currentStreaming));
       return;
     }
 
@@ -175,12 +202,15 @@ export function createPixelStreamFrame({ root }) {
       currentSrc = streamURL;
       root.classList.add('is-loading');
       frame.src = streamURL;
+      clearLoadTimer();
+      loadTimer = setTimeout(() => showFallback('Sin respuesta'), 12000);
     } else {
       postProjectCommand();
     }
   }
 
   function clear() {
+    clearLoadTimer();
     currentProject = null;
     currentStreaming = null;
     currentSrc = '';

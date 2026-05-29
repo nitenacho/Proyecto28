@@ -7,7 +7,6 @@
    ========================================================= */
 
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const PALETTE_TO_HEX = {
   cyan:   { color: 0x9FE5DC, emissive: 0x39C7B6 },
@@ -23,7 +22,7 @@ const SHAPE_BUILDERS = {
   torusKnot: () => new THREE.TorusKnotGeometry(0.30, 0.08, 80, 12),
 };
 
-const gltfLoader = new GLTFLoader();
+let gltfLoaderPromise = null;
 const gltfCache = new Map(); // url -> Promise<Object3D>
 
 export function createHoverModel(scene) {
@@ -67,7 +66,11 @@ export function createHoverModel(scene) {
 
   function loadGLB(url) {
     if (gltfCache.has(url)) return gltfCache.get(url);
-    const p = new Promise((resolve) => {
+    if (!gltfLoaderPromise) {
+      gltfLoaderPromise = import('three/addons/loaders/GLTFLoader.js')
+        .then(({ GLTFLoader }) => new GLTFLoader());
+    }
+    const p = gltfLoaderPromise.then((gltfLoader) => new Promise((resolve) => {
       gltfLoader.load(
         url,
         (gltf) => {
@@ -85,7 +88,7 @@ export function createHoverModel(scene) {
         undefined,
         (err) => { console.warn('[hover-model] glb load failed', url, err); resolve(null); },
       );
-    });
+    }));
     gltfCache.set(url, p);
     return p;
   }

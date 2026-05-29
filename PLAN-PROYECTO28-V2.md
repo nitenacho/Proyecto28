@@ -32,7 +32,7 @@
 | 13 — Sync Claude Design | ✅ Cerrada | `v0.17.0` | `ec9355d` |
 | 13 hotfix — Release asset auto-tag | ✅ Cerrada | `v0.17.1` | `fcb488a` |
 | 14 — GSAP polish | ✅ Cerrada | `v0.18.0` | `f84a391` |
-| 15 — Performance + a11y | ⏳ Pendiente | — | — |
+| 15 — Performance + a11y | ✅ Cerrada | `v0.19.0` | — |
 | 16 — Documentación final | ⏳ Pendiente | — | — |
 
 ## Decisiones tomadas durante la ejecución (resoluciones al §1)
@@ -780,6 +780,7 @@ Tweaks → Strapi + `PublishLog`; Discord queda opcional vía webhook si existe
 ---
 
 ### ETAPA 15 — Performance, responsive deep-dive, accesibilidad
+**Estado:** ✅ Cerrada en `v0.19.0`.
 **Objetivo:** Hardening final antes de v1.0.0.
 
 **Tareas:**
@@ -816,6 +817,23 @@ Tweaks → Strapi + `PublishLog`; Discord queda opcional vía webhook si existe
 - Lighthouse a11y ≥95
 - No errores en consola en navegadores principales
 - UX consistente en 320px–1920px
+
+**Resultado v0.19.0:**
+- Code-splitting final: `three`, `three-addons`, `gsap` y `streaming` en
+  chunks separados; `streaming-*` y `three-addons-*` no se precargan en mobile
+  durante boot normal.
+- Pixel Streaming usa lazy overlay y respeta el tweak `Preview visible`; si
+  está apagado y no hay stream válido, no descarga ni monta preview.
+- Mobile/reduced-motion usa modo ligero sin bloom/sombras caras y con pixel
+  ratio acotado.
+- Lighthouse `vite preview`: mobile Performance `80` / Accessibility `100`;
+  desktop Performance `98` / Accessibility `100`.
+- Responsive CDP: `320`, `375`, `414`, `768`, `1024`, `1440`, `1920` px con
+  `body/html/canvas == innerWidth`.
+- Accesibilidad: navegación `Tab` por cubos, `Enter` abre popup, `Escape`
+  cierra, roles/labels ARIA en canvas/popup/ruta/tweaks.
+- SEO base agregado: canonical, OG, Twitter cards, `robots.txt`, `sitemap.xml`.
+
 **Dependencias:** Todas las etapas previas.
 **Riesgo:** Medio. Pixel Streaming + Three.js pueden saturar mobiles low-end. Documentar mínimo de hardware soportado.
 

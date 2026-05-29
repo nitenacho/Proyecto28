@@ -26,6 +26,7 @@ export function createPopup() {
   function show(project) {
     if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
     activeProject = project;
+    root.setAttribute('aria-hidden', 'false');
     titleEl.textContent    = project.title;
     descEl.textContent     = project.description;
     idEl.textContent       = `Módulo · ${project.id}`;
@@ -35,6 +36,8 @@ export function createPopup() {
     if (project.imageURL) {
       img.loading = 'lazy';
       img.decoding = 'async';
+      img.fetchPriority = 'low';
+      img.sizes = '(max-width: 1024px) 100vw, 380px';
       img.alt = project.title;
       imgWrap.hidden = false;
       imgWrap.classList.remove('loaded', 'failed');
@@ -61,6 +64,9 @@ export function createPopup() {
 
     btnEl.href = project.redirectURL || '#';
     btnEl.target = project.redirectURL && project.redirectURL.startsWith('http') ? '_blank' : '_self';
+    btnEl.rel = btnEl.target === '_blank' ? 'noopener' : '';
+    const label = btnEl.querySelector('span:first-child');
+    if (label) label.textContent = project.popupCTALabel || 'Explorar proyecto';
     root.classList.toggle('cyan-accent', project.color === 'cyan');
     root.classList.add('visible');
     popupEnterTimeline(root);
@@ -72,6 +78,7 @@ export function createPopup() {
     closeTimer = setTimeout(() => {
       popupExitTimeline(root);
       root.classList.remove('visible');
+      root.setAttribute('aria-hidden', 'true');
       activeProject = null;
       if (coordModule) coordModule.textContent = '—';
     }, 420);
@@ -81,6 +88,7 @@ export function createPopup() {
     if (closeTimer) clearTimeout(closeTimer);
     popupExitTimeline(root);
     root.classList.remove('visible');
+    root.setAttribute('aria-hidden', 'true');
     activeProject = null;
     if (coordModule) coordModule.textContent = '—';
   }
@@ -115,6 +123,7 @@ export function createPopup() {
   closeEl.addEventListener('click', hideNow);
 
   return { show, scheduleHide, hideNow, setPlacement, positionAtCursor,
+    focus() { root.focus({ preventScroll: true }); },
     get placement() { return placement; },
     get active() { return activeProject; } };
 }

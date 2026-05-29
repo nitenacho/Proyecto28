@@ -12,6 +12,62 @@ o a un fix puntual entre etapas.
 
 Sin cambios todavía.
 
+## [0.19.0] — 2026-05-29 — Etapa 15: Performance + responsive + a11y
+
+### Added
+- Navegación accesible por teclado para los 6 cubos del grid mediante
+  controles DOM espejo: foco visible, `Enter` abre el popup y `Escape` cierra.
+- Roles/labels ARIA para canvas, popup, overlay de ruta, feedback del panel
+  Tweaks y controles del panel.
+- SEO base: canonical, OpenGraph, Twitter cards, `robots.txt` y `sitemap.xml`.
+
+### Changed
+- `vite.config.js` separa chunks `three`, `three-addons`, `gsap` y
+  `streaming`, y evita preloads iniciales de `streaming-*`/`three-addons-*`.
+- Pixel Streaming ahora carga su overlay/iframe de forma diferida con
+  `createLazyStreamOverlay`; si `Preview visible` está apagado y no hay stream
+  válido, no monta overlay ni descarga el chunk `streaming-*`.
+- En viewports móviles o `prefers-reduced-motion`, la escena usa geometría
+  simple, pixel ratio acotado, sin sombras caras y sin bloom/post-processing.
+  Desktop mantiene rounded cubes + bloom.
+- El fallback de Pixel Streaming recupera placeholder si el iframe falla o no
+  responde a tiempo, y puede volver a estado `Live` si el iframe carga tarde.
+- `PUBLICAR CAMBIOS` ahora reintenta una vez con sesión Google fresca cuando
+  Strapi responde token Google inválido, y muestra mensajes claros en español.
+- Popup images mantienen lazy/async decode y agregan `fetchPriority=low` +
+  `sizes`.
+
+### Verified
+- `npm run build` OK.
+- Build final:
+  - `assets/index-DzLC3Syc.js` `54.19 kB` / `19.64 kB` gzip.
+  - `assets/streaming-DWwWXc9J.js` `6.16 kB` / `2.54 kB` gzip.
+  - `assets/three-addons-hfx1tmN4.js` `65.32 kB` / `17.93 kB` gzip.
+  - `assets/gsap-CzGW6FVa.js` `70.46 kB` / `27.81 kB` gzip.
+  - `assets/three-CdxnkpeF.js` `530.20 kB` / `134.12 kB` gzip.
+- Lighthouse sobre `vite preview`:
+  - Mobile: Performance `80`, Accessibility `100`.
+  - Desktop: Performance `98`, Accessibility `100`.
+- Responsive smoke con Chrome headless/CDP sobre build producción:
+  - `320x568`, `375x812`, `414x896`, `768x1024`, `1024x768`,
+    `1440x900`, `1920x1080`: `body/html/canvas == innerWidth`.
+  - `320/375/414`: no se cargan chunks `streaming-*` ni `three-addons-*`
+    durante el boot normal.
+- Browser local:
+  - sin preview, `streamOverlayLoaded=false`.
+  - con `?streamPreview=028.A`, fallback visible y sin overflow.
+  - `Enter` sobre cubo accesible abre popup `Holograma`; `Escape` lo cierra.
+- Strapi/producción antes de deploy:
+  - `/api/projects?populate=*` => `200`
+  - `/api/admin-whitelists` => `403`
+  - `/api/site-setting` => `200`
+  - `/api/auth/check?email=inconcha@gmail.com` =>
+    `{ allowed:true, role:"owner" }`
+  - `/api/auth/check?email=yk8arts@gmail.com` =>
+    `{ allowed:true, role:"editor" }`
+  - `/api/publish` sin token => `401`
+  - `https://proyecto28.com` => `200`
+
 ## [0.18.0] — 2026-05-29 — Etapa 14: GSAP polish + animaciones premium
 
 ### Added

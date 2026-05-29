@@ -201,7 +201,7 @@ export function mountTweaks({ host, defaults, controls, actions = [], onChange, 
   let fab = null;
   function ensureFab() {
     if (fab) return;
-    fab = el('button', { className: 'twk-fab', title: 'Abrir Tweaks', onClick: fabClick }, '⚙');
+    fab = el('button', { className: 'twk-fab', title: 'Abrir Tweaks', 'aria-label': 'Abrir Tweaks', onClick: fabClick }, '⚙');
     host.appendChild(fab);
   }
 
@@ -224,7 +224,7 @@ export function mountTweaks({ host, defaults, controls, actions = [], onChange, 
     const value = state[key];
     const idx = Math.max(0, options.findIndex((o) => o.value === value));
     const n = options.length;
-    const track = el('div', { className: 'twk-seg', role: 'radiogroup' }, [
+    const track = el('div', { className: 'twk-seg', role: 'radiogroup', 'aria-label': label }, [
       el('div', {
         className: 'twk-seg-thumb',
         style: {
@@ -250,6 +250,7 @@ export function mountTweaks({ host, defaults, controls, actions = [], onChange, 
   function buildSelect({ key, label, options }) {
     const sel = el('select', {
       className: 'twk-field',
+      'aria-label': label,
       onChange: (e) => setKey(key, e.target.value),
     }, options.map((o) => {
       const opt = el('option', { value: o.value }, o.label);
@@ -267,6 +268,7 @@ export function mountTweaks({ host, defaults, controls, actions = [], onChange, 
     const valSpan = el('span', { className: 'twk-val' }, `${value}${unit}`);
     const input = el('input', {
       type: 'range', className: 'twk-slider', min, max, step, value,
+      'aria-label': label,
       onInput: (e) => {
         const v = Number(e.target.value);
         valSpan.textContent = `${v}${unit}`;
@@ -284,6 +286,7 @@ export function mountTweaks({ host, defaults, controls, actions = [], onChange, 
     const btn = el('button', {
       type: 'button', className: 'twk-toggle', role: 'switch',
       'aria-checked': value ? 'true' : 'false',
+      'aria-label': label,
       dataset: { on: value ? '1' : '0' },
       onClick: () => setKey(key, !state[key]),
     }, [el('i', {})]);
@@ -306,7 +309,11 @@ export function mountTweaks({ host, defaults, controls, actions = [], onChange, 
           onClick: () => runAction(action),
         }, busy ? (action.busyLabel || 'Publicando...') : action.label);
       }),
-      feedback ? el('div', { className: 'twk-feedback', dataset: { kind: feedback.kind || 'info' } }, feedback.message) : null,
+      feedback ? el('div', {
+        className: 'twk-feedback',
+        role: feedback.kind === 'error' ? 'alert' : 'status',
+        dataset: { kind: feedback.kind || 'info' },
+      }, feedback.message) : null,
     ])];
   }
 
@@ -328,7 +335,7 @@ export function mountTweaks({ host, defaults, controls, actions = [], onChange, 
     ]);
     const close = el('button', { className: 'twk-x', 'aria-label': 'Cerrar tweaks', onClick: () => { open = false; render(); } }, '✕');
     const hd = el('div', { className: 'twk-hd' }, [el('b', {}, title), close]);
-    panel = el('div', { className: 'twk-panel' }, [hd, body]);
+    panel = el('div', { className: 'twk-panel', role: 'dialog', 'aria-label': title }, [hd, body]);
 
     // Drag
     hd.addEventListener('mousedown', (e) => {

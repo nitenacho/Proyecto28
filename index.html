@@ -5,8 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#000000" />
   <meta name="description" content="PROYECTO 28 — Laboratorio 3D interactivo" />
+  <link rel="canonical" href="https://proyecto28.com/" />
   <meta property="og:title" content="PROYECTO 28" />
   <meta property="og:description" content="Tiles 3D interactivos · WebGL · Three.js" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://proyecto28.com/" />
+  <meta property="og:image" content="https://proyecto28.com/assets/proyecto28-logo-isometric.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="PROYECTO 28" />
+  <meta name="twitter:description" content="Laboratorio 3D interactivo con proyectos, Tweaks admin y Pixel Streaming." />
+  <meta name="twitter:image" content="https://proyecto28.com/assets/proyecto28-logo-isometric.png" />
   <title>PROYECTO 28 — Interactive Tiles 3D</title>
   <link rel="icon" href="/assets/proyecto28-logo-isometric.png" type="image/png" />
   <script>
@@ -35,9 +43,9 @@
   <link rel="stylesheet" href="/src/styles/three-host.css" />
 </head>
 <body class="p28-root">
-  <canvas id="c"></canvas>
+  <canvas id="c" role="img" aria-label="Escena 3D interactiva de Proyecto 28 con cubos de proyectos"></canvas>
 
-  <div id="boot">
+  <div id="boot" role="status" aria-live="polite">
     <div class="ring"></div>
     <div>Cargando módulo · 028 · Holograma</div>
   </div>
@@ -86,7 +94,7 @@
     </div>
   </div>
 
-  <div id="popup" class="popup side">
+  <div id="popup" class="popup side" role="dialog" aria-modal="false" aria-labelledby="popup-title" aria-describedby="popup-desc" aria-hidden="true" tabindex="-1">
     <div class="popup-corners">
       <span class="tl"></span><span class="tr"></span>
       <span class="bl"></span><span class="br"></span>
@@ -112,11 +120,11 @@
     </div>
   </div>
 
-  <div class="route-overlay" id="route-overlay">
-    <div class="label">↳ Cargando módulo</div>
+  <div class="route-overlay" id="route-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="route-title">
+    <div class="label" id="route-title">↳ Cargando módulo</div>
     <div class="spinner"></div>
     <div class="route" id="route-label">/proyectos/—</div>
-    <button class="back" id="route-back">← VOLVER AL GRID</button>
+    <button class="back" id="route-back" aria-label="Volver al grid de proyectos">← VOLVER AL GRID</button>
   </div>
 
   <div id="tweaks-root"></div>

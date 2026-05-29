@@ -1,4 +1,4 @@
-import { getCurrentUser, signIn } from '../auth/google.js';
+import { getCurrentUser, signIn, signOut } from '../auth/google.js';
 
 const CMS_URL = (import.meta.env.VITE_CMS_URL || '').replace(/\/$/, '');
 
@@ -62,6 +62,20 @@ function errorMessageFromResponse(status, payload) {
   );
 }
 
+function isGoogleTokenError(message = '') {
+  return /invalid google (token|id_token|access_token)|missing google token|google .*rejected/i.test(message);
+}
+
+function userFacingPublishError(message) {
+  if (isGoogleTokenError(message)) {
+    return 'Google rechazó la sesión. Vuelve a elegir una cuenta permitida y publica nuevamente.';
+  }
+  if (/email not allowed/i.test(message)) {
+    return 'La cuenta Google no está autorizada en la whitelist de Strapi.';
+  }
+  return message;
+}
+
 async function getPublishBearerToken() {
   let user = getCurrentUser();
   if (user?.accessToken) return user.accessToken;
@@ -91,22 +105,36 @@ export async function publishTweaksSnapshot({ state, baseline }) {
     throw new Error('CMS no configurado: falta VITE_CMS_URL.');
   }
 
-  const bearerToken = await getPublishBearerToken();
-
   const snapshot = pickPublishable(state);
   const diff = diffStates(snapshot, baseline);
-  const res = await fetch(`${CMS_URL}/api/publish`, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      authorization: `Bearer ${bearerToken}`,
-    },
-    body: JSON.stringify({ state: snapshot, diff }),
-  });
 
-  const payload = await res.json().catch(() => ({}));
+  async function postWithToken(token) {
+    const res = await fetch(`${CMS_URL}/api/publish`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ state: snapshot, diff }),
+    });
+    const payload = await res.json().catch(() => ({}));
+    return { res, payload };
+  }
+
+  let bearerToken = await getPublishBearerToken();
+  let { res, payload } = await postWithToken(bearerToken);
+
+  if ((!res.ok || payload?.ok === false) && isGoogleTokenError(errorMessageFromResponse(res.status, payload))) {
+    signOut();
+    const refreshed = await signIn();
+    bearerToken = refreshed?.accessToken || refreshed?.idToken || '';
+    if (bearerToken) {
+      ({ res, payload } = await postWithToken(bearerToken));
+    }
+  }
+
   if (!res.ok || payload?.ok === false) {
-    throw new Error(errorMessageFromResponse(res.status, payload));
+    throw new Error(userFacingPublishError(errorMessageFromResponse(res.status, payload)));
   }
 
   return { ...payload, diff };

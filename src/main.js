@@ -8,8 +8,9 @@ import * as THREE from 'three';
 import { loadContent } from './data/cms.js';
 import { createScene } from './scene/scene.js';
 import { createControllableLight } from './game/light.js';
-import { createStreamOverlay } from './streaming/streamOverlay.js';
+import { createLazyStreamOverlay } from './streaming/lazyStreamOverlay.js';
 import { createPopup } from './ui/popup.js';
+import { mountCubeA11y } from './ui/cubeA11y.js';
 import { mountTweaks } from './ui/tweaks.js';
 import { mountAdminButton } from './ui/adminButton.js';
 import { mountHud } from './ui/hud.js';
@@ -42,11 +43,11 @@ async function boot() {
   const { site, projects, grid, source } = await loadContent();
   console.log(`[p28] content source: ${source}`);
 
-  const sceneCtx = createScene({ canvas, grid, projects });
+  const sceneCtx = await createScene({ canvas, grid, projects });
   entranceTimeline(sceneCtx.tiles);
   const defaults = site.defaults;
   const hud = mountHud();
-  const streamOverlay = createStreamOverlay({ site, camera: sceneCtx.camera });
+  const streamOverlay = createLazyStreamOverlay({ site, camera: sceneCtx.camera });
   let activeTile = null;
   const controlLight = createControllableLight({
     scene: sceneCtx.scene,
@@ -264,6 +265,7 @@ async function boot() {
       tweaks.show();
     } catch (err) {
       console.warn('[p28 auth] sign-in failed:', err.message);
+      alert(`No se pudo iniciar sesión con Google: ${err.message || 'intenta nuevamente con una cuenta permitida.'}`);
     }
   }
 
@@ -347,6 +349,7 @@ async function boot() {
   const pointer = new THREE.Vector2(-10, -10);
   const pointerPx = { x: 0, y: 0 };
   let hovered = null;
+  let keyboardHovered = null;
 
   function setPointerFromEvent(e) {
     pointerPx.x = e.clientX;
@@ -356,6 +359,7 @@ async function boot() {
   }
 
   window.addEventListener('pointermove', (e) => {
+    keyboardHovered = null;
     setPointerFromEvent(e);
     controlLight.notifyMouseMoved();
     if (popup.placement === 'cursor') popup.positionAtCursor(e.clientX, e.clientY);
@@ -385,7 +389,10 @@ async function boot() {
     const tile = hits.length ? hits[0].object : null;
     if (!tile || !tile.userData.isProject) {
       // Tap fuera de un cubo en mobile cierra el popup.
-      if (downXY.type === 'touch') popup.hideNow();
+      if (downXY.type === 'touch') {
+        keyboardHovered = null;
+        popup.hideNow();
+      }
       return;
     }
     if (downXY.type === 'touch') {
@@ -416,16 +423,65 @@ async function boot() {
   const routeEl = document.getElementById('route-overlay');
   const routeLabelEl = document.getElementById('route-label');
   const routeBackEl = document.getElementById('route-back');
+
+  function closeRouteOverlay() {
+    routeEl.classList.remove('visible');
+    routeEl.setAttribute('aria-hidden', 'true');
+  }
+
+  function openRouteOverlay(project) {
+    routeLabelEl.textContent = project.redirectURL;
+    routeEl.classList.add('visible');
+    routeEl.setAttribute('aria-hidden', 'false');
+    routeBackEl.focus({ preventScroll: true });
+  }
+
+  function focusTileForKeyboard(tile, focusPopup = false) {
+    if (!tile?.userData?.isProject) return;
+    keyboardHovered = tile;
+    const project = tile.userData.project;
+    popup.show(project);
+    sceneCtx.hoverModel.setHovered(tile, project);
+    canvas.style.cursor = 'pointer';
+    if (focusPopup) popup.focus();
+  }
+
+  routeBackEl.addEventListener('click', closeRouteOverlay);
+
+  mountCubeA11y({
+    tiles: sceneCtx.tiles,
+    onFocusTile(tile) {
+      focusTileForKeyboard(tile, false);
+    },
+    onOpenTile(tile) {
+      focusTileForKeyboard(tile, true);
+    },
+    onClear() {
+      keyboardHovered = null;
+      popup.hideNow();
+      sceneCtx.hoverModel.setHovered(null, null);
+      canvas.style.cursor = 'default';
+    },
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (routeEl.classList.contains('visible')) {
+      closeRouteOverlay();
+      return;
+    }
+    keyboardHovered = null;
+    popup.hideNow();
+  });
+
   function navigateTo(project) {
     if (!project.redirectURL) return;
     if (/^https?:\/\//i.test(project.redirectURL)) {
       window.open(project.redirectURL, '_blank', 'noopener');
       return;
     }
-    routeLabelEl.textContent = project.redirectURL;
-    routeEl.classList.add('visible');
+    openRouteOverlay(project);
   }
-  routeBackEl.addEventListener('click', () => routeEl.classList.remove('visible'));
 
   // Render loop
   let lastT = performance.now();
@@ -447,7 +503,8 @@ async function boot() {
     raycaster.setFromCamera(pointer, sceneCtx.camera);
     controlLight.update(dt, now, raycaster);
     const hits = raycaster.intersectObjects(sceneCtx.tiles, false);
-    const hit = hits.length ? hits[0].object : null;
+    const pointerHit = hits.length ? hits[0].object : null;
+    const hit = keyboardHovered || pointerHit;
 
     if (hit !== hovered) {
       hovered = hit;
