@@ -1,7 +1,7 @@
 # HANDOFF - Proyecto 28
 
 > **Ultima actualizacion:** 2026-05-29 (cierre Etapa 15 - `v0.19.0`)
-> **Tag activo esperado:** `v0.19.0`
+> **Tag activo:** `v0.19.0`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
@@ -202,16 +202,31 @@ Nota importante:
 
 ## 5. Validacion hosting/GitHub
 
-Antes del merge:
-- `gh` CLI local no tiene sesion (`gh auth login` pendiente), por lo que la
-  validacion de Actions debe hacerse con GitHub web/API publica o desde el
-  navegador del owner.
+Commit de etapa:
+- `18515bb feat(perf): harden performance and a11y [skip-tag]`
 
-Despues de merge/push esperado:
-- GitHub Pages verde.
-- `https://proyecto28.com` sirve bundle `v0.19.0`.
+GitHub Actions:
+- `Build and deploy frontend to GitHub Pages` run `26631677133` => `success`
+- `Auto tag semantic releases` run `26631677112` => `success` / skip por
+  `[skip-tag]`; tag `v0.19.0` se dejo manual al cierre.
+- `gh` CLI local no tiene sesion (`gh auth login` pendiente), por lo que la
+  validacion de Actions se hizo con GitHub API publica.
+
+Produccion despues del deploy:
+- `https://proyecto28.com` => `200`
 - `https://proyecto28.com/robots.txt` => `200`
 - `https://proyecto28.com/sitemap.xml` => `200`
+- HTML de produccion sirve bundle `assets/index-CD085i8n.js` junto a
+  `three-CdxnkpeF.js`, `gsap-CzGW6FVa.js` y CSS `index-Dj54e5kw.css`.
+
+Smoke Chrome headless/CDP sobre `https://proyecto28.com`:
+- phone `390x844`: `html=390`, `body=390`, `canvas=390`,
+  `streamingChunkLoaded=false`, `addonsChunkLoaded=false`.
+- iPad portrait `810x1080`: `html=810`, `body=810`, `canvas=810`,
+  `streamingChunkLoaded=false`, `addonsChunkLoaded=false`.
+- desktop `1440x900`: `html=1440`, `body=1440`, `canvas=1440`,
+  `streamingChunkLoaded=false`, `addonsChunkLoaded=true`.
+- `cubeButtons=6`, `popupRole=dialog`.
 
 ---
 

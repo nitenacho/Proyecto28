@@ -57,7 +57,7 @@ Sin cambios todavía.
   - sin preview, `streamOverlayLoaded=false`.
   - con `?streamPreview=028.A`, fallback visible y sin overflow.
   - `Enter` sobre cubo accesible abre popup `Holograma`; `Escape` lo cierra.
-- Strapi/producción antes de deploy:
+- Strapi/producción:
   - `/api/projects?populate=*` => `200`
   - `/api/admin-whitelists` => `403`
   - `/api/site-setting` => `200`
@@ -67,6 +67,16 @@ Sin cambios todavía.
     `{ allowed:true, role:"editor" }`
   - `/api/publish` sin token => `401`
   - `https://proyecto28.com` => `200`
+- GitHub Pages run `26631677133` OK para `18515bb`.
+- Producción post-deploy:
+  - `https://proyecto28.com` => `200`
+  - `https://proyecto28.com/robots.txt` => `200`
+  - `https://proyecto28.com/sitemap.xml` => `200`
+  - bundle principal `assets/index-CD085i8n.js`.
+- Smoke CDP sobre `https://proyecto28.com`:
+  - phone `390x844`, iPad portrait `810x1080` y desktop `1440x900`:
+    `body/html/canvas == innerWidth`.
+  - boot normal no carga `streaming-*`; `three-addons-*` queda fuera de mobile.
 
 ## [0.18.0] — 2026-05-29 — Etapa 14: GSAP polish + animaciones premium
 
