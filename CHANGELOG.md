@@ -52,6 +52,22 @@ Sin cambios todavía.
 - Smoke responsive local:
   - phone `390x844`: `body=390`, `html=390`, `canvas=390`.
   - tablet portrait `810x1080`: `body=810`, `html=810`, `canvas=810`.
+- GitHub Pages run `26629020837` OK para `f84a391`.
+- Auto-tag run `26629020874` OK; creó `v0.18.0`.
+- GitHub Release `v0.18.0` contiene `claude-design-export.zip`.
+- Producción `https://proyecto28.com` responde `200` y sirve
+  `assets/index-CXlJ-Gn6.js` + `assets/gsap-CzGW6FVa.js`.
+- Smoke producción:
+  - desktop `1280`: `body=1280`, `html=1280`, `canvas=1280`, sin errores de
+    consola.
+  - phone `390x844`: `body=390`, `html=390`, `canvas=390`.
+  - tablet portrait `810x1080`: `body=810`, `html=810`, `canvas=810`.
+- Strapi post-deploy:
+  - `/api/projects?populate=*` => `200`
+  - `/api/admin-whitelists` => `403`
+  - `/api/site-setting` => `200`
+  - `/api/auth/check?email=inconcha@gmail.com` => `200`
+  - `/api/auth/check?email=yk8arts@gmail.com` => `200`
 
 ## [0.17.1] — 2026-05-29 — Hotfix CI: release asset en auto-tag
 

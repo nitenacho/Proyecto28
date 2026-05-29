@@ -56,7 +56,7 @@ Codigos clave:
 - `8465330 fix(auth): accept publish access tokens`
 - `ec9355d feat(ci): sync Claude Design tokens`
 - `fcb488a fix(ci): attach design export to auto tags`
-- `pendiente feat(anim): add GSAP polish timelines`
+- `f84a391 feat(anim): add GSAP polish timelines`
 - GitHub Pages run `26425439630` success para `c0590e4`.
 - GitHub Pages run `26433985069` success para `8465330`.
 - GitHub Pages run `26626392593` success para `ec9355d`.
@@ -64,6 +64,8 @@ Codigos clave:
 - Auto-tag run `26626392562` success: creo `v0.17.0`.
 - Auto-tag run `26626485820` success: creo `v0.17.1` y Release asset.
 - GitHub Pages run `26626485864` success para `fcb488a`.
+- GitHub Pages run `26629020837` success para `f84a391`.
+- Auto-tag run `26629020874` success: creo `v0.18.0` y Release asset.
 
 Nota honesta de validacion:
 - Frontend, backend, schema, CORS, whitelist y Strapi Cloud quedaron
@@ -95,8 +97,7 @@ Esperado:
 - working tree clean
 - ultimo tag `v0.18.0`
 - commit hotfix `8465330`
-- ultimos commits de codigo/CI: `feat(anim): add GSAP polish timelines`,
-  `fcb488a`, `ec9355d`, `8465330`
+- ultimos commits de codigo/CI: `f84a391`, `fcb488a`, `ec9355d`, `8465330`
 
 ### Paso 2 - Leer docs (orden)
 
@@ -104,8 +105,8 @@ Esperado:
 2. `CHANGELOG.md` - entradas `[0.18.0]`, `[0.17.1]`, `[0.17.0]`,
    `[0.16.1]` y `[0.16.0]`.
 3. Google Doc oficial - ultima subpestana bajo `Handoff`:
-   `2026-05-29 08:30 UTC v0.17.1 design`.
-   Tab id: `t.l9sl79q157hl` (padre `Handoff`: `t.7lpfc5ado1h`).
+   `2026-05-29 09:25 UTC v0.18.0 gsap`.
+   Tab id: `t.e6rjue6t3zcx` (padre `Handoff`: `t.7lpfc5ado1h`).
 4. `PLAN-PROYECTO28-V2.md` - Etapa 15 queda como siguiente bloque.
 5. `DEPLOY.md` y `cms/README.md` si se toca deploy/CMS.
 
@@ -298,6 +299,22 @@ Validacion local:
   - phone `390x844`: `body=390`, `html=390`, `canvas=390`.
   - tablet portrait `810x1080`: `body=810`, `html=810`, `canvas=810`.
 
+Validacion GitHub/produccion:
+- Push `f84a391` a `main` OK.
+- GitHub Pages run `26629020837` success.
+- Auto-tag run `26629020874` success:
+  - creo tag automatico `v0.18.0` desde `f84a391`
+  - creo GitHub Release `v0.18.0`
+  - adjunto `claude-design-export.zip`
+- `https://proyecto28.com?stage14=v0180` => `200`.
+- Produccion sirve `assets/index-CXlJ-Gn6.js`, `assets/gsap-CzGW6FVa.js`,
+  `assets/index-MaAdMODM.css`.
+- Smoke produccion:
+  - desktop `1280`: `body=1280`, `html=1280`, `canvas=1280`, sin
+    errores/warnings de consola.
+  - phone `390x844`: `body=390`, `html=390`, `canvas=390`.
+  - tablet portrait `810x1080`: `body=810`, `html=810`, `canvas=810`.
+
 ### Produccion Strapi Cloud
 
 - Despues del deploy, `/api/publish` cambio de `405` a `401` sin token:
@@ -332,14 +349,15 @@ Valores SiteSetting produccion validados 2026-05-29:
 ## 4. Estado de GitHub / deploy
 
 - Branch: `main`
-- Codigo Etapa 12:
-  - pendiente `feat(anim): add GSAP polish timelines`
+- Codigo reciente:
+  - `f84a391 feat(anim): add GSAP polish timelines`
   - `fcb488a fix(ci): attach design export to auto tags`
   - `ec9355d feat(ci): sync Claude Design tokens`
   - `8465330 fix(auth): accept publish access tokens`
   - `e8c3f74 feat(admin): publish tweaks to Strapi`
   - `c0590e4 fix(auth): support explicit Google admin publish flow`
 - GitHub Pages:
+  - `26629020837` success para `f84a391`
   - `26626485864` success para `fcb488a`
   - `26626392593` success para `ec9355d`
   - `26425130576` success para `e8c3f74`
@@ -349,8 +367,7 @@ Valores SiteSetting produccion validados 2026-05-29:
   - `v0.17.0` auto-tag para `ec9355d`
   - `v0.17.1` auto-tag para `fcb488a`, con Release asset
 - Tag Etapa 14:
-  - `v0.18.0` esperado por auto-tag tras merge del commit `feat(anim): add GSAP
-    polish timelines`
+  - `v0.18.0` auto-tag para `f84a391`, con Release asset
 
 `gh` local no estaba autenticado en esta maquina; los runs se validaron por la
 API publica de GitHub.

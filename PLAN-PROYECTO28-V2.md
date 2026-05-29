@@ -31,7 +31,7 @@
 | 12 hotfix — Publish Google token | ✅ Cerrada | `v0.16.1` | `8465330` |
 | 13 — Sync Claude Design | ✅ Cerrada | `v0.17.0` | `ec9355d` |
 | 13 hotfix — Release asset auto-tag | ✅ Cerrada | `v0.17.1` | `fcb488a` |
-| 14 — GSAP polish | ✅ Cerrada | `v0.18.0` | pendiente auto-tag |
+| 14 — GSAP polish | ✅ Cerrada | `v0.18.0` | `f84a391` |
 | 15 — Performance + a11y | ⏳ Pendiente | — | — |
 | 16 — Documentación final | ⏳ Pendiente | — | — |
 
