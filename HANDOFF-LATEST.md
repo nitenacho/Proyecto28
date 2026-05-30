@@ -218,6 +218,26 @@ Nota: antes del deploy de `v0.21.0`, Strapi Cloud todavia puede no exponer
 `gameLightColor` en `/api/site-setting`. Eso se espera hasta que Strapi Cloud
 reconstruya `cms/**` desde `main`.
 
+### Produccion postdeploy v0.21.0
+
+- Commit desplegado por Pages: `6e8efa0`.
+- GitHub Pages run: `26690318569` => success.
+- Auto-tag run: `26690318568` => success con `[skip-tag]`; tag manual al final
+  del cierre.
+- Produccion:
+  - `https://proyecto28.com` => `200`
+  - `https://proyecto28.com/robots.txt` => `200`
+  - `https://proyecto28.com/sitemap.xml` => `200`
+- Bundle vivo:
+  - asset `assets/index-Dsng2GHA.js`
+  - contiene `p28-sphere-best-time-ms-v1`
+  - contiene `gameLightColor`
+  - contiene `Gema rojiza`
+  - contiene `p28-collectible-spheres`
+- Strapi Cloud:
+  - `/api/site-setting` incluye `"gameLightColor":"cyan"`
+  - `updatedAt` => `2026-05-30T17:33:05.966Z`
+
 ---
 
 ## 4. Operacion clave
@@ -285,10 +305,11 @@ Flujo correcto:
 3. Push de rama.
 4. Merge a `main` con commit `feat(...) [skip-tag]` para evitar auto-tag antes
    de validar produccion.
-5. GitHub Pages despliega porque se tocaron `src/**`.
-6. Strapi Cloud reconstruye porque se tocaron `cms/**`.
-7. Verificar `https://proyecto28.com` y endpoints Strapi.
-8. Actualizar handoff con evidencia final si falta.
+5. GitHub Pages despliega porque se tocaron `src/**` - OK run `26690318569`.
+6. Strapi Cloud reconstruye porque se tocaron `cms/**` - OK,
+   `/api/site-setting` incluye `gameLightColor`.
+7. Verificar `https://proyecto28.com` y endpoints Strapi - OK.
+8. Actualizar handoff con evidencia final - OK.
 9. Crear/pushear tag `v0.21.0`.
 10. Copiar handoff al Google Doc como subpestana bajo `Handoff`.
 
@@ -323,7 +344,7 @@ Regla:
 - Titulo esperado:
 
 ```text
-2026-05-30 HH:mm UTC - v0.21.0 pacman-luz-color-admin
+2026-05-30 17:33 UTC - v0.21.0 pacman-luz-color-admin
 ```
 
 Respaldo anterior:

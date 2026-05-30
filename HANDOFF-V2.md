@@ -95,6 +95,15 @@ Validado en cierre local/predeploy `v0.21.0`:
 - Produccion/Strapi predeploy: site/robots/sitemap `200`, projects `200`,
   site-setting `200`, admin-whitelists `403`, auth owner/editor OK.
 
+Validado postdeploy `v0.21.0`:
+
+- GitHub Pages run `26690318569` OK para `6e8efa0`.
+- Produccion sirve `assets/index-Dsng2GHA.js` con
+  `p28-sphere-best-time-ms-v1`, `gameLightColor`, `Gema rojiza` y
+  `p28-collectible-spheres`.
+- Strapi Cloud `/api/site-setting` incluye `"gameLightColor":"cyan"` con
+  `updatedAt` `2026-05-30T17:33:05.966Z`.
+
 ---
 
 ## 4. Cambios v0.21.0
@@ -210,7 +219,7 @@ https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/
 Titulo esperado para este cierre:
 
 ```text
-2026-05-30 HH:mm UTC - v0.21.0 pacman-luz-color-admin
+2026-05-30 17:33 UTC - v0.21.0 pacman-luz-color-admin
 ```
 
 Regla absoluta: nunca crear cierres como pestanas raiz junto a `MISION`,

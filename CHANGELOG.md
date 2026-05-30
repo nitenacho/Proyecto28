@@ -56,6 +56,19 @@ o a un fix puntual entre etapas.
     `{ allowed:true, role:"owner" }`
   - `/api/auth/check?email=yk8arts@gmail.com` =>
     `{ allowed:true, role:"editor" }`
+- GitHub Pages run `26690318569` OK para `6e8efa0`.
+- Auto-tag run `26690318568` OK con `[skip-tag]`; el tag `v0.21.0` se crea
+  manualmente despues de validar produccion.
+- Produccion post-deploy:
+  - `https://proyecto28.com` => `200`
+  - `https://proyecto28.com/robots.txt` => `200`
+  - `https://proyecto28.com/sitemap.xml` => `200`
+  - bundle `assets/index-Dsng2GHA.js` contiene
+    `p28-sphere-best-time-ms-v1`, `gameLightColor`, `Gema rojiza` y
+    `p28-collectible-spheres`.
+- Strapi Cloud post-deploy:
+  - `/api/site-setting` incluye `"gameLightColor":"cyan"`
+  - `updatedAt` => `2026-05-30T17:33:05.966Z`
 
 ## [0.20.1] — 2026-05-29 — Fix hover estable + URLs operativas
 
