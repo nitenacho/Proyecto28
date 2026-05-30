@@ -11,6 +11,10 @@ Proyecto 28. Debe leerse junto a `README.md`, `DEPLOY.md`, `VERSIONING.md` y
 
 URLs de consola y administracion rapida: `ADMIN-URLS.md`.
 
+Regla de estabilidad: cada cambio funcional debe cerrar con repo, GitHub
+Pages (`proyecto28.com`), Strapi Cloud, changelog, handoff y Google Doc
+sincronizados. Si algo queda solo local, la etapa sigue abierta.
+
 ---
 
 ## 1. Smoke test rapido
@@ -18,7 +22,7 @@ URLs de consola y administracion rapida: `ADMIN-URLS.md`.
 Ejecutar al empezar cualquier sesion o despues de un deploy:
 
 ```powershell
-cd "C:/Users/incon/OneDrive/Desktop/Proyectos_Claude/Claude_P28/Proyecto28"
+cd "C:/Users/incon/Downloads/EscritorioNobita/Proyectos_Claude/Claude_P28/Proyecto28"
 git checkout main
 git pull --ff-only
 git status

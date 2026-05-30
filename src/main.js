@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { loadContent } from './data/cms.js';
 import { createScene } from './scene/scene.js';
 import { createControllableLight } from './game/light.js';
+import { createCollectibleSpheres } from './game/collectibles.js';
 import { createLazyStreamOverlay } from './streaming/lazyStreamOverlay.js';
 import { createPopup } from './ui/popup.js';
 import { mountCubeA11y } from './ui/cubeA11y.js';
@@ -25,6 +26,7 @@ const canvas = document.getElementById('c');
 const bootEl = document.getElementById('boot');
 const coordModule = document.getElementById('coord-module');
 const brandNameEl = document.getElementById('brand-name');
+const BEST_TIME_KEY = 'p28-sphere-best-time-ms-v1';
 
 function normalizeStreamingMode(mode) {
   return mode === 'per-cube' || mode === 'dedicated' ? 'per-cube' : 'shared';
@@ -39,6 +41,20 @@ function applyHudVisibility({ showGrid, showScanlines, showViewfinder }) {
   if (vf) vf.style.display = showViewfinder ? '' : 'none';
 }
 
+function readBestSphereTime() {
+  try {
+    const value = Number(localStorage.getItem(BEST_TIME_KEY));
+    return Number.isFinite(value) && value > 0 ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeBestSphereTime(ms) {
+  try { localStorage.setItem(BEST_TIME_KEY, String(Math.max(0, Math.floor(ms)))); }
+  catch { /* localStorage can be unavailable in private contexts. */ }
+}
+
 async function boot() {
   const { site, projects, grid, source } = await loadContent();
   console.log(`[p28] content source: ${source}`);
@@ -47,8 +63,83 @@ async function boot() {
   entranceTimeline(sceneCtx.tiles);
   const defaults = site.defaults;
   const hud = mountHud();
+  const collectibles = createCollectibleSpheres({
+    scene: sceneCtx.scene,
+    tiles: sceneCtx.tiles,
+  });
   const streamOverlay = createLazyStreamOverlay({ site, camera: sceneCtx.camera });
   let activeTile = null;
+  let lightControlled = false;
+  const sphereRun = {
+    active: false,
+    complete: false,
+    startAt: 0,
+    elapsedMs: 0,
+    collected: 0,
+    bestMs: readBestSphereTime(),
+  };
+
+  hud.setCollectibles(0, collectibles.total);
+  hud.setTimer(0, false);
+  hud.setBestTime(sphereRun.bestMs);
+
+  function startSphereRun(nowMs = performance.now()) {
+    if (!collectibles.total) return;
+    sphereRun.active = true;
+    sphereRun.complete = false;
+    sphereRun.startAt = nowMs;
+    sphereRun.elapsedMs = 0;
+    sphereRun.collected = 0;
+    collectibles.reset();
+    collectibles.setActive(true);
+    hud.setCollectibles(0, collectibles.total);
+    hud.setTimer(0, true);
+  }
+
+  function resetSphereRun() {
+    sphereRun.active = false;
+    sphereRun.complete = false;
+    sphereRun.startAt = 0;
+    sphereRun.elapsedMs = 0;
+    sphereRun.collected = 0;
+    collectibles.setActive(false);
+    collectibles.reset();
+    hud.setCollectibles(0, collectibles.total);
+    hud.setTimer(0, false);
+  }
+
+  function finishSphereRun(nowMs) {
+    if (sphereRun.complete) return;
+    sphereRun.active = false;
+    sphereRun.complete = true;
+    sphereRun.elapsedMs = Math.max(0, nowMs - sphereRun.startAt);
+    collectibles.setActive(false);
+    hud.setCollectibles(collectibles.total, collectibles.total);
+    hud.setTimer(sphereRun.elapsedMs, false, true);
+    if (!sphereRun.bestMs || sphereRun.elapsedMs < sphereRun.bestMs) {
+      sphereRun.bestMs = sphereRun.elapsedMs;
+      writeBestSphereTime(sphereRun.bestMs);
+      hud.setBestTime(sphereRun.bestMs);
+    }
+    controlLight.flashVictory();
+  }
+
+  function updateSphereRun(nowMs, timeSeconds) {
+    collectibles.update(timeSeconds);
+    if (!sphereRun.active) return;
+    const picked = collectibles.collectNear(controlLight.mesh);
+    if (picked > 0) {
+      sphereRun.collected = Math.min(collectibles.total, sphereRun.collected + picked);
+      hud.setCollectibles(sphereRun.collected, collectibles.total);
+    }
+    if (sphereRun.collected >= collectibles.total) {
+      finishSphereRun(nowMs);
+      return;
+    }
+    sphereRun.elapsedMs = Math.max(0, nowMs - sphereRun.startAt);
+    hud.setTimer(sphereRun.elapsedMs, true);
+  }
+
   const controlLight = createControllableLight({
     scene: sceneCtx.scene,
     config: site.game,
@@ -58,7 +149,18 @@ async function boot() {
       activeTile = tile;
       streamOverlay.setActiveTile(tile);
     },
-    onRespawn(n) { hud.setFallCount(n); },
+    onRespawn(n) {
+      hud.setFallCount(n);
+      resetSphereRun();
+    },
+    onRespawnComplete() {
+      if (lightControlled) startSphereRun();
+    },
+    onControlModeChange(controlled) {
+      lightControlled = controlled;
+      if (controlled) startSphereRun();
+      else resetSphereRun();
+    },
   });
   const popup = createPopup();
 
@@ -77,6 +179,7 @@ async function boot() {
     gameJumpCount: site.game.jumpCount,
     gameGravity: site.game.gravity,
     gameVelocityCurve: site.game.velocityCurve,
+    gameLightColor: site.game.lightColor || 'cyan',
     gameMouseFollowDelay: site.game.mouseFollowDelay,
     gameFallDuration: site.game.fallDuration,
     gameShadowSize: site.game.shadowSize ?? 0.45,
@@ -127,9 +230,11 @@ async function boot() {
       site.game.jumpCount        = state.gameJumpCount;
       site.game.gravity          = state.gameGravity;
       site.game.velocityCurve    = state.gameVelocityCurve;
+      site.game.lightColor       = state.gameLightColor;
       site.game.mouseFollowDelay = state.gameMouseFollowDelay;
       site.game.fallDuration     = state.gameFallDuration;
       site.game.shadowSize       = state.gameShadowSize;
+      controlLight.setLightColor(site.game.lightColor);
       // Streaming — Etapa 11: iframe sobre el cubo activo o fallback local.
       site.streaming.enabled     = !!state.streamingEnabled;
       site.streaming.previewEnabled = !!state.streamingPreviewEnabled;
@@ -199,6 +304,14 @@ async function boot() {
               { value: 'linear',   label: 'Lineal' },
               { value: 'easeOut',  label: 'Ease out' },
               { value: 'easeInOut', label: 'Ease in-out' },
+            ],
+          },
+          {
+            type: 'select', key: 'gameLightColor', label: 'Color luz',
+            options: [
+              { value: 'cyan',  label: 'Gema cyan' },
+              { value: 'red',   label: 'Gema rojiza' },
+              { value: 'green', label: 'Gema verde' },
             ],
           },
           { type: 'slider', key: 'gameMouseFollowDelay', label: 'Delay mouse-follow', min: 0,   max: 3,   step: 0.1, unit: 's' },
@@ -576,6 +689,7 @@ async function boot() {
 
     raycaster.setFromCamera(pointer, sceneCtx.camera);
     controlLight.update(dt, now, raycaster);
+    updateSphereRun(now, t);
     const hits = raycaster.intersectObjects(sceneCtx.tiles, false);
     const pointerHit = hits.length ? hits[0].object : null;
     const hit = resolveHoverTarget(pointerHit, now);

@@ -31,6 +31,7 @@ export const FALLBACK_SITE = {
     jumpCount: 4,
     gravity: 30.0,             // v0.9.2: ajuste fino del owner (antes 16.0)
     velocityCurve: 'kirby',
+    lightColor: 'cyan',
     mouseFollowDelay: 1.0,
     fallDuration: 1.0,
     shadowSize: 0.3,           // v0.9.2: ajuste fino del owner (antes 0.45)

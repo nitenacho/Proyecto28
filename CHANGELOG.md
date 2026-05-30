@@ -10,13 +10,52 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.21.0] — 2026-05-30 — Etapa 17: Pacman de luz + color admin
+
+### Added
+- Mini-juego de recoleccion estilo Pacman para la luz controlable: 1 esfera
+  pequena por cada cubo oscuro/vacio, visible solo en modo controlado
+  WASD/flechas/gamepad, con recoleccion por cercania.
+- HUD compacto con contador de esferas, cronometro de run y mejor tiempo local
+  persistido en `localStorage`.
+- Feedback de victoria: al recolectar todas las esferas, el cronometro se
+  detiene y la luz brilla en dorado durante 1 segundo.
+- Tweak admin `Color luz` con opciones `Gema cyan`, `Gema rojiza` y
+  `Gema verde`, publicable via Strapi como `gameLightColor`.
+
+### Changed
+- La luz controlable ahora expone callbacks de cambio de modo y fin de respawn
+  para que sistemas de juego externos puedan reaccionar sin inferir estado
+  desde el DOM.
+- Las rutas locales de continuidad ahora apuntan al checkout movido bajo
+  `C:/Users/incon/Downloads/EscritorioNobita/Proyectos_Claude/Claude_P28/Proyecto28`.
+
 ### Fixed
+- Las esferas ahora se activan con control manual WASD/flechas/gamepad aunque
+  el tweak local de gravedad este apagado; la recoleccion usa cercania X/Z tipo
+  Pacman para funcionar tambien cuando la luz flota sobre la esfera.
 - `Project` desactiva Draft & Publish para evitar el choque entre el campo
   editable `status` y el `status` interno de Strapi v5. El bootstrap migra
   valores desde la columna temporal `project_status` o desde los defaults de
   seed, y el frontend acepta ambos nombres durante la transicion. Esto corrige
   el error del admin al guardar y evita que Strapi Cloud quede en 503 tras el
   rename del campo.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- Smoke local de la mecanica: 18 esferas para 18 cubos vacios/oscuros;
+  `collectNear` recoge 1 esfera por cercania X/Z y deja 17 visibles.
+- Smoke vivo pre-deploy:
+  - `https://proyecto28.com` => `200`
+  - `https://proyecto28.com/robots.txt` => `200`
+  - `https://proyecto28.com/sitemap.xml` => `200`
+  - `/api/projects?populate=*` => `200`
+  - `/api/site-setting` => `200`
+  - `/api/admin-whitelists` => `403`
+  - `/api/auth/check?email=inconcha@gmail.com` =>
+    `{ allowed:true, role:"owner" }`
+  - `/api/auth/check?email=yk8arts@gmail.com` =>
+    `{ allowed:true, role:"editor" }`
 
 ## [0.20.1] — 2026-05-29 — Fix hover estable + URLs operativas
 
@@ -1205,7 +1244,24 @@ Feedback del owner sobre `v0.14.0` en iOS Safari real:
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.21.0...HEAD
+[0.21.0]: https://github.com/nitenacho/Proyecto28/compare/v0.20.1...v0.21.0
+[0.20.1]: https://github.com/nitenacho/Proyecto28/compare/v0.20.0...v0.20.1
+[0.20.0]: https://github.com/nitenacho/Proyecto28/compare/v0.19.0...v0.20.0
+[0.19.0]: https://github.com/nitenacho/Proyecto28/compare/v0.18.0...v0.19.0
+[0.18.0]: https://github.com/nitenacho/Proyecto28/compare/v0.17.1...v0.18.0
+[0.17.1]: https://github.com/nitenacho/Proyecto28/compare/v0.17.0...v0.17.1
+[0.17.0]: https://github.com/nitenacho/Proyecto28/compare/v0.16.1...v0.17.0
+[0.16.1]: https://github.com/nitenacho/Proyecto28/compare/v0.16.0...v0.16.1
+[0.16.0]: https://github.com/nitenacho/Proyecto28/compare/v0.15.0...v0.16.0
+[0.15.0]: https://github.com/nitenacho/Proyecto28/compare/v0.14.7...v0.15.0
+[0.14.7]: https://github.com/nitenacho/Proyecto28/compare/v0.14.6...v0.14.7
+[0.14.6]: https://github.com/nitenacho/Proyecto28/compare/v0.14.2...v0.14.6
+[0.14.2]: https://github.com/nitenacho/Proyecto28/compare/v0.14.0...v0.14.2
+[0.14.0]: https://github.com/nitenacho/Proyecto28/compare/v0.13.0...v0.14.0
+[0.13.0]: https://github.com/nitenacho/Proyecto28/compare/v0.12.0...v0.13.0
+[0.12.0]: https://github.com/nitenacho/Proyecto28/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/nitenacho/Proyecto28/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/nitenacho/Proyecto28/compare/v0.9.2...v0.10.0
 [0.9.2]: https://github.com/nitenacho/Proyecto28/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/nitenacho/Proyecto28/compare/v0.9.0...v0.9.1

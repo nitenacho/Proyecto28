@@ -1,39 +1,44 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-05-29 (fix hover estable + URLs - `v0.20.1`)
-> **Tag activo esperado tras cierre:** `v0.20.1`
+> **Ultima actualizacion:** 2026-05-30 (Etapa 17 Pacman de luz + color admin - `v0.21.0`)
+> **Tag activo esperado tras cierre:** `v0.21.0`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
 
-Etapas 1-16 cerradas. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
+Etapas 1-17 cerradas. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
-sync Claude Design, hardening performance/a11y y documentacion final. El fix
-puntual `v0.20.1` estabiliza el hover en bordes de cubos y agrega un indice de
-URLs operativas.
+sync Claude Design, hardening performance/a11y, documentacion operativa y una
+primera mecanica de juego tipo Pacman para la luz controlable.
 
 ---
 
 ## 0. Resumen en 30 segundos
 
-Estado vigente:
+Estado vigente esperado tras cierre:
 
-- `v0.20.1`: ultimo codigo funcional; fix anti-parpadeo de hover y
-  `ADMIN-URLS.md`.
-- `v0.20.0`: cierre documental final con `RUNBOOK.md`, `HANDOFF-V2.md`,
-  diagrama, guion/demo y release assets.
+- `v0.21.0`: mini-juego de esferas para la luz, cronometro, mejor tiempo local,
+  color de luz publicable y schema Strapi `gameLightColor`.
+- `v0.20.1`: ultimo tag anterior, hover estable en bordes y `ADMIN-URLS.md`.
+- Tres fixes CMS posteriores a `v0.20.1` quedan absorbidos en `v0.21.0`:
+  normalizacion de `Project.status`, desactivacion de Draft & Publish en
+  `Project` y recuperacion del admin Strapi tras el conflicto de schema.
 - Dominio canonico: `https://proyecto28.com`.
 - CMS: `https://honest-candy-800d1e4a92.strapiapp.com`.
 - `.cl` sigue secundario/pending segun DNS/certificado; no bloquear continuidad
   si `.com` esta sano.
+
+Regla operativa confirmada por el owner: el proyecto no se considera cerrado si
+solo funciona local. Cada cambio funcional debe terminar con repo, Pages,
+Strapi, docs, handoff y Google Doc sincronizados.
 
 ---
 
 ## 1. Como arrancar como nuevo agente IA
 
 ```powershell
-cd "C:/Users/incon/OneDrive/Desktop/Proyectos_Claude/Claude_P28/Proyecto28"
+cd "C:/Users/incon/Downloads/EscritorioNobita/Proyectos_Claude/Claude_P28/Proyecto28"
 git checkout main
 git pull --ff-only
 git status
@@ -46,66 +51,144 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- ultimo tag `v0.20.1`
+- ultimo tag `v0.21.0`
 - build Vite OK
 
 Lectura obligatoria:
 
-1. `HANDOFF-V2.md` - handoff final compacto.
+1. `HANDOFF-V2.md` - handoff compacto.
 2. `ADMIN-URLS.md` - URLs para administrar todos los servicios.
 3. `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
 4. `DEPLOY.md` - GitHub Pages, Strapi, OAuth, Pixel Streaming, releases.
-5. `CHANGELOG.md` - `[0.20.1]`.
-6. `PLAN-PROYECTO28-V2.md` - Etapa 16 cerrada.
+5. `CHANGELOG.md` - `[0.21.0]`.
+6. `PLAN-PROYECTO28-V2.md` - Etapa 17 cerrada.
+7. `cms/README.md` - SiteSetting incluye `gameLightColor`.
 
 ---
 
-## 2. Cambios v0.20.1
+## 2. Cambios v0.21.0
+
+### Mini-juego de recoleccion
+
+- Se agrega `src/game/collectibles.js`.
+- Crea 1 esfera pequena por cada cubo oscuro/vacio (`!tile.userData.isProject`).
+- En el grid actual son 18 esferas: 24 cubos totales menos 6 cubos proyecto.
+- Las esferas flotan sutilmente sobre el cubo, sin popup y sin texto.
+- Solo aparecen cuando la luz esta bajo control manual
+  (`W/A/S/D`, flechas o gamepad).
+- Desaparecen al volver al mouse-follow o al completar la run.
+- La recoleccion ocurre por cercania X/Z para que funcione aunque la luz este
+  flotando a distinta altura.
+
+### Timer, contador y mejor tiempo
+
+- `src/main.js` mantiene un estado de run:
+  `active`, `complete`, `startAt`, `elapsedMs`, `collected`, `bestMs`.
+- El timer arranca al controlar la luz.
+- Si la luz deja de estar controlada, el contador/timer se reinician y las
+  esferas vuelven para la proxima run.
+- Si la luz cae al vacio, se resetea el run junto al respawn.
+- Al recolectar todas las esferas:
+  - el timer se detiene en pantalla;
+  - el contador queda en `total/total`;
+  - la luz brilla dorada durante 1 segundo;
+  - el mejor tiempo se guarda en `localStorage` con key
+    `p28-sphere-best-time-ms-v1`.
+
+### HUD
+
+- `src/ui/hud.js` ahora muestra, en formato compacto:
+  - `Caidas`
+  - `Esferas`
+  - `Tiempo`
+  - `Mejor`
+- El HUD esta pensado para no molestar la vista del juego y seguir siendo
+  legible en desktop/gamepad.
+
+### Color de luz
+
+- `src/game/light.js` agrega paletas:
+  - `cyan`
+  - `red`
+  - `green`
+- `Admin -> Tweaks -> Juego -> Color luz` ofrece:
+  - `Gema cyan`
+  - `Gema rojiza`
+  - `Gema verde`
+- El campo se normaliza desde Strapi como `gameLightColor`.
+- El frontend muta `site.game.lightColor` en vivo y llama
+  `controlLight.setLightColor(...)`.
+- Durante victoria, el color temporal dorado tiene prioridad y luego vuelve a
+  la gema seleccionada.
+
+### Strapi / Publicar cambios
 
 Archivos tocados:
 
-- `src/main.js`: agrega histeresis de hover:
-  - conserva el ultimo cubo activo por `180ms` cuando el raycast pierde el
-    tile por borde.
-  - exige `90ms` de estabilidad antes de cambiar a otro cubo.
-  - centraliza `applyHoverTarget` para popup, modelo 3D y cursor.
-  - mantiene cierre inmediato por teclado/Escape.
-- `ADMIN-URLS.md`: lista operativa de URLs para sitio publico, Strapi Cloud,
-  GitHub, Google Cloud/OAuth, Google Doc, Cloudflare/NIC, Pixel Streaming y
-  desarrollo local.
-- `README.md` y `RUNBOOK.md`: enlazan `ADMIN-URLS.md`.
-- `CHANGELOG.md`, `HANDOFF-LATEST.md`, `HANDOFF-V2.md`: cierre documental del
-  fix.
+- `cms/src/api/site-setting/content-types/site-setting/schema.json`
+- `cms/src/api/site-setting/controllers/site-setting.js`
+- `cms/src/index.js`
+- `src/admin/publish.js`
+- `src/data/cms.js`
+- `src/data/fallback.js`
 
-Motivo: en desktop, al dejar el mouse justo en la orilla de un cubo, el
-raycast podia alternar frame a frame entre cubo y vacio. Eso generaba batalla
-entre popup/modelo visible y oculto. El fix no agranda la hitbox visual; solo
-filtra micro-cortes del raycast.
+Campo agregado:
 
----
+```text
+gameLightColor: enum(cyan, red, green), default cyan
+```
 
-## 3. Cambios de Etapa 16
+Este campo queda permitido en `/api/publish`, se normaliza en el frontend y se
+incluye en el bootstrap/default del singleton SiteSetting.
 
-Archivos principales:
+### Estabilidad y rutas
 
-- `RUNBOOK.md`: smoke tests, operacion normal, agregar proyecto, incidentes,
-  rotacion de secretos y rollback.
-- `HANDOFF-V2.md`: handoff final para agentes nuevos.
-- `README.md`: stack final, docs operativas, flujo para agregar proyectos.
-- `DEPLOY.md`: variables productivas, OAuth, `stream.proyecto28.com`,
-  webhook Discord opcional y release assets.
-- `PLAN-PROYECTO28-V2.md`: Etapa 16 marcada como cerrada.
-- `docs/architecture.svg` y `docs/architecture.png`: diagrama operativo.
-- `docs/demo-script.md`: guion para video demo.
-- `scripts/record-demo.mjs`: helper para generar WebM tecnico desde el canvas.
-- `.github/workflows/sync-design.yml`: adjunta assets documentales al release
-  en tags `v*` cuando existen.
-- `.github/workflows/deploy.yml`: ignora docs/runbook/handoff/assets para
-  evitar deploys Pages por cambios puramente documentales.
+- Las rutas de continuidad se ajustaron al nuevo checkout local:
+
+```text
+C:/Users/incon/Downloads/EscritorioNobita/Proyectos_Claude/Claude_P28/Proyecto28
+```
+
+- Ya no quedan comandos apuntando a la ruta local anterior.
+- El servidor Vite local verificado sale desde la ruta nueva y sirve
+  `src/main.js` con `createCollectibleSpheres` y `gameLightColor`.
 
 ---
 
-## 4. Validacion viva esperada
+## 3. Validacion realizada antes del cierre
+
+### Local
+
+```powershell
+npm run build
+```
+
+Resultado:
+
+- OK.
+- Warning existente: chunk `three` >500 kB.
+
+Smoke logico de collectibles:
+
+- 24 tiles fake.
+- 6 tiles proyecto.
+- 18 tiles vacios/oscuros.
+- `createCollectibleSpheres(...).total === 18`.
+- Con luz alineada en X/Z sobre una esfera:
+  - `collectNear(...) === 1`
+  - primera esfera queda oculta
+  - quedan 17 visibles.
+
+Servidor local:
+
+- `http://127.0.0.1:5173/` responde `HTTP 200`.
+- Proceso `node.exe` de Vite apunta a:
+  `C:\Users\incon\Downloads\EscritorioNobita\Proyectos_Claude\Claude_P28\Proyecto28`.
+- `http://127.0.0.1:5173/src/main.js` incluye
+  `createCollectibleSpheres`, `gameLightColor`, `BEST_TIME_KEY` y
+  `startSphereRun`.
+
+### Produccion/Strapi predeploy
 
 ```powershell
 curl.exe -L -s -o NUL -w "site: %{http_code}`n" "https://proyecto28.com"
@@ -120,49 +203,24 @@ curl.exe -s "$base/api/auth/check?email=inconcha@gmail.com"
 curl.exe -s "$base/api/auth/check?email=yk8arts@gmail.com"
 ```
 
-Esperado:
+Resultado predeploy:
 
-- site/robots/sitemap `200`
+- site `200`
+- robots `200`
+- sitemap `200`
 - projects `200`
 - site-setting `200`
 - admin-whitelists `403`
-- `inconcha@gmail.com` permitido como `owner`
-- `yk8arts@gmail.com` permitido como `editor`
+- `inconcha@gmail.com` => `{ allowed:true, role:"owner" }`
+- `yk8arts@gmail.com` => `{ allowed:true, role:"editor" }`
 
-Verificado localmente antes del cierre `v0.20.1`:
-
-- `npm run build` OK.
-- `vite preview` + Chrome headless/CDP:
-  - hover detectado en `Atlas Móvil`.
-  - popup visible sobre tile.
-  - tras salir del tile, popup sigue visible a `80ms` y queda oculto luego de
-    `400ms`.
-  - viewport local `html/body/canvas = innerWidth = 1440`.
-- `https://proyecto28.com`, `robots.txt`, `sitemap.xml`: `200`.
-- Strapi: projects `200`, site-setting `200`, admin-whitelists `403`.
-- Auth check: `inconcha@gmail.com` owner, `yk8arts@gmail.com` editor.
-
-Verificado en cierre `v0.20.0`:
-
-- `npm run build` OK.
-- `node scripts/export-claude-design.mjs` OK (`96` tokens).
-- `node scripts/record-demo.mjs` genero `docs/proyecto28-demo.webm`
-  (`923482` bytes).
-- `docs/architecture.png` generado y revisado.
+Nota: antes del deploy de `v0.21.0`, Strapi Cloud todavia puede no exponer
+`gameLightColor` en `/api/site-setting`. Eso se espera hasta que Strapi Cloud
+reconstruya `cms/**` desde `main`.
 
 ---
 
-## 5. Operacion clave
-
-### URLs de administracion
-
-Abrir `ADMIN-URLS.md` para tener a mano:
-
-- sitio publico, robots y sitemap.
-- Strapi Cloud/Admin/API checks.
-- GitHub repo, Actions, Pages, secrets y releases.
-- Google Cloud OAuth, test users y Google Doc handoff.
-- Cloudflare/NIC y Pixel Streaming.
+## 4. Operacion clave
 
 ### Admin / Tweaks / publicar
 
@@ -174,6 +232,30 @@ El boton `Admin` abre Google OAuth. Strapi whitelist permite:
 `PUBLICAR CAMBIOS` persiste snapshots al singleton `SiteSetting` via
 `/api/publish`. Si el token Google vence, el frontend reintenta una vez con
 sesion fresca.
+
+Color de luz:
+
+```text
+Admin -> Tweaks -> Juego -> Color luz
+```
+
+Valores aceptados:
+
+- `cyan`
+- `red`
+- `green`
+
+### Como probar el mini-juego
+
+1. Abrir `https://proyecto28.com` despues del deploy.
+2. Hacer hard refresh si el navegador conserva assets viejos.
+3. Controlar la luz con `W/A/S/D`, flechas o gamepad.
+4. Las esferas deben aparecer solo mientras la luz esta controlada.
+5. Tocar cada esfera por cercania.
+6. Confirmar contador `Esferas`, `Tiempo` y `Mejor`.
+7. Al terminar todas, el timer queda detenido y la luz brilla dorado 1 segundo.
+8. Mover el mouse o caer al vacio debe reiniciar timer/contador y ocultar o
+   reaparecer esferas segun corresponda.
 
 ### Pixel Streaming
 
@@ -194,6 +276,24 @@ si aplica, `unrealStreamURL` + `unrealLevelName`. Procedimiento completo:
 
 ---
 
+## 5. Deploy esperado
+
+Flujo correcto:
+
+1. Trabajar en rama `etapa-17-pacman-luz`.
+2. Commit funcional/documental.
+3. Push de rama.
+4. Merge a `main` con commit `feat(...) [skip-tag]` para evitar auto-tag antes
+   de validar produccion.
+5. GitHub Pages despliega porque se tocaron `src/**`.
+6. Strapi Cloud reconstruye porque se tocaron `cms/**`.
+7. Verificar `https://proyecto28.com` y endpoints Strapi.
+8. Actualizar handoff con evidencia final si falta.
+9. Crear/pushear tag `v0.21.0`.
+10. Copiar handoff al Google Doc como subpestana bajo `Handoff`.
+
+---
+
 ## 6. Riesgos y pendientes
 
 - `proyecto28.cl` no es canonico hasta cerrar DNS/certificado/redirect.
@@ -203,32 +303,37 @@ si aplica, `unrealStreamURL` + `unrealLevelName`. Procedimiento completo:
   editable `status` y el `status` interno de Strapi v5.
 - Pixel Streaming real depende de servidor GPU externo, TLS, costos y
   auto-suspend.
-- `gh` CLI local no estaba autenticado en cierres previos; usar API publica o
-  GitHub UI para validar Actions si sigue asi.
+- El mejor tiempo del mini-juego es local por navegador; no existe leaderboard
+  remoto todavia.
+- La etapa 17 esta enfocada en desktop/gamepad. Mobile solo entra si el
+  navegador/dispositivo expone gamepad compatible.
 
 ---
 
 ## 7. Google Doc
 
-Respaldo final creado como subpestana bajo `Handoff` en:
+Respaldo oficial:
 
 https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/edit
 
-Titulo:
+Regla:
+
+- Crear/copiar el cierre como subpestana bajo `Handoff`.
+- No crear cierres como pestanas raiz.
+- Titulo esperado:
+
+```text
+2026-05-30 HH:mm UTC - v0.21.0 pacman-luz-color-admin
+```
+
+Respaldo anterior:
 
 ```text
 2026-05-29 21:30 UTC - v0.20.1 hover-estable-urls
 ```
 
-Tab id creado y verificado: `t.rox2yd4prf1o` bajo padre `Handoff`
-(`t.7lpfc5ado1h`).
-
-Respaldo anterior: `2026-05-29 19:00 UTC - v0.20.0 documentacion-final`,
-tab id `t.yau0g6g371sa` bajo padre `Handoff` (`t.7lpfc5ado1h`).
-
-Regla: nunca crear cierres como pestanas raiz. El siguiente agente debe tomar
-la ultima subpestana bajo `Handoff`.
+Tab id anterior: `t.rox2yd4prf1o` bajo padre `Handoff` (`t.7lpfc5ado1h`).
 
 ---
 
-Fin del handoff `v0.20.1`.
+Fin del handoff `v0.21.0`.

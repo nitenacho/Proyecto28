@@ -113,6 +113,7 @@ const SITE_SETTING_DEFAULTS = {
   gameLightJumpCount: 4,
   gameLightGravity: 20.0,
   gameLightVelocityCurve: 'kirby',
+  gameLightColor: 'cyan',
   gameMouseFollowDelay: 1.0,
   gameFallDuration: 1.0,
   gameShadowSize: 0.3,

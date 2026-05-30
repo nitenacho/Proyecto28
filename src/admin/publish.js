@@ -18,6 +18,7 @@ const PUBLISHABLE_KEYS = new Set([
   'gameJumpCount',
   'gameGravity',
   'gameVelocityCurve',
+  'gameLightColor',
   'gameMouseFollowDelay',
   'gameFallDuration',
   'gameShadowSize',

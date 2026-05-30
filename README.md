@@ -80,6 +80,22 @@ Vite separa GSAP en `assets/gsap-*.js` para que el chunk principal del sitio no
 absorba ese peso. El build local de cierre dejó el chunk GSAP en `27.81 kB`
 gzip.
 
+### Mini-juego de luz
+
+Etapa 17 convierte la luz controlable en una prueba tipo Pacman enfocada en
+desktop/gamepad:
+
+- cuando la luz queda bajo control manual (`W/A/S/D`, flechas o gamepad),
+  aparecen esferas pequenas sobre cada cubo oscuro/vacio;
+- la recoleccion ocurre por cercania X/Z, sin popup ni click;
+- el HUD compacto muestra esferas, cronometro y mejor tiempo local;
+- al recolectar todas las esferas, el timer se detiene, la luz brilla dorado
+  por 1 segundo y el mejor tiempo queda guardado en `localStorage`;
+- si la luz cae o deja de estar controlada, contador/cronometro se reinician y
+  las esferas reaparecen en el siguiente run;
+- `Admin -> Tweaks -> Juego -> Color luz` permite elegir `Gema cyan`,
+  `Gema rojiza` o `Gema verde`, publicable en Strapi como `gameLightColor`.
+
 ### Performance y accesibilidad
 
 Etapa 15 endurece el boot final antes de v1:
@@ -183,6 +199,10 @@ Resumen del flujo:
 GitHub Actions se encarga del deploy automático a GH Pages. Strapi Cloud
 hace rebuild automático de `cms/**`. **No hay deploy manual.**
 
+Regla operativa: despues de cada cambio funcional, el repo, `proyecto28.com`,
+Strapi Cloud y el handoff deben quedar sincronizados. Un cambio que existe solo
+en local no se considera cerrado.
+
 Regla de continuidad: el Google Doc oficial no usa pestañas raíz para cierres.
 Cada respaldo debe quedar como subpestaña dentro del tab raíz `Handoff`, con
 formato `YYYY-MM-DD HH:mm UTC - vX.Y.Z <slug>`.
@@ -223,3 +243,4 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 14 — GSAP polish | ✅ Cerrado — timelines + polish premium | `v0.18.0` |
 | 15 — Performance + a11y | ✅ Cerrado — Lighthouse + responsive + teclado | `v0.19.0` |
 | 16 — Documentación final | ✅ Cerrado — runbook + handoff V2 + assets | `v0.20.0` |
+| 17 — Pacman de luz + color admin | ✅ Cerrado — esferas, timer, best time y Strapi `gameLightColor` | `v0.21.0` |

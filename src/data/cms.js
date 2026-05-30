@@ -52,6 +52,7 @@ const CMS_URL = (import.meta.env.VITE_CMS_URL || '').replace(/\/$/, '');
  * @property {number} game.jumpCount
  * @property {number} game.gravity
  * @property {'linear'|'easeOut'|'easeInOut'|'kirby'} game.velocityCurve
+ * @property {'cyan'|'red'|'green'} game.lightColor
  * @property {number} game.mouseFollowDelay      Segundos sin WASD antes de seguir mouse
  * @property {number} game.fallDuration          Segundos de caída antes del respawn
  * @property {number} game.shadowSize            Tamaño del anillo de sombra
@@ -137,6 +138,7 @@ function normalizeSite(s) {
       jumpCount: num(a.gameLightJumpCount, fb.game.jumpCount),
       gravity: num(parseFloat(a.gameLightGravity), fb.game.gravity),
       velocityCurve: a.gameLightVelocityCurve || fb.game.velocityCurve,
+      lightColor: ['cyan', 'red', 'green'].includes(a.gameLightColor) ? a.gameLightColor : fb.game.lightColor,
       mouseFollowDelay: num(parseFloat(a.gameMouseFollowDelay), fb.game.mouseFollowDelay),
       fallDuration: num(parseFloat(a.gameFallDuration), fb.game.fallDuration),
       shadowSize: num(parseFloat(a.gameShadowSize), fb.game.shadowSize),

@@ -1,7 +1,6 @@
 /* =========================================================
-   PROYECTO 28 — HUD (Etapa 6)
-   Contador "LUCES CAÍDAS" en esquina superior derecha.
-   Estado en memoria — se resetea al recargar.
+   PROYECTO 28 — HUD
+   Contadores discretos de caídas + mini-juego de esferas.
    ========================================================= */
 
 import { hudCounterTimeline } from '../animations/timelines.js';
@@ -16,20 +15,27 @@ const HUD_CSS = `
   pointer-events: none;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  align-items: stretch;
+  gap: 3px;
   font-family: var(--font-mono);
-  font-size: var(--fs-12);
+  font-size: 10px;
   letter-spacing: var(--tr-wide);
   text-transform: uppercase;
   color: var(--ink-2);
   background: var(--bg-overlay);
-  padding: 8px 12px;
+  padding: 7px 9px;
   border: var(--bd-soft);
   border-radius: var(--r-sm);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   font-feature-settings: "tnum";
+}
+.p28-hud-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 118px;
+  line-height: 1.35;
 }
 .p28-hud-label {
   color: var(--ink-3);
@@ -40,15 +46,31 @@ const HUD_CSS = `
   display: inline-block;
   transform-origin: 50% 60%;
 }
+.p28-hud-value.is-idle {
+  color: var(--ink-3);
+}
+.p28-hud-value.is-win {
+  color: var(--warning);
+  text-shadow: 0 0 12px rgba(255, 200, 87, 0.55);
+}
+.p28-hud-best {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  opacity: 0.78;
+}
 @media (max-width: 1024px), (pointer: coarse), (max-aspect-ratio: 1/1) {
   .p28-hud {
     top: auto;
     bottom: 100px;
     right: 12px;
     padding: 5px 8px;
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 0.08em;
     border-radius: 4px;
+  }
+  .p28-hud-row {
+    min-width: 104px;
+    gap: 8px;
   }
 }
 `;
@@ -65,8 +87,41 @@ function pad3(n) {
   return String(Math.max(0, Math.min(999, n | 0))).padStart(3, '0');
 }
 
+function pad2(n) {
+  return String(Math.max(0, n | 0)).padStart(2, '0');
+}
+
+function formatTime(ms) {
+  if (!Number.isFinite(ms) || ms < 0) return '--:--.--';
+  const totalCs = Math.floor(ms / 10);
+  const minutes = Math.floor(totalCs / 6000);
+  const seconds = Math.floor((totalCs % 6000) / 100);
+  const centis = totalCs % 100;
+  return `${pad2(minutes)}:${pad2(seconds)}.${pad2(centis)}`;
+}
+
+function makeRow(labelText, valueText, extraClass = '') {
+  const row = document.createElement('div');
+  row.className = `p28-hud-row ${extraClass}`.trim();
+  const label = document.createElement('span');
+  label.className = 'p28-hud-label';
+  label.textContent = labelText;
+  const value = document.createElement('span');
+  value.className = 'p28-hud-value';
+  value.textContent = valueText;
+  row.appendChild(label);
+  row.appendChild(value);
+  return { row, value };
+}
+
 /**
- * @returns {{ setFallCount: (n:number)=>void, element: HTMLDivElement }}
+ * @returns {{
+ *   setFallCount: (n:number)=>void,
+ *   setCollectibles: (current:number,total:number)=>void,
+ *   setTimer: (ms:number, active?:boolean, complete?:boolean)=>void,
+ *   setBestTime: (ms:number|null)=>void,
+ *   element: HTMLDivElement
+ * }}
  */
 export function mountHud() {
   ensureStyle();
@@ -74,23 +129,36 @@ export function mountHud() {
   const root = document.createElement('div');
   root.className = 'p28-hud';
 
-  const row = document.createElement('div');
-  const label = document.createElement('span');
-  label.className = 'p28-hud-label';
-  label.textContent = 'Luces caídas · ';
-  const value = document.createElement('span');
-  value.className = 'p28-hud-value';
-  value.textContent = pad3(0);
-  row.appendChild(label);
-  row.appendChild(value);
-  root.appendChild(row);
+  const falls = makeRow('Caidas', pad3(0));
+  const spheres = makeRow('Esferas', '00/00');
+  const timer = makeRow('Tiempo', formatTime(0));
+  const best = makeRow('Mejor', formatTime(null), 'p28-hud-best');
+  root.appendChild(falls.row);
+  root.appendChild(spheres.row);
+  root.appendChild(timer.row);
+  root.appendChild(best.row);
 
   document.body.appendChild(root);
 
   function setFallCount(n) {
-    value.textContent = pad3(n);
-    hudCounterTimeline(value);
+    falls.value.textContent = pad3(n);
+    hudCounterTimeline(falls.value);
   }
 
-  return { setFallCount, element: root };
+  function setCollectibles(current, total) {
+    spheres.value.textContent = `${pad2(current)}/${pad2(total)}`;
+    hudCounterTimeline(spheres.value);
+  }
+
+  function setTimer(ms, active = false, complete = false) {
+    timer.value.textContent = formatTime(ms);
+    timer.value.classList.toggle('is-idle', !active && !complete);
+    timer.value.classList.toggle('is-win', !!complete);
+  }
+
+  function setBestTime(ms) {
+    best.value.textContent = formatTime(ms);
+  }
+
+  return { setFallCount, setCollectibles, setTimer, setBestTime, element: root };
 }

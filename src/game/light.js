@@ -13,7 +13,7 @@
    ========================================================= */
 
 import * as THREE from 'three';
-import { lightFallTimeline, lightSquashTimeline } from '../animations/timelines.js';
+import { lightFallTimeline, lightSquashTimeline, lightVictoryTimeline } from '../animations/timelines.js';
 
 const LIGHT_Y = 1.0;
 const RESPAWN_HEIGHT = 4.0;
@@ -27,6 +27,13 @@ const VOID_Y = -10;
 const FADE_IN_DURATION = 0.3;
 const BASE_LIGHT_INTENSITY = 4.5;
 const BASE_EMISSIVE_INTENSITY = 2.5;
+const VICTORY_GOLD = { color: 0xffc857, emissive: 0xffd166, shadow: 0xffc857 };
+
+const LIGHT_PALETTES = {
+  cyan:  { color: LIGHT_COLOR, emissive: LIGHT_EMISSIVE, shadow: 0x5ee5d6 },
+  red:   { color: 0xd85a56, emissive: 0xff4d5e, shadow: 0xff5c7a },
+  green: { color: 0x5ee5a0, emissive: 0x35ff94, shadow: 0x5ee5a0 },
+};
 
 // Sombra (decal) — geometry unitaria (outer=1), tamaño final via scale.
 const SHADOW_INNER = 0.78;            // ratio inner/outer del ring (grosor relativo)
@@ -52,23 +59,32 @@ function arrowToWASD(key) {
 /**
  * @param {Object} opts
  * @param {THREE.Scene} opts.scene
- * @param {{ lightSpeed:number, mouseFollowDelay:number, gravity:number, jumpHeight:number, jumpCount:number, fallDuration:number, shadowSize?:number }} opts.config
+ * @param {{ lightSpeed:number, mouseFollowDelay:number, gravity:number, jumpHeight:number, jumpCount:number, fallDuration:number, shadowSize?:number, lightColor?:string }} opts.config
  * @param {THREE.Mesh[]} opts.tiles
  * @param {boolean} [opts.gravityEnabled=false]
  * @param {(tile:THREE.Mesh|null)=>void} [opts.onActiveTileChange]
  * @param {(fallCount:number)=>void} [opts.onRespawn]
+ * @param {()=>void} [opts.onRespawnComplete]
+ * @param {(controlled:boolean, mode:string)=>void} [opts.onControlModeChange]
  */
 export function createControllableLight({
   scene, config, tiles,
   gravityEnabled = false,
   onActiveTileChange = null,
   onRespawn = null,
+  onRespawnComplete = null,
+  onControlModeChange = null,
 }) {
+  let paletteKey = LIGHT_PALETTES[config.lightColor] ? config.lightColor : 'cyan';
+  let victoryFlashTimer = 0;
+  let victoryFlashing = false;
+  let manualControlActive = false;
+
   const mesh = new THREE.Mesh(
     new THREE.SphereGeometry(SPHERE_RADIUS, 24, 16),
     new THREE.MeshStandardMaterial({
-      color: LIGHT_COLOR,
-      emissive: LIGHT_EMISSIVE,
+      color: LIGHT_PALETTES[paletteKey].color,
+      emissive: LIGHT_PALETTES[paletteKey].emissive,
       emissiveIntensity: BASE_EMISSIVE_INTENSITY,
       roughness: 0.3,
       metalness: 0.0,
@@ -78,7 +94,7 @@ export function createControllableLight({
   );
   scene.add(mesh);
 
-  const light = new THREE.PointLight(LIGHT_COLOR, BASE_LIGHT_INTENSITY, 12, 1.8);
+  const light = new THREE.PointLight(LIGHT_PALETTES[paletteKey].color, BASE_LIGHT_INTENSITY, 12, 1.8);
   scene.add(light);
 
   // Sombra-anillo: RingGeometry unitaria (outer = 1.0). El tamaño final
@@ -87,7 +103,7 @@ export function createControllableLight({
   const shadow = new THREE.Mesh(
     new THREE.RingGeometry(SHADOW_INNER, 1.0, 48),
     new THREE.MeshBasicMaterial({
-      color: 0x5ee5d6,
+      color: LIGHT_PALETTES[paletteKey].shadow,
       transparent: true,
       opacity: SHADOW_BASE_OPACITY,
       depthWrite: false,
@@ -135,6 +151,36 @@ export function createControllableLight({
   const shadowRay = new THREE.Raycaster();
   const shadowOrigin = new THREE.Vector3();
 
+  function applyPalette(palette) {
+    mesh.material.color.setHex(palette.color);
+    mesh.material.emissive.setHex(palette.emissive);
+    light.color.setHex(palette.color);
+    shadow.material.color.setHex(palette.shadow);
+  }
+
+  function setLightColor(key = 'cyan') {
+    paletteKey = LIGHT_PALETTES[key] ? key : 'cyan';
+    if (!victoryFlashing) applyPalette(LIGHT_PALETTES[paletteKey]);
+  }
+
+  function setManualControlActive(active) {
+    if (manualControlActive === active) return;
+    manualControlActive = active;
+    if (onControlModeChange) onControlModeChange(manualControlActive, mode);
+  }
+
+  function flashVictory() {
+    victoryFlashing = true;
+    if (victoryFlashTimer) window.clearTimeout(victoryFlashTimer);
+    applyPalette(VICTORY_GOLD);
+    lightVictoryTimeline(mesh, light);
+    victoryFlashTimer = window.setTimeout(() => {
+      victoryFlashing = false;
+      victoryFlashTimer = 0;
+      applyPalette(LIGHT_PALETTES[paletteKey]);
+    }, 1000);
+  }
+
   function setActiveTile(next) {
     if (next === activeTile) return;
     activeTile = next;
@@ -153,12 +199,14 @@ export function createControllableLight({
     vy = 0;
     grounded = false;
     jumpsUsed = 0;
+    setManualControlActive(true);
   }
 
   function exitPhysics() {
     if (mode === 'floating') return;
     mode = 'floating';
     setActiveTile(null);
+    setManualControlActive(false);
   }
 
   function setGravityEnabled(v) {
@@ -279,6 +327,7 @@ export function createControllableLight({
 
     const delayMs = config.mouseFollowDelay * 1000;
     const wasdMode = anyMove || (nowMs - lastMoveInput) < delayMs;
+    setManualControlActive(wasdMode);
 
     if (wasdMode) {
       velocity.set(move.x, 0, move.z).multiplyScalar(config.lightSpeed);
@@ -388,6 +437,7 @@ export function createControllableLight({
         respawnPhase = 'none';
         respawnT = 0;
         setOpacity(1);
+        if (onRespawnComplete) onRespawnComplete();
       } else {
         setOpacity(respawnT);
       }
@@ -429,5 +479,16 @@ export function createControllableLight({
     updateShadow();
   }
 
-  return { mesh, light, shadow, onKeyDown, onKeyUp, update, setGravityEnabled, notifyMouseMoved };
+  return {
+    mesh,
+    light,
+    shadow,
+    onKeyDown,
+    onKeyUp,
+    update,
+    setGravityEnabled,
+    setLightColor,
+    flashVictory,
+    notifyMouseMoved,
+  };
 }

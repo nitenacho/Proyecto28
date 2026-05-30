@@ -94,6 +94,12 @@
       "enum": ["linear", "easeOut", "easeInOut", "kirby"],
       "description": "Curva de ramp-up de velocidad al presionar WASD."
     },
+    "gameLightColor": {
+      "type": "enumeration",
+      "default": "cyan",
+      "enum": ["cyan", "red", "green"],
+      "description": "Color visual de la luz controlable desde Tweaks."
+    },
     "gameMouseFollowDelay": {
       "type": "decimal",
       "default": 1.0,

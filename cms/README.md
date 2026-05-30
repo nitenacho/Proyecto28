@@ -24,6 +24,8 @@ Headless CMS that owns the content shown in the frontend:
     - `gameLightSpeed`, `gameLightJumpHeight`, `gameLightJumpCount`,
       `gameLightGravity`, `gameLightVelocityCurve`, `gameMouseFollowDelay`,
       `gameFallDuration` — tweaks del juego de plataformas (Etapas 4–6)
+    - `gameLightColor` — color publicable de la luz controlable (`cyan`,
+      `red`, `green`) usado por el mini-juego de recoleccion (Etapa 17)
     - `adminButtonVisible` — toggle del botón secreto bajo el logo
     - `pixelStreamingEnabled` — master switch global de streaming
     - `pixelStreamingPreviewEnabled` — muestra/oculta el preview fallback sobre el cubo

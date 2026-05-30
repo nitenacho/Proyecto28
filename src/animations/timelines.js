@@ -123,6 +123,20 @@ export function lightFallTimeline(lightMesh) {
     .to(lightMesh.rotation, { z: '+=0.9', duration: 0.24 }, 0);
 }
 
+export function lightVictoryTimeline(lightMesh, pointLight) {
+  if (!lightMesh || reducedMotion()) return null;
+  kill([lightMesh.scale, lightMesh.material, pointLight], 'x,y,z,emissiveIntensity,intensity');
+  const baseIntensity = pointLight?.intensity || 4.5;
+  const baseEmissive = lightMesh.material?.emissiveIntensity || 2.5;
+  return gsap.timeline({ defaults: { ease: EASE_OUT } })
+    .to(lightMesh.scale, { x: 1.42, y: 1.42, z: 1.42, duration: 0.18 }, 0)
+    .to(lightMesh.material, { emissiveIntensity: baseEmissive * 1.8, duration: 0.18 }, 0)
+    .to(pointLight || {}, { intensity: baseIntensity * 1.8, duration: 0.18 }, 0)
+    .to(lightMesh.scale, { x: 1, y: 1, z: 1, duration: 0.52, ease: 'elastic.out(1, 0.45)' }, 0.18)
+    .to(lightMesh.material, { emissiveIntensity: baseEmissive, duration: 0.62 }, 0.28)
+    .to(pointLight || {}, { intensity: baseIntensity, duration: 0.62 }, 0.28);
+}
+
 export function hudCounterTimeline(valueEl) {
   if (!valueEl || reducedMotion()) return null;
   kill(valueEl, 'scale,color,textShadow');
