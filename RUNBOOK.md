@@ -100,7 +100,7 @@ una vez con token fresco.
 4. Completar:
    - `slot`: posicion fija del grid.
    - `projectId`: formato recomendado `028.X`.
-   - `title`, `projectStatus`, `description`, `tags`.
+   - `title`, `status`, `description`, `tags`.
    - `redirectURL`.
    - `popupImage` o `image`.
    - `popupBody` y `popupCTALabel`.

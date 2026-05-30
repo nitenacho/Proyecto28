@@ -4,7 +4,7 @@ Headless CMS that owns the content shown in the frontend:
 
 - **Project** (collection) — one entry per cube with popup
   - `slot` — fixed grid position (Rectangle 4–9)
-  - `projectId`, `title`, `projectStatus`, `color` (cyan/copper)
+  - `projectId`, `title`, `status`, `color` (cyan/copper)
   - `description`, `tags[]`
   - `image` — image shown inside the popup
   - `model3D` — `.glb` / `.gltf` floating above the cube on hover

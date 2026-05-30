@@ -8,7 +8,7 @@
     "description": "Un cubo de proyecto en el grid 3D — textos, imagen, modelo 3D y URL de redirección."
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {
@@ -38,10 +38,9 @@
       "description": "Título grande del popup.",
       "maxLength": 80
     },
-    "projectStatus": {
+    "status": {
       "type": "enumeration",
       "default": "EN PRODUCCIÓN",
-      "description": "Estado visible del proyecto. No usar el nombre interno 'status': Strapi v5 lo reserva para Draft/Publish.",
       "enum": [
         "EN PRODUCCIÓN",
         "BETA",
