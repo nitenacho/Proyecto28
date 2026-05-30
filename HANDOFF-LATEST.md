@@ -199,8 +199,8 @@ si aplica, `unrealStreamURL` + `unrealLevelName`. Procedimiento completo:
 - `proyecto28.cl` no es canonico hasta cerrar DNS/certificado/redirect.
 - Google OAuth consent screen puede seguir en Testing; al agregar emails a
   Strapi, tambien agregarlos como test users en Google Cloud.
-- Tech debt Strapi: si aparece `Invalid status` al editar Project, normalizar
-  valores legacy de `Project.status`.
+- Strapi v5 reserva `status` para Draft/Publish en Content Manager. Usar
+  `Project.projectStatus` para el estado visible del proyecto.
 - Pixel Streaming real depende de servidor GPU externo, TLS, costos y
   auto-suspend.
 - `gh` CLI local no estaba autenticado en cierres previos; usar API publica o

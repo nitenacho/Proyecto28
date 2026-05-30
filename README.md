@@ -149,7 +149,7 @@ publican, los cambios viven sólo en su sesión.
 ## Agregar un proyecto nuevo
 
 1. En Strapi, crear o duplicar un registro en **Project**.
-2. Completar `slot`, `projectId`, `title`, `status`, `description`, `tags`,
+2. Completar `slot`, `projectId`, `title`, `projectStatus`, `description`, `tags`,
    `redirectURL`, imagen del popup y/o modelo `.glb`.
 3. Si usa Unreal, completar `unrealEnabled`, `unrealStreamURL` y
    `unrealLevelName`.

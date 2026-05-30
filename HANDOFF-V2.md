@@ -154,8 +154,8 @@ usa Unreal conectar `unrealStreamURL` + `unrealLevelName`. Ver `RUNBOOK.md`.
 - `proyecto28.cl` sigue secundario; `.com` es canonico.
 - Google Cloud consent screen puede seguir en Testing; si se agregan correos a
   Strapi, tambien agregarlos como test users en GCP.
-- Tech debt Strapi: si reaparece `Invalid status` al editar Project, normalizar
-  valores legacy de `Project.status` en bootstrap o script puntual.
+- Strapi v5 reserva `status` para Draft/Publish en Content Manager. Usar
+  `Project.projectStatus` para el estado visible del proyecto.
 - GPU Pixel Streaming real depende de infraestructura externa y costos.
 
 ---

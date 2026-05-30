@@ -91,7 +91,7 @@ function normalizeProject(p) {
     id: a.projectId,
     title: a.title,
     color: a.color || 'cyan',
-    status: a.status || '—',
+    status: a.projectStatus || a.status || '—',
     description: a.description || '',
     tags: Array.isArray(a.tags) ? a.tags : (a.tags?.split?.(',').map((s) => s.trim()) || []),
     redirectURL: a.redirectURL || '#',

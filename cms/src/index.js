@@ -18,7 +18,7 @@
 const SAMPLE_PROJECTS = [
   {
     slot: 'Rectangle 9',
-    projectId: '028.A', title: 'Holograma', status: 'EN PRODUCCIÓN', color: 'cyan',
+    projectId: '028.A', title: 'Holograma', projectStatus: 'EN PRODUCCIÓN', color: 'cyan',
     description: 'Bot conversacional con memoria persistente, multi-canal y voz. Vive en 3 servidores de Discord y aprende de cada interacción.',
     tags: ['Discord.js', 'OpenAI', 'Postgres', 'Node 20'],
     redirectURL: 'https://github.com/nitenacho/Proyecto28',
@@ -26,7 +26,7 @@ const SAMPLE_PROJECTS = [
   },
   {
     slot: 'Rectangle 8',
-    projectId: '028.B', title: 'Atlas Móvil', status: 'BETA', color: 'cyan',
+    projectId: '028.B', title: 'Atlas Móvil', projectStatus: 'BETA', color: 'cyan',
     description: 'Mapa interactivo 3D para una expedición patagónica. Datos en vivo, capas geoespaciales, captura offline.',
     tags: ['React', 'Mapbox', 'Three.js', 'Supabase'],
     redirectURL: '/proyectos/atlas-movil',
@@ -34,7 +34,7 @@ const SAMPLE_PROJECTS = [
   },
   {
     slot: 'Rectangle 7',
-    projectId: '028.C', title: 'Saturno Engine', status: 'PROTOTIPO', color: 'cyan',
+    projectId: '028.C', title: 'Saturno Engine', projectStatus: 'PROTOTIPO', color: 'cyan',
     description: 'Sandbox de física para un videojuego indie de exploración espacial. Editor de niveles con replays cinemáticos.',
     tags: ['Unreal Engine 5', 'Blueprints', 'C++', 'Niagara'],
     redirectURL: '/proyectos/saturno-engine',
@@ -42,7 +42,7 @@ const SAMPLE_PROJECTS = [
   },
   {
     slot: 'Rectangle 6',
-    projectId: '028.D', title: 'Línea Cero', status: 'EN PRODUCCIÓN', color: 'cyan',
+    projectId: '028.D', title: 'Línea Cero', projectStatus: 'EN PRODUCCIÓN', color: 'cyan',
     description: 'Automatización end-to-end para un estudio de fotografía: ingesta, etiquetado IA, entrega al cliente.',
     tags: ['n8n', 'OpenAI Vision', 'S3', 'Resend'],
     redirectURL: '/proyectos/linea-cero',
@@ -50,7 +50,7 @@ const SAMPLE_PROJECTS = [
   },
   {
     slot: 'Rectangle 5',
-    projectId: '028.E', title: 'Cabina HUD', status: 'EN PRODUCCIÓN', color: 'copper',
+    projectId: '028.E', title: 'Cabina HUD', projectStatus: 'EN PRODUCCIÓN', color: 'copper',
     description: 'Dashboard operacional para un equipo de logística. Telemetría en tiempo real, alertas, replay de incidentes.',
     tags: ['Next.js', 'Tailwind', 'WebSockets', 'TimescaleDB'],
     redirectURL: '/proyectos/cabina-hud',
@@ -58,7 +58,7 @@ const SAMPLE_PROJECTS = [
   },
   {
     slot: 'Rectangle 4',
-    projectId: '028.F', title: 'Eco Sur', status: 'ARCHIVADO', color: 'copper',
+    projectId: '028.F', title: 'Eco Sur', projectStatus: 'ARCHIVADO', color: 'copper',
     description: 'Experiencia AR para una muestra de arte contemporánea. WebXR sin app, escaneo de markers impresos.',
     tags: ['WebXR', 'A-Frame', 'GLTF'],
     redirectURL: '/proyectos/eco-sur',
@@ -130,11 +130,14 @@ function canonicalStatusKey(value) {
     .toUpperCase();
 }
 
-function normalizeProjectStatus(value) {
+function normalizeProjectStatus(value, fallback = 'EN PRODUCCIÓN') {
   if (PROJECT_STATUS_VALUES.includes(value)) return value;
 
-  const alias = PROJECT_STATUS_ALIASES.get(canonicalStatusKey(value));
-  return alias || 'EN PRODUCCIÓN';
+  const key = canonicalStatusKey(value);
+  if (!key) return fallback;
+
+  const alias = PROJECT_STATUS_ALIASES.get(key);
+  return alias || fallback;
 }
 
 async function grantPublicReadAccess(strapi) {
@@ -247,21 +250,40 @@ async function seedIfEmpty(strapi) {
 async function backfillProjectStatuses(strapi) {
   const projectModel = strapi.getModel('api::project.project');
   const tableName = projectModel.collectionName || 'projects';
+  const hasProjectStatus = await strapi.db.connection.schema.hasColumn(tableName, 'project_status');
+  if (!hasProjectStatus) {
+    strapi.log.warn(`[bootstrap] skipped project status backfill: ${tableName}.project_status missing`);
+    return;
+  }
+
+  const hasLegacyStatus = await strapi.db.connection.schema.hasColumn(tableName, 'status');
+  const columns = ['id', 'project_id', 'slot', 'project_status'];
+  if (hasLegacyStatus) columns.push('status');
+
   const projects = await strapi.db
     .connection(tableName)
-    .select(['id', 'project_id', 'slot', 'status']);
+    .select(columns);
 
   const invalidProjects = projects
-    .map((project) => ({
-      project,
-      status: normalizeProjectStatus(project.status),
-    }))
-    .filter(({ project, status }) => project.status !== status);
+    .map((project) => {
+      const sampleStatus = SAMPLE_PROJECTS.find(
+        (sample) => sample.projectId === project.project_id || sample.slot === project.slot
+      )?.projectStatus;
+      return {
+        project,
+        status:
+          normalizeProjectStatus(project.project_status, null) ||
+          normalizeProjectStatus(project.status, null) ||
+          sampleStatus ||
+          'EN PRODUCCIÓN',
+      };
+    })
+    .filter(({ project, status }) => project.project_status !== status);
 
   if (invalidProjects.length === 0) return;
 
   for (const { project, status } of invalidProjects) {
-    await strapi.db.connection(tableName).where({ id: project.id }).update({ status });
+    await strapi.db.connection(tableName).where({ id: project.id }).update({ project_status: status });
   }
 
   const labels = invalidProjects

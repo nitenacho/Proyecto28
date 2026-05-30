@@ -38,9 +38,10 @@
       "description": "Título grande del popup.",
       "maxLength": 80
     },
-    "status": {
+    "projectStatus": {
       "type": "enumeration",
       "default": "EN PRODUCCIÓN",
+      "description": "Estado visible del proyecto. No usar el nombre interno 'status': Strapi v5 lo reserva para Draft/Publish.",
       "enum": [
         "EN PRODUCCIÓN",
         "BETA",

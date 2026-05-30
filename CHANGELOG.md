@@ -11,11 +11,11 @@ o a un fix puntual entre etapas.
 ## [Unreleased]
 
 ### Fixed
-- `cms/src/index.js` agrega un backfill idempotente para normalizar `Project.status`
-  en todas las filas draft/published durante el bootstrap de Strapi. Repara
-  borradores con `status` nulo, vacio o escrito como variante legacy
-  (`EN PRODUCCION`, `paused`, etc.) para evitar el error del admin al guardar:
-  "There are validation errors in your document".
+- `Project.status` se renombra a `Project.projectStatus` en Strapi para evitar
+  el choque con el `status` interno de Draft/Publish en Strapi v5. El bootstrap
+  migra valores legacy desde la columna `status` o desde los defaults de seed,
+  y el frontend acepta ambos nombres durante la transicion. Esto corrige el
+  error del admin al guardar: "There are validation errors in your document".
 
 ## [0.20.1] — 2026-05-29 — Fix hover estable + URLs operativas
 

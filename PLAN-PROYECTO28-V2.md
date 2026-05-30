@@ -50,9 +50,9 @@
 - **§1.5 Detalles del juego:** ✅ Defaults documentados en Strapi
   `SiteSetting` y reflejados en `src/data/fallback.js`. Ajustables vía
   panel de tweaks una vez exista (Etapas 7+).
-- **§1.6 Admin Strapi:** ⏳ Cuenta/admin operativo parcialmente; queda como
-  pendiente de gestión owner si se requiere acceso nuevo. Tech debt activo:
-  enum legacy `Project.status` puede bloquear edición de proyectos en Strapi.
+- **§1.6 Admin Strapi:** ✅ Admin operativo. Fix aplicado: el estado visible
+  del proyecto ahora vive en `Project.projectStatus` para no chocar con el
+  `status` interno de Draft/Publish en Strapi v5.
 
 ## Ajustes al flujo aprendidos durante la ejecución
 
