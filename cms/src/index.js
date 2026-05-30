@@ -66,6 +66,29 @@ const SAMPLE_PROJECTS = [
   },
 ];
 
+const PROJECT_STATUS_VALUES = [
+  'EN PRODUCCIÓN',
+  'BETA',
+  'PROTOTIPO',
+  'ARCHIVADO',
+  'EN PAUSA',
+];
+
+const PROJECT_STATUS_ALIASES = new Map([
+  ['EN PRODUCCION', 'EN PRODUCCIÓN'],
+  ['PRODUCCION', 'EN PRODUCCIÓN'],
+  ['PRODUCCIÓN', 'EN PRODUCCIÓN'],
+  ['EN PRODUCTION', 'EN PRODUCCIÓN'],
+  ['BETA', 'BETA'],
+  ['PROTOTIPO', 'PROTOTIPO'],
+  ['PROTOTYPE', 'PROTOTIPO'],
+  ['ARCHIVADO', 'ARCHIVADO'],
+  ['ARCHIVED', 'ARCHIVADO'],
+  ['EN PAUSA', 'EN PAUSA'],
+  ['PAUSA', 'EN PAUSA'],
+  ['PAUSED', 'EN PAUSA'],
+]);
+
 const ADMIN_WHITELIST_SEED = [
   { email: 'inconcha@gmail.com', role: 'owner', note: 'Dueño del proyecto.' },
   { email: 'cnignacioa@gmail.com', role: 'owner', note: 'Dueño del proyecto (cuenta alterna).' },
@@ -98,6 +121,21 @@ const SITE_SETTING_DEFAULTS = {
   pixelStreamingPreviewEnabled: false,
   pixelStreamingMode: 'shared',
 };
+
+function canonicalStatusKey(value) {
+  return String(value || '')
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase();
+}
+
+function normalizeProjectStatus(value) {
+  if (PROJECT_STATUS_VALUES.includes(value)) return value;
+
+  const alias = PROJECT_STATUS_ALIASES.get(canonicalStatusKey(value));
+  return alias || 'EN PRODUCCIÓN';
+}
 
 async function grantPublicReadAccess(strapi) {
   const publicRole = await strapi
@@ -206,12 +244,39 @@ async function seedIfEmpty(strapi) {
   }
 }
 
+async function backfillProjectStatuses(strapi) {
+  const projectModel = strapi.getModel('api::project.project');
+  const tableName = projectModel.collectionName || 'projects';
+  const projects = await strapi.db
+    .connection(tableName)
+    .select(['id', 'project_id', 'slot', 'status']);
+
+  const invalidProjects = projects
+    .map((project) => ({
+      project,
+      status: normalizeProjectStatus(project.status),
+    }))
+    .filter(({ project, status }) => project.status !== status);
+
+  if (invalidProjects.length === 0) return;
+
+  for (const { project, status } of invalidProjects) {
+    await strapi.db.connection(tableName).where({ id: project.id }).update({ status });
+  }
+
+  const labels = invalidProjects
+    .map(({ project }) => project.project_id || project.slot || project.id)
+    .join(', ');
+  strapi.log.info(`[bootstrap] normalized invalid project status values: ${labels}`);
+}
+
 module.exports = {
   register() {},
   async bootstrap({ strapi }) {
     try {
       await grantPublicReadAccess(strapi);
       await seedIfEmpty(strapi);
+      await backfillProjectStatuses(strapi);
     } catch (err) {
       strapi.log.error('[bootstrap] failed', err);
     }

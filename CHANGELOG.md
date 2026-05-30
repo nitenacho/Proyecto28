@@ -10,7 +10,12 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
-Sin cambios todavía.
+### Fixed
+- `cms/src/index.js` agrega un backfill idempotente para normalizar `Project.status`
+  en todas las filas draft/published durante el bootstrap de Strapi. Repara
+  borradores con `status` nulo, vacio o escrito como variante legacy
+  (`EN PRODUCCION`, `paused`, etc.) para evitar el error del admin al guardar:
+  "There are validation errors in your document".
 
 ## [0.20.1] — 2026-05-29 — Fix hover estable + URLs operativas
 
