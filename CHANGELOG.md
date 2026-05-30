@@ -34,12 +34,6 @@ o a un fix puntual entre etapas.
 - Las esferas ahora se activan con control manual WASD/flechas/gamepad aunque
   el tweak local de gravedad este apagado; la recoleccion usa cercania X/Z tipo
   Pacman para funcionar tambien cuando la luz flota sobre la esfera.
-- `Project` desactiva Draft & Publish para evitar el choque entre el campo
-  editable `status` y el `status` interno de Strapi v5. El bootstrap migra
-  valores desde la columna temporal `project_status` o desde los defaults de
-  seed, y el frontend acepta ambos nombres durante la transicion. Esto corrige
-  el error del admin al guardar y evita que Strapi Cloud quede en 503 tras el
-  rename del campo.
 
 ### Verified
 - `npm run build` OK. Warning existente: chunk `three` >500 kB.
@@ -69,6 +63,29 @@ o a un fix puntual entre etapas.
 - Strapi Cloud post-deploy:
   - `/api/site-setting` incluye `"gameLightColor":"cyan"`
   - `updatedAt` => `2026-05-30T17:33:05.966Z`
+
+## [0.20.4] — 2026-05-30 — Fix CMS admin availability
+
+### Fixed
+- Restaura la disponibilidad del admin Strapi despues del ajuste de schema de
+  `Project`.
+- Mantiene `Project` sin Draft & Publish para evitar el choque con el campo
+  editable `status`, sin dejar al admin en 503.
+
+## [0.20.3] — 2026-05-30 — Fix CMS status field collision
+
+### Fixed
+- `Project` desactiva Draft & Publish para evitar el choque entre el campo
+  editable `status` y el `status` interno de Strapi v5.
+- El bootstrap migra valores desde la columna temporal `project_status` o desde
+  los defaults de seed.
+- El frontend acepta ambos nombres durante la transicion.
+
+## [0.20.2] — 2026-05-30 — Fix CMS project status normalization
+
+### Fixed
+- Normaliza valores de `Project.status` durante bootstrap para no romper el
+  contenido existente tras los cambios del schema Strapi.
 
 ## [0.20.1] — 2026-05-29 — Fix hover estable + URLs operativas
 
@@ -1258,7 +1275,10 @@ Feedback del owner sobre `v0.14.0` en iOS Safari real:
 - `.cl` esperando propagación NIC al momento del handoff.
 
 [Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.21.0...HEAD
-[0.21.0]: https://github.com/nitenacho/Proyecto28/compare/v0.20.1...v0.21.0
+[0.21.0]: https://github.com/nitenacho/Proyecto28/compare/v0.20.4...v0.21.0
+[0.20.4]: https://github.com/nitenacho/Proyecto28/compare/v0.20.3...v0.20.4
+[0.20.3]: https://github.com/nitenacho/Proyecto28/compare/v0.20.2...v0.20.3
+[0.20.2]: https://github.com/nitenacho/Proyecto28/compare/v0.20.1...v0.20.2
 [0.20.1]: https://github.com/nitenacho/Proyecto28/compare/v0.20.0...v0.20.1
 [0.20.0]: https://github.com/nitenacho/Proyecto28/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/nitenacho/Proyecto28/compare/v0.18.0...v0.19.0

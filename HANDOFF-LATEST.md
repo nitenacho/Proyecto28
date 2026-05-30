@@ -20,8 +20,11 @@ Estado vigente esperado tras cierre:
 
 - `v0.21.0`: mini-juego de esferas para la luz, cronometro, mejor tiempo local,
   color de luz publicable y schema Strapi `gameLightColor`.
-- `v0.20.1`: ultimo tag anterior, hover estable en bordes y `ADMIN-URLS.md`.
-- Tres fixes CMS posteriores a `v0.20.1` quedan absorbidos en `v0.21.0`:
+- `v0.20.4`: ultimo tag anterior, restauracion de disponibilidad del admin
+  Strapi tras los fixes de `Project.status`.
+- `v0.20.1`: hover estable en bordes y `ADMIN-URLS.md`.
+- Tres fixes CMS entre `v0.20.2` y `v0.20.4` quedan documentados antes de
+  `v0.21.0`:
   normalizacion de `Project.status`, desactivacion de Draft & Publish en
   `Project` y recuperacion del admin Strapi tras el conflicto de schema.
 - Dominio canonico: `https://proyecto28.com`.

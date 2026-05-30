@@ -34,10 +34,11 @@ Ultimo codigo funcional esperado:
 
 Tags/commits acumulados:
 
+- `v0.20.4` - restauracion de disponibilidad del admin Strapi.
+- `v0.20.3` - evita colision entre `Project.status` editable y el `status`
+  interno de Strapi v5.
+- `v0.20.2` - normalizacion de valores `Project.status`.
 - `v0.20.1` - hover estable en bordes + URLs operativas.
-- Commits CMS posteriores a `v0.20.1` quedan incorporados en `v0.21.0`:
-  normalizacion de `Project.status`, desactivacion de Draft & Publish en
-  `Project` y restauracion de disponibilidad del admin Strapi.
 - `v0.20.0` - Etapa 16 runbook/handoff/assets.
 
 ---
