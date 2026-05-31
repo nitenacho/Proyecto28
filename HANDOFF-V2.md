@@ -1,8 +1,8 @@
 # HANDOFF V2 - Proyecto 28
 
-> Ultima actualizacion: 2026-05-30 (Etapa 17 Pacman de luz + color admin - `v0.21.0`)
+> Ultima actualizacion: 2026-05-31 (Etapa 18 Mobile parity + audio interactivo - `v0.22.0`)
 > Branch esperado: `main`
-> Tag activo esperado tras cierre: `v0.21.0`
+> Tag activo esperado tras cierre: `v0.22.0`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
 
@@ -13,7 +13,7 @@ operacion detallada, leer `RUNBOOK.md`.
 
 ## 1. Estado ejecutivo
 
-Etapas 1-17 cerradas. Proyecto28 queda como web 3D interactiva con:
+Etapas 1-18 cerradas. Proyecto28 queda como web 3D interactiva con:
 
 - Vite + Three.js + GSAP.
 - Strapi Cloud como CMS.
@@ -22,18 +22,24 @@ Etapas 1-17 cerradas. Proyecto28 queda como web 3D interactiva con:
 - Pixel Streaming iframe/fallback sobre cubos, con preview controlable.
 - Sync Claude Design y release assets en GitHub.
 - Performance/a11y hardening y documentacion final.
-- Fix anti-parpadeo de hover en bordes de cubos y `ADMIN-URLS.md`.
 - Mini-juego de recoleccion para la luz: esferas sobre cubos oscuros,
   cronometro, contador, mejor tiempo local y feedback dorado de victoria.
-- Color de luz configurable desde `Admin -> Tweaks -> Juego` y publicable en
-  Strapi como `gameLightColor`.
+- Color de luz configurable desde `Admin -> Tweaks -> Juego` como
+  `gameLightColor`.
+- Mobile con la misma calidad visual que desktop: cubos redondeados, sombras,
+  antialias y bloom/post-processing.
+- Botones pequenos de pantalla completa y mute local.
+- Audio WebAudio sintetizado para hover de bloques e interacciones, configurable
+  desde `Admin -> Tweaks -> Audio` y Strapi (`audio*`).
 
 Ultimo codigo funcional esperado:
 
+- `v0.22.0` - Mobile parity + audio interactivo.
+
+Tags/commits recientes:
+
+- `v0.22.0` - `936717b` mobile parity + audio interactivo.
 - `v0.21.0` - Pacman de luz + color admin.
-
-Tags/commits acumulados:
-
 - `v0.20.4` - restauracion de disponibilidad del admin Strapi.
 - `v0.20.3` - evita colision entre `Project.status` editable y el `status`
   interno de Strapi v5.
@@ -53,14 +59,17 @@ git status
 git describe --tags --abbrev=0
 git log --oneline -12
 npm run build
+cd cms
+npm run build
 ```
 
 Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- tag `v0.21.0`
+- tag `v0.22.0`
 - build Vite OK
+- build Strapi OK
 
 ---
 
@@ -88,53 +97,53 @@ Esperado:
 - inconcha owner permitido
 - yk8arts editor permitido
 
-Validado en cierre local/predeploy `v0.21.0`:
+Validado postdeploy `v0.22.0`:
 
-- `npm run build` OK.
-- Smoke mecanica: 18 esferas para 18 cubos vacios/oscuros; recoleccion por
-  cercania X/Z recoge 1 y deja 17 visibles.
-- Produccion/Strapi predeploy: site/robots/sitemap `200`, projects `200`,
-  site-setting `200`, admin-whitelists `403`, auth owner/editor OK.
-
-Validado postdeploy `v0.21.0`:
-
-- GitHub Pages run `26690318569` OK para `6e8efa0`.
-- Produccion sirve `assets/index-Dsng2GHA.js` con
-  `p28-sphere-best-time-ms-v1`, `gameLightColor`, `Gema rojiza` y
-  `p28-collectible-spheres`.
-- Strapi Cloud `/api/site-setting` incluye `"gameLightColor":"cyan"` con
-  `updatedAt` `2026-05-30T17:33:05.966Z`.
+- GitHub Pages run `26708867215` OK para `936717b`.
+- Auto-tag run `26708867220` OK.
+- Produccion sirve `assets/index-BwOh2oIH.js` con:
+  - `p28-audio-muted-v1`
+  - `audioPreset`
+  - `MIDI moderno`
+  - `p28-system-controls`
+  - `RoundedBoxGeometry`
+  - `UnrealBloomPass`
+- Strapi Cloud `/api/site-setting` incluye:
+  - `audioEnabled: true`
+  - `audioPreset: "midi"`
+  - `audioMasterVolume: 0.24`
+  - `audioHoverVolume: 0.2`
+  - `audioInteractionVolume: 0.18`
+  - `updatedAt: 2026-05-31T09:29:14.831Z`
 
 ---
 
-## 4. Cambios v0.21.0
+## 4. Cambios v0.22.0
 
 Archivos principales:
 
-- `src/game/collectibles.js`: crea esferas pequenas sobre cubos no-proyecto,
-  las anima sutilmente, las oculta fuera de control manual y permite
-  recoleccion por cercania X/Z.
-- `src/game/light.js`: agrega paletas `cyan/red/green`, flash dorado de
-  victoria, callbacks de control/respawn y activacion correcta con
-  WASD/flechas/gamepad aunque `gravityEnabled` este apagado.
-- `src/main.js`: orquesta run de esferas, cronometro, contador, mejor tiempo
-  en `localStorage`, reset por caida/salida de control y fin por victoria.
-- `src/ui/hud.js`: HUD compacto con caidas, esferas, tiempo y mejor tiempo.
-- `src/animations/timelines.js`: timeline `lightVictoryTimeline`.
-- `src/data/*`, `src/admin/publish.js` y `cms/**`: `gameLightColor` en
-  fallback, normalizador, publicacion y schema Strapi.
-- `README.md`, `RUNBOOK.md`, `PLAN-PROYECTO28-V2.md`, `CHANGELOG.md` y
-  handoffs: estado operativo actualizado.
+- `src/scene/scene.js`: elimina modo visual reducido por mobile/coarse pointer;
+  usa geometria redondeada, sombras, antialias y bloom en mobile y desktop.
+- `src/styles/app.css`: mobile mantiene viewfinder y recupera blur/saturacion
+  de popup/stream card.
+- `src/audio/interactionAudio.js`: sintetizador WebAudio con presets
+  `midi`, `glass`, `soft`, notas por bloque y feedback minimalista de juego/UI.
+- `src/ui/systemControls.js`: botones pequenos de fullscreen y mute local.
+- `src/main.js`: monta audio/controles, dispara sonidos en hover de bloques,
+  tap, control, pickup, caida y victoria.
+- `src/data/*`, `src/admin/publish.js` y `cms/**`: campos `audio*` en
+  fallback, normalizador, publicacion, schema Strapi y bootstrap.
+- `README.md`, `PLAN-PROYECTO28-V2.md`, `CHANGELOG.md` y handoffs:
+  estado operativo actualizado.
 
 Comportamiento importante:
 
-- Las esferas no aparecen en reposo ni mientras la luz sigue al mouse.
-- Aparecen al controlar la luz con teclado/gamepad.
-- Si el usuario mueve el mouse y deja el control manual, el run se reinicia.
-- Si la luz cae, el run se reinicia; al terminar el respawn se puede empezar
-  otra vez.
-- Al recolectar todas, el timer queda detenido, la luz brilla dorado 1 segundo
-  y el mejor tiempo se guarda localmente.
+- El audio no suena antes de la primera interaccion real del usuario por
+  politicas de autoplay del navegador.
+- El mute es local por navegador (`p28-audio-muted-v1`).
+- `audioEnabled` en Strapi permite apagar globalmente el sintetizador.
+- Mobile queda visualmente al nivel de desktop; si un celular tiene gamepad, el
+  mini-juego sigue siendo jugable.
 
 ---
 
@@ -166,13 +175,13 @@ Admins permitidos:
 El panel Tweaks permite cambiar defaults y publicar a Strapi. Si Google
 rechaza token, el frontend reintenta con una sesion fresca.
 
-`Color luz` vive en:
+Rutas clave:
 
 ```text
 Admin -> Tweaks -> Juego -> Color luz
+Admin -> Tweaks -> Audio
+Admin -> Tweaks -> Streaming -> Preview visible
 ```
-
-Valores aceptados por Strapi: `cyan`, `red`, `green`.
 
 ### Pixel Streaming
 
@@ -185,12 +194,6 @@ entrega URL valida:
 - `Project.unrealStreamURL`
 - `Project.unrealLevelName`
 
-El preview/fallback se apaga desde Tweaks:
-
-```text
-Admin -> Tweaks -> Streaming -> Preview visible OFF -> PUBLICAR CAMBIOS
-```
-
 ### Agregar proyecto
 
 Crear/duplicar Project en Strapi, publicar, probar popup/modelo/redirect, y si
@@ -200,6 +203,8 @@ usa Unreal conectar `unrealStreamURL` + `unrealLevelName`. Ver `RUNBOOK.md`.
 
 ## 7. Pendientes conocidos
 
+- Audio: requiere primera interaccion real antes de sonar.
+- Mobile con calidad desktop puede exigir mas GPU en equipos muy viejos.
 - `proyecto28.cl` sigue secundario; `.com` es canonico.
 - Google Cloud consent screen puede seguir en Testing; si se agregan correos a
   Strapi, tambien agregarlos como test users en GCP.
@@ -213,18 +218,16 @@ usa Unreal conectar `unrealStreamURL` + `unrealLevelName`. Ver `RUNBOOK.md`.
 
 ## 8. Google Doc
 
-El respaldo final debe quedar como subpestana bajo `Handoff` en:
+El respaldo final debe quedar en el Google Doc oficial, sin usar el
+Handoff:Kaiyi:
 
 https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/edit
 
 Titulo esperado para este cierre:
 
 ```text
-2026-05-30 17:33 UTC - v0.21.0 pacman-luz-color-admin
+2026-05-31 09:29 UTC - v0.22.0 mobile-audio-controls
 ```
-
-Regla absoluta: nunca crear cierres como pestanas raiz junto a `MISION`,
-`Aprender` o `Handoff`.
 
 ---
 

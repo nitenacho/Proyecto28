@@ -38,6 +38,18 @@ o a un fix puntual entre etapas.
 - Chrome CDP smoke mobile `390x844`: WebGL activo, canvas full viewport,
   mobile con bloom/sombras/cubos redondeados, HUD/status/controles dentro del
   viewport y sin overflow horizontal (`body/html == 390`).
+- GitHub Pages run `26708867215` OK para `936717b`.
+- Auto-tag run `26708867220` OK; tag `v0.22.0`.
+- Produccion postdeploy:
+  - `https://proyecto28.com` => `200`
+  - bundle `assets/index-BwOh2oIH.js` contiene `p28-audio-muted-v1`,
+    `audioPreset`, `MIDI moderno`, `p28-system-controls`,
+    `RoundedBoxGeometry` y `UnrealBloomPass`.
+- Strapi Cloud postdeploy:
+  - `/api/site-setting` incluye `audioEnabled:true`, `audioPreset:"midi"`,
+    `audioMasterVolume:0.24`, `audioHoverVolume:0.2`,
+    `audioInteractionVolume:0.18`.
+  - `updatedAt` => `2026-05-31T09:29:14.831Z`.
 
 ## [0.21.0] — 2026-05-30 — Etapa 17: Pacman de luz + color admin
 
