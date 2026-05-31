@@ -39,6 +39,30 @@ o a un fix puntual entre etapas.
     `body/html == 1440`, popup visible.
   - popup mobile con imagen real `Invasión`: `object-fit: cover`, ratio
     `16 / 9`, URL de media versionada con `?v=...`, sin overflow horizontal.
+- GitHub Pages run `26719864051` OK para `cefbbe7`.
+- Auto-tag run `26719864045` OK; tag `v0.25.0`.
+- Produccion postdeploy:
+  - `https://proyecto28.com` => `200`
+  - `https://proyecto28.com/robots.txt` => `200`
+  - `https://proyecto28.com/sitemap.xml` => `200`
+  - bundle `assets/index-CSMZXJFR.js` contiene `_p28ts`,
+    `brandLogoImage`, `no-store` y `popupImageURL`.
+  - HTML vivo contiene `boot-progress`.
+- Smoke mobile vivo `390x844`:
+  - carga desde `cms`;
+  - requests a `/api/site-setting` y `/api/projects` incluyen `_p28ts`;
+  - popup `Invasión` visible con imagen `cover` `16 / 9`;
+  - `body/html == 390`, sin overflow horizontal.
+- Strapi Cloud postdeploy:
+  - `/admin` => `200`
+  - `/api/projects?populate=*` => `200`
+  - `/api/site-setting?populate=*` => `200`
+  - `/api/site-setting?populate[brandLogoImage]=true` => `200`
+  - `/api/admin-whitelists` => `403`
+  - `/api/auth/check?email=inconcha@gmail.com` =>
+    `{ allowed:true, role:"owner" }`
+  - `/api/auth/check?email=yk8arts@gmail.com` =>
+    `{ allowed:true, role:"editor" }`
 
 ## [0.24.0] — 2026-05-31 — Etapa 20: Split-screen touch joystick
 

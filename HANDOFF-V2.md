@@ -126,6 +126,25 @@ Validado local `v0.25.0`:
   - popup mobile con imagen real: `object-fit: cover`, ratio `16 / 9`, URL
     versionada `?v=...`.
 
+Validado postdeploy `v0.25.0`:
+
+- GitHub Pages run `26719864051` OK para `cefbbe7`.
+- Auto-tag run `26719864045` OK; tag `v0.25.0`.
+- Produccion sirve `assets/index-CSMZXJFR.js` con `_p28ts`,
+  `brandLogoImage`, `no-store` y `popupImageURL`; HTML contiene
+  `boot-progress`.
+- Smoke mobile vivo `390x844`: carga desde `cms`, requests Strapi incluyen
+  `_p28ts`, popup `Invasión` visible con imagen `cover` `16 / 9`,
+  `body/html == 390`.
+- Strapi Cloud postdeploy:
+  - `/admin` => `200`
+  - `/api/projects?populate=*` => `200`
+  - `/api/site-setting?populate=*` => `200`
+  - `/api/site-setting?populate[brandLogoImage]=true` => `200`
+  - `/api/admin-whitelists` => `403`
+  - `/api/auth/check?email=inconcha@gmail.com` => owner permitido
+  - `/api/auth/check?email=yk8arts@gmail.com` => editor permitido
+
 Validado postdeploy `v0.24.0`:
 
 - GitHub Pages run `26718658099` OK para `b9aaeb5`.
@@ -307,12 +326,12 @@ https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/
 
 Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 Revision Google Doc post-insercion:
-`AFwiY1-BMO5OtT6yc2WVyVX425LMXusp_GiQwApeM6ybJMpz5PXwR3WSbL4wOUzPsAL5-Am0bVXXLkQ1b8tFPe5fxp7vcxfainCRwUvUYNc`.
+`AFwiY1_TXlf3FoswqooNxLXGtXcXZfEIrg8-6ShBAQRxVW-msmWHGrErSDaGxjF6-ipR_G9V3H42vYOPPJRDiE_dySqPTLCkhjLiNrRZVoo`.
 
 Titulo/anchor para este cierre:
 
 ```text
-2026-05-31 16:58 UTC - v0.24.0 split-touch-joystick
+2026-05-31 17:50 UTC - v0.25.0 loader-logo-mobile-cms
 ```
 
 ---

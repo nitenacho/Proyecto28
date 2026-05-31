@@ -328,30 +328,33 @@ Chrome CDP smoke:
 - `/api/auth/check?email=yk8arts@gmail.com` =>
   `{ allowed:true, role:"editor" }`
 
-### Produccion postdeploy v0.24.0
+### Produccion postdeploy v0.25.0
 
-- Commit desplegado por Pages: `b9aaeb5`.
-- GitHub Pages run: `26718658099` => success.
-- Auto-tag run: `26718658101` => success.
-- Tag: `v0.24.0`.
+- Commit desplegado por Pages: `cefbbe7`.
+- GitHub Pages run: `26719864051` => success.
+- Auto-tag run: `26719864045` => success.
+- Tag: `v0.25.0`.
 - Produccion:
   - `https://proyecto28.com` => `200`
   - `https://proyecto28.com/robots.txt` => `200`
   - `https://proyecto28.com/sitemap.xml` => `200`
 - Bundle vivo:
-  - asset `assets/index-yCREtV-Q.js`
-  - contiene `p28-touch-controls`
-  - contiene `p28-touch-zone-left`
-  - contiene `p28-joystick`
-  - contiene `p28-touch-jump-hint`
-  - contiene `setExternalMoveVector`
-  - contiene `p28-sphere-best-time-ms-v1`
-  - no contiene `DeviceOrientationEvent`
-  - no contiene `isLightControlSafeTarget`
+  - asset `assets/index-CSMZXJFR.js`
+  - contiene `_p28ts`
+  - contiene `brandLogoImage`
+  - contiene `no-store`
+  - contiene `popupImageURL`
+  - HTML vivo contiene `boot-progress`
+- Smoke mobile vivo `390x844`:
+  - carga desde `cms`
+  - requests `/api/site-setting` y `/api/projects` incluyen `_p28ts`
+  - popup `Invasión` visible con imagen `cover` `16 / 9`
+  - `body/html == 390`, sin overflow horizontal
 - Strapi Cloud postdeploy:
   - `/admin` => `200`
   - `/api/projects?populate=*` => `200`
-  - `/api/site-setting` => `200`
+  - `/api/site-setting?populate=*` => `200`
+  - `/api/site-setting?populate[brandLogoImage]=true` => `200`
   - `/api/admin-whitelists` => `403`
   - `/api/auth/check?email=inconcha@gmail.com` =>
     `{ allowed:true, role:"owner" }`
@@ -438,12 +441,12 @@ Flujo correcto para una etapa nueva:
 8. Actualizar handoff local + Google Doc.
 9. Confirmar tag semver.
 
-Para `v0.24.0`:
+Para `v0.25.0`:
 
-- Rama usada: `etapa-20-mobile-split-touch-joystick`.
-- Commit funcional: `b9aaeb5 feat: add mobile split touch joystick`.
-- Pages run: `26718658099`.
-- Auto-tag run: `26718658101`.
+- Rama usada: `etapa-21-loader-logo-mobile-cms`.
+- Commit funcional: `cefbbe7 feat: add loader and CMS logo freshness`.
+- Pages run: `26719864051`.
+- Auto-tag run: `26719864045`.
 
 ---
 
@@ -480,13 +483,13 @@ Regla:
 - No usar el Handoff:Kaiyi para esta etapa.
 - Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 - Revision Google Doc post-insercion:
-  `AFwiY1-BMO5OtT6yc2WVyVX425LMXusp_GiQwApeM6ybJMpz5PXwR3WSbL4wOUzPsAL5-Am0bVXXLkQ1b8tFPe5fxp7vcxfainCRwUvUYNc`.
+  `AFwiY1_TXlf3FoswqooNxLXGtXcXZfEIrg8-6ShBAQRxVW-msmWHGrErSDaGxjF6-ipR_G9V3H42vYOPPJRDiE_dySqPTLCkhjLiNrRZVoo`.
 - Titulo/anchor:
 
 ```text
-2026-05-31 16:58 UTC - v0.24.0 split-touch-joystick
+2026-05-31 17:50 UTC - v0.25.0 loader-logo-mobile-cms
 ```
 
 ---
 
-Fin del handoff `v0.24.0`.
+Fin del handoff `v0.25.0`.
