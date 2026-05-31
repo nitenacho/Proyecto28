@@ -10,6 +10,39 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.23.0] — 2026-05-31 — Etapa 19: Control discoverable + gyro/gamepad
+
+### Added
+- Boton minimo dentro del HUD del mini-juego para alternar entre luz controlada
+  y luz libre. Al activarlo se descubren las esferas y arranca el run sin
+  depender de WASD/gamepad.
+- Soporte de D-pad/flechas de gamepad como input de movimiento, ademas del
+  stick izquierdo existente.
+- Canal de input externo para sensores mobile: al activar el boton en mobile,
+  se solicita `DeviceOrientationEvent` cuando aplica y el giroscopio mueve la
+  luz con una zona muerta suave.
+- Toque tactil sobre la escena en modo controlado para saltar la luz, evitando
+  conflicto con botones de sistema, Tweaks, Admin, popup y route overlay.
+
+### Changed
+- El control activado por el boton queda bloqueado: mover el mouse ya no saca a
+  la luz del modo fisico hasta pulsar de nuevo el boton.
+- El HUD ahora expone estado accesible (`aria-pressed`) para el control de luz.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- Dev server local `http://127.0.0.1:5173/` responde `200` desde la ruta activa
+  `C:/Users/incon/Downloads/EscritorioNobita/Proyectos_Claude/Claude_P28/Proyecto28`.
+- Bundle local `dist/assets/index-BlBVVWk8.js` contiene `p28-control-toggle`,
+  `DeviceOrientationEvent`, `Controlar luz`, `Soltar luz`,
+  `setExternalMoveVector` y `toggleControl`.
+- Chrome headless screenshot desktop `1440x900`: HUD/control visibles sin tapar
+  la escena.
+- Chrome CDP smoke desktop: click del boton cambia `aria-pressed:false -> true`
+  y una pulsacion simulada de D-pad derecho activa el control de la luz.
+- Chrome CDP smoke mobile: boton activo, evento de orientacion simulado aceptado,
+  touch jump sin error y HUD dentro del viewport CSS.
+
 ## [0.22.0] — 2026-05-31 — Etapa 18: Mobile parity + audio interactivo
 
 ### Added

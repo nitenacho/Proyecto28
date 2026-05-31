@@ -30,6 +30,50 @@ const HUD_CSS = `
   -webkit-backdrop-filter: blur(6px);
   font-feature-settings: "tnum";
 }
+.p28-hud-head {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 118px;
+  margin-bottom: 1px;
+}
+.p28-control-toggle {
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(107, 196, 187, 0.36);
+  border-radius: 50%;
+  background: rgba(6, 15, 24, 0.66);
+  color: var(--ink-3);
+  cursor: pointer;
+  box-shadow: 0 0 0 rgba(107, 196, 187, 0);
+  transition: color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.p28-control-toggle::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  box-sizing: border-box;
+}
+.p28-control-toggle:hover,
+.p28-control-toggle:focus-visible {
+  color: var(--cyan);
+  border-color: rgba(107, 196, 187, 0.72);
+  outline: none;
+}
+.p28-control-toggle.is-active {
+  color: var(--warning);
+  border-color: rgba(255, 200, 87, 0.72);
+  box-shadow: 0 0 14px rgba(255, 200, 87, 0.22);
+  transform: scale(1.04);
+}
+.p28-control-toggle.is-active::before {
+  background: currentColor;
+}
 .p28-hud-row {
   display: flex;
   justify-content: space-between;
@@ -67,6 +111,9 @@ const HUD_CSS = `
     font-size: 9px;
     letter-spacing: 0.08em;
     border-radius: 4px;
+  }
+  .p28-hud-head {
+    min-width: 104px;
   }
   .p28-hud-row {
     min-width: 104px;
@@ -120,6 +167,8 @@ function makeRow(labelText, valueText, extraClass = '') {
  *   setCollectibles: (current:number,total:number)=>void,
  *   setTimer: (ms:number, active?:boolean, complete?:boolean)=>void,
  *   setBestTime: (ms:number|null)=>void,
+ *   setControlActive: (active:boolean)=>void,
+ *   onControlToggle: (fn:()=>void)=>void,
  *   element: HTMLDivElement
  * }}
  */
@@ -128,17 +177,35 @@ export function mountHud() {
 
   const root = document.createElement('div');
   root.className = 'p28-hud';
+  let controlToggleHandler = null;
+
+  const head = document.createElement('div');
+  head.className = 'p28-hud-head';
+  const controlButton = document.createElement('button');
+  controlButton.type = 'button';
+  controlButton.className = 'p28-control-toggle';
+  controlButton.setAttribute('aria-label', 'Controlar luz');
+  controlButton.setAttribute('aria-pressed', 'false');
+  controlButton.title = 'Controlar luz';
+  head.appendChild(controlButton);
 
   const falls = makeRow('Caidas', pad3(0));
   const spheres = makeRow('Esferas', '00/00');
   const timer = makeRow('Tiempo', formatTime(0));
   const best = makeRow('Mejor', formatTime(null), 'p28-hud-best');
+  root.appendChild(head);
   root.appendChild(falls.row);
   root.appendChild(spheres.row);
   root.appendChild(timer.row);
   root.appendChild(best.row);
 
   document.body.appendChild(root);
+
+  controlButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (controlToggleHandler) controlToggleHandler();
+  });
 
   function setFallCount(n) {
     falls.value.textContent = pad3(n);
@@ -160,5 +227,24 @@ export function mountHud() {
     best.value.textContent = formatTime(ms);
   }
 
-  return { setFallCount, setCollectibles, setTimer, setBestTime, element: root };
+  function setControlActive(active) {
+    controlButton.classList.toggle('is-active', !!active);
+    controlButton.setAttribute('aria-pressed', active ? 'true' : 'false');
+    controlButton.title = active ? 'Soltar luz' : 'Controlar luz';
+    controlButton.setAttribute('aria-label', active ? 'Soltar luz' : 'Controlar luz');
+  }
+
+  function onControlToggle(fn) {
+    controlToggleHandler = typeof fn === 'function' ? fn : null;
+  }
+
+  return {
+    setFallCount,
+    setCollectibles,
+    setTimer,
+    setBestTime,
+    setControlActive,
+    onControlToggle,
+    element: root,
+  };
 }

@@ -108,6 +108,16 @@ Etapa 18 mejora la experiencia mobile y suma capa de audio:
   `audioPreset`, `audioMasterVolume`, `audioHoverVolume` y
   `audioInteractionVolume`.
 
+Etapa 19 hace mas descubrible el juego oculto y amplia inputs:
+
+- el HUD compacto suma un boton minimo para tomar o soltar control de la luz;
+- el control por gamepad acepta stick izquierdo, D-pad/flechas del pad y boton
+  inferior para salto;
+- en mobile, activar el control desde el HUD habilita giroscopio si el navegador
+  lo permite; tocar la escena hace saltar la luz;
+- el modo bloqueado por boton mantiene la luz controlada aunque se mueva el
+  mouse, hasta que el jugador vuelva a soltarla.
+
 ### Performance y accesibilidad
 
 Etapa 15 endurece el boot final antes de v1:
@@ -259,3 +269,4 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 16 — Documentación final | ✅ Cerrado — runbook + handoff V2 + assets | `v0.20.0` |
 | 17 — Pacman de luz + color admin | ✅ Cerrado — esferas, timer, best time y Strapi `gameLightColor` | `v0.21.0` |
 | 18 — Mobile parity + audio interactivo | ✅ Cerrado — calidad desktop en mobile, fullscreen/mute y audio Strapi | `v0.22.0` |
+| 19 — Control discoverable + gyro/gamepad | ✅ Cerrado — boton HUD, D-pad y giroscopio mobile | `v0.23.0` |

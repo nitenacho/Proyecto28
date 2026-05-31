@@ -9,7 +9,7 @@
          · Sombra ahora es ring (argolla) en vez de círculo relleno.
          · Tamaño de sombra controlable vía config.shadowSize.
          · Input: flechas del teclado mapeadas a WASD.
-         · Input: gamepad (stick izq para mover, button 0 = face bottom para saltar).
+         · Input: gamepad (stick izq / D-pad para mover, button 0 = face bottom para saltar).
    ========================================================= */
 
 import * as THREE from 'three';
@@ -47,6 +47,11 @@ const KIRBY_MULTIPLIERS = [1.0, 0.85, 0.7, 0.55];
 // Gamepad
 const GAMEPAD_DEADZONE = 0.18;
 const GAMEPAD_JUMP_BUTTON = 0;        // standard mapping: Face Button Bottom
+const GAMEPAD_DPAD_UP = 12;
+const GAMEPAD_DPAD_DOWN = 13;
+const GAMEPAD_DPAD_LEFT = 14;
+const GAMEPAD_DPAD_RIGHT = 15;
+const GAMEPAD_DPAD_AXIS_DEADZONE = 0.45;
 
 function arrowToWASD(key) {
   if (key === 'ArrowUp')    return 'w';
@@ -79,6 +84,7 @@ export function createControllableLight({
   let victoryFlashTimer = 0;
   let victoryFlashing = false;
   let manualControlActive = false;
+  let controlLocked = false;
 
   const mesh = new THREE.Mesh(
     new THREE.SphereGeometry(SPHERE_RADIUS, 24, 16),
@@ -128,6 +134,7 @@ export function createControllableLight({
   const target = mesh.position.clone();
   const velocity = new THREE.Vector3();
   const keysActive = new Set();
+  const externalMove = { x: 0, z: 0, active: false };
   let lastMoveInput = -Infinity;
   let prevJumpButton = false;
   let gamepadActiveThisFrame = false;
@@ -205,26 +212,66 @@ export function createControllableLight({
   function exitPhysics() {
     if (mode === 'floating') return;
     mode = 'floating';
+    target.set(mesh.position.x, LIGHT_Y, mesh.position.z);
     setActiveTile(null);
     setManualControlActive(false);
   }
 
   function setGravityEnabled(v) {
     gravityFlag = !!v;
-    if (!gravityFlag) exitPhysics();
+    if (!gravityFlag) {
+      controlLocked = false;
+      setExternalMoveVector(0, 0, false);
+      exitPhysics();
+    }
   }
 
   function notifyMouseMoved() {
-    if (mode === 'physics' && respawnPhase === 'none') exitPhysics();
+    if (mode === 'physics' && respawnPhase === 'none' && !controlLocked) exitPhysics();
   }
 
   function tryJump() {
-    if (jumpsUsed >= config.jumpCount) return;
+    if (jumpsUsed >= config.jumpCount) return false;
     const mult = KIRBY_MULTIPLIERS[Math.min(jumpsUsed, KIRBY_MULTIPLIERS.length - 1)];
     vy = Math.sqrt(2 * config.gravity * config.jumpHeight) * mult;
     jumpsUsed++;
     grounded = false;
     lightSquashTimeline(mesh, 'jump');
+    return true;
+  }
+
+  function jump() {
+    if (mode !== 'physics' || respawnPhase !== 'none') return false;
+    return tryJump();
+  }
+
+  function isControlActive() {
+    return mode === 'physics' || manualControlActive;
+  }
+
+  function setControlActive(active) {
+    controlLocked = !!active;
+    if (active) {
+      target.set(mesh.position.x, LIGHT_Y, mesh.position.z);
+      enterPhysics();
+    } else {
+      keysActive.clear();
+      lastMoveInput = -Infinity;
+      setExternalMoveVector(0, 0, false);
+      if (mode === 'physics') exitPhysics();
+      else setManualControlActive(false);
+    }
+    return isControlActive();
+  }
+
+  function toggleControl() {
+    return setControlActive(!isControlActive());
+  }
+
+  function setExternalMoveVector(x = 0, z = 0, active = true) {
+    externalMove.x = THREE.MathUtils.clamp(Number.isFinite(x) ? x : 0, -1, 1);
+    externalMove.z = THREE.MathUtils.clamp(Number.isFinite(z) ? z : 0, -1, 1);
+    externalMove.active = !!active && (externalMove.x !== 0 || externalMove.z !== 0);
   }
 
   function handleMoveKey(k) {
@@ -267,7 +314,21 @@ export function createControllableLight({
     }
   }
 
-  // Lee primer gamepad conectado (standard mapping). Retorna stick izq + edge del botón 0.
+  function buttonPressed(buttons, index) {
+    return !!(buttons[index] && buttons[index].pressed);
+  }
+
+  function readDpadAxes(pad) {
+    let x = 0;
+    let z = 0;
+    const ax = pad.axes[6];
+    const az = pad.axes[7];
+    if (Number.isFinite(ax) && Math.abs(ax) > GAMEPAD_DPAD_AXIS_DEADZONE) x += Math.sign(ax);
+    if (Number.isFinite(az) && Math.abs(az) > GAMEPAD_DPAD_AXIS_DEADZONE) z += Math.sign(az);
+    return { x, z };
+  }
+
+  // Lee primer gamepad conectado (standard mapping). Retorna movimiento + edge del botón 0.
   function readGamepad() {
     gamepadActiveThisFrame = false;
     if (!navigator.getGamepads) return { x: 0, z: 0, jumpEdge: false };
@@ -285,6 +346,20 @@ export function createControllableLight({
     if (Math.abs(ax) < GAMEPAD_DEADZONE) ax = 0;
     if (Math.abs(az) < GAMEPAD_DEADZONE) az = 0;
 
+    let dpadX = 0;
+    let dpadZ = 0;
+    if (buttonPressed(pad.buttons, GAMEPAD_DPAD_UP)) dpadZ -= 1;
+    if (buttonPressed(pad.buttons, GAMEPAD_DPAD_DOWN)) dpadZ += 1;
+    if (buttonPressed(pad.buttons, GAMEPAD_DPAD_LEFT)) dpadX -= 1;
+    if (buttonPressed(pad.buttons, GAMEPAD_DPAD_RIGHT)) dpadX += 1;
+    if (dpadX === 0 && dpadZ === 0) {
+      const axisDpad = readDpadAxes(pad);
+      dpadX = axisDpad.x;
+      dpadZ = axisDpad.z;
+    }
+    ax += dpadX;
+    az += dpadZ;
+
     const jumpBtn = pad.buttons[GAMEPAD_JUMP_BUTTON];
     const jumpPressed = !!(jumpBtn && jumpBtn.pressed);
     const jumpEdge = jumpPressed && !prevJumpButton;
@@ -293,10 +368,12 @@ export function createControllableLight({
     if (ax !== 0 || az !== 0 || jumpPressed) {
       gamepadActiveThisFrame = true;
     }
+    const mag = Math.hypot(ax, az);
+    if (mag > 1) { ax /= mag; az /= mag; }
     return { x: ax, z: az, jumpEdge };
   }
 
-  // Combina input de teclado + gamepad en un vector horizontal normalizado.
+  // Combina input de teclado + gamepad + sensores externos en un vector horizontal normalizado.
   function getMoveVector(padInput) {
     let mx = 0, mz = 0;
     if (keysActive.has('w')) mz -= 1;
@@ -305,6 +382,10 @@ export function createControllableLight({
     if (keysActive.has('d')) mx += 1;
     mx += padInput.x;
     mz += padInput.z;
+    if (externalMove.active) {
+      mx += externalMove.x;
+      mz += externalMove.z;
+    }
     const mag = Math.hypot(mx, mz);
     if (mag > 1) { mx /= mag; mz /= mag; }
     return { x: mx, z: mz };
@@ -490,5 +571,10 @@ export function createControllableLight({
     setLightColor,
     flashVictory,
     notifyMouseMoved,
+    setControlActive,
+    toggleControl,
+    isControlActive,
+    setExternalMoveVector,
+    jump,
   };
 }
