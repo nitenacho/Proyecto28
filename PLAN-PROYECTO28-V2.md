@@ -37,7 +37,7 @@
 | 17 — Pacman de luz + color admin | ✅ Cerrada | `v0.21.0` | — |
 | 18 — Mobile parity + audio interactivo | ✅ Cerrada | `v0.22.0` | — |
 | 19 — Control discoverable + gyro/gamepad | ✅ Cerrada | `v0.23.0` | `f386de6` |
-| 20 — Split-screen touch joystick | ✅ Cerrada | `v0.24.0` | — |
+| 20 — Split-screen touch joystick | ✅ Cerrada | `v0.24.0` | `b9aaeb5` |
 
 ## Decisiones tomadas durante la ejecución (resoluciones al §1)
 

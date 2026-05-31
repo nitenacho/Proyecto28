@@ -1,18 +1,19 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-05-31 (Etapa 19 Control discoverable + gyro/gamepad - `v0.23.0`)
-> **Tag activo esperado tras cierre:** `v0.23.0`
+> **Ultima actualizacion:** 2026-05-31 (Etapa 20 Split-screen touch joystick - `v0.24.0`)
+> **Tag activo esperado tras cierre:** `v0.24.0`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
 
-Etapas 1-19 cerradas. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
+Etapas 1-20 cerradas. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
 sync Claude Design, hardening performance/a11y, mini-juego Pacman de luz y una
 capa de audio interactivo configurable desde Strapi. La luz ahora se puede
 tomar/soltar desde un boton minimo en HUD, acepta D-pad/flechas de gamepad y en
-mobile se controla con giroscopio + toque para saltar.
+mobile usa pantalla dividida tactil: joystick dinamico izquierdo y zona derecha
+de salto inmediato.
 
 ---
 
@@ -20,12 +21,14 @@ mobile se controla con giroscopio + toque para saltar.
 
 Estado vigente esperado tras cierre:
 
+- `v0.24.0`: mobile reemplaza giroscopio + toque global por Split-Screen Touch
+  solo al presionar el boton amarillo: joystick dinamico izquierdo y salto
+  dedicado derecho, con la escena libre fuera de esa zona inferior.
 - `v0.22.0`: mobile vuelve a usar calidad visual de desktop; se agregan botones
   pequenos de fullscreen/mute; el sitio sintetiza audio WebAudio tipo MIDI en
   hover de bloques e interacciones; Strapi SiteSetting incluye `audio*`.
 - `v0.23.0`: el HUD del mini-juego incluye boton minimo para controlar/soltar
-  la luz; gamepad acepta D-pad/flechas; mobile puede usar giroscopio y toque
-  tactil para salto.
+  la luz; gamepad acepta D-pad/flechas.
 - `v0.21.0`: mini-juego de esferas para la luz, cronometro, mejor tiempo local
   y color de luz `gameLightColor`.
 - Dominio canonico: `https://proyecto28.com`.
@@ -57,7 +60,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- ultimo tag `v0.23.0`
+- ultimo tag `v0.24.0`
 - build Vite OK
 - build Strapi OK
 
@@ -67,13 +70,46 @@ Lectura obligatoria:
 2. `ADMIN-URLS.md` - URLs para administrar todos los servicios.
 3. `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
 4. `DEPLOY.md` - GitHub Pages, Strapi, OAuth, Pixel Streaming, releases.
-5. `CHANGELOG.md` - `[0.23.0]`.
-6. `PLAN-PROYECTO28-V2.md` - Etapa 19 cerrada.
+5. `CHANGELOG.md` - `[0.24.0]`.
+6. `PLAN-PROYECTO28-V2.md` - Etapa 20 cerrada.
 7. `cms/README.md` - SiteSetting incluye `gameLightColor` y `audio*`.
 
 ---
 
-## 2. Cambios v0.23.0
+## 2. Cambios v0.24.0
+
+### Split-screen touch joystick
+
+- Nuevo `src/ui/touchControls.js`.
+- La capa tactil mobile/coarse pointer vive sutilmente en la zona inferior y se
+  activa solo cuando el boton amarillo del HUD toma control de la luz.
+- Mitad izquierda: joystick dinamico. El primer toque fija el centro y el
+  movimiento del dedo calcula vector X/Z normalizado con radio maximo y zona
+  muerta.
+- Mitad derecha: zona invisible de salto. Ejecuta `controlLight.jump()` en
+  `pointerdown`, sin esperar `touchend`, para permitir saltos multiples.
+- El joystick no usa Nipple.js: se implementa con Pointer Events para no sumar
+  dependencias ni peso al bundle.
+
+### Mobile input
+
+- Se elimina el giroscopio mobile (`DeviceOrientationEvent`) como control del
+  juego oculto.
+- Se elimina el salto tactil global sobre toda la escena.
+- Fuera de la zona inferior, mobile vuelve a quedar libre para inspeccionar la
+  escena y abrir popups sin saltos accidentales.
+
+### Archivos tocados
+
+- `src/ui/touchControls.js`
+- `src/main.js`
+- `README.md`
+- `CHANGELOG.md`
+- `PLAN-PROYECTO28-V2.md`
+
+---
+
+## 3. Cambios v0.23.0
 
 ### Control discoverable
 
@@ -118,7 +154,7 @@ Lectura obligatoria:
 
 ---
 
-## 3. Cambios v0.22.0
+## 4. Cambios v0.22.0
 
 ### Mobile parity visual
 
@@ -190,7 +226,7 @@ Archivos tocados:
 
 ---
 
-## 4. Validacion realizada antes del cierre
+## 5. Validacion realizada antes del cierre
 
 ### Local
 
@@ -208,26 +244,27 @@ Servidor local:
 - `http://127.0.0.1:5173/` responde `HTTP 200`.
 - Dev server Vite levantado desde:
   `C:/Users/incon/Downloads/EscritorioNobita/Proyectos_Claude/Claude_P28/Proyecto28`.
-- Bundle local `dist/assets/index-BlBVVWk8.js` contiene:
-  - `p28-control-toggle`
-  - `DeviceOrientationEvent`
-  - `Controlar luz`
-  - `Soltar luz`
+- Bundle local `dist/assets/index-gCm6b1gG.js` contiene:
+  - `p28-touch-controls`
+  - `p28-touch-zone-left`
+  - `p28-joystick`
+  - `p28-touch-jump-hint`
   - `setExternalMoveVector`
-  - `toggleControl`
+- Bundle local no contiene:
+  - `DeviceOrientationEvent`
+  - `isLightControlSafeTarget`
 
 Chrome CDP smoke:
 
-- Desktop `1440x900`:
-  - boton HUD existe;
-  - click cambia `aria-pressed:false -> true`;
-  - D-pad derecho simulado activa el control de la luz;
-  - HUD visible y discreto.
-- Mobile/headless:
-  - boton queda activo;
-  - `DeviceOrientationEvent` simulado no rompe;
-  - touch jump no genera errores;
-  - HUD cabe dentro del viewport CSS.
+- Mobile `390x844`:
+  - boton amarillo cambia `aria-pressed:false -> true`;
+  - `.p28-touch-controls` queda activo;
+  - joystick se ancla al primer toque en la mitad izquierda;
+  - nub responde a vector `34,-22`;
+  - zona derecha dispara pulso de salto inmediato;
+  - `body/html == 478`, sin overflow horizontal.
+- Screenshot headless mobile confirma joystick minimo abajo izquierda, indicador
+  de salto discreto abajo derecha y HUD intacto.
 
 ### Produccion/Strapi predeploy
 
@@ -242,37 +279,39 @@ Chrome CDP smoke:
 - `/api/auth/check?email=yk8arts@gmail.com` =>
   `{ allowed:true, role:"editor" }`
 
-### Produccion postdeploy v0.23.0
+### Produccion postdeploy v0.24.0
 
-- Commit desplegado por Pages: `f386de6`.
-- GitHub Pages run: `26709528030` => success.
-- Auto-tag run: `26709528025` => success.
-- Tag: `v0.23.0`.
+- Commit desplegado por Pages: `b9aaeb5`.
+- GitHub Pages run: `26718658099` => success.
+- Auto-tag run: `26718658101` => success.
+- Tag: `v0.24.0`.
 - Produccion:
   - `https://proyecto28.com` => `200`
   - `https://proyecto28.com/robots.txt` => `200`
   - `https://proyecto28.com/sitemap.xml` => `200`
 - Bundle vivo:
-  - asset `assets/index-CfbiJP66.js`
-  - contiene `p28-control-toggle`
-  - contiene `DeviceOrientationEvent`
-  - contiene `Controlar luz`
-  - contiene `Soltar luz`
+  - asset `assets/index-yCREtV-Q.js`
+  - contiene `p28-touch-controls`
+  - contiene `p28-touch-zone-left`
+  - contiene `p28-joystick`
+  - contiene `p28-touch-jump-hint`
   - contiene `setExternalMoveVector`
   - contiene `p28-sphere-best-time-ms-v1`
+  - no contiene `DeviceOrientationEvent`
+  - no contiene `isLightControlSafeTarget`
 - Strapi Cloud postdeploy:
+  - `/admin` => `200`
   - `/api/projects?populate=*` => `200`
   - `/api/site-setting` => `200`
   - `/api/admin-whitelists` => `403`
-  - `/api/site-setting` incluye:
-    - `gameLightColor: "red"`
-    - `audioEnabled: true`
-    - `audioPreset: "midi"`
-  - `updatedAt` => `2026-05-31T09:29:14.831Z`
+  - `/api/auth/check?email=inconcha@gmail.com` =>
+    `{ allowed:true, role:"owner" }`
+  - `/api/auth/check?email=yk8arts@gmail.com` =>
+    `{ allowed:true, role:"editor" }`
 
 ---
 
-## 5. Operacion clave
+## 6. Operacion clave
 
 ### Admin / Tweaks / publicar
 
@@ -313,8 +352,9 @@ Valores `audioPreset` aceptados:
 5. Controlar la luz con el boton pequeno del HUD, `W/A/S/D`, flechas,
    stick izquierdo o D-pad/flechas de gamepad.
 6. Las esferas deben aparecer solo mientras la luz esta controlada.
-7. En mobile, activar el boton y permitir sensores si el navegador lo pide;
-   inclinar el telefono mueve la luz y tocar la escena salta.
+7. En mobile, activar el boton amarillo; la zona inferior izquierda debe crear
+   el joystick dinamico donde toca el dedo y la zona derecha debe saltar en el
+   primer toque.
 8. Recolectar cada esfera por cercania.
 9. Confirmar contador `Esferas`, `Tiempo` y `Mejor`.
 10. Al terminar todas, el timer queda detenido, la luz brilla dorado 1 segundo
@@ -335,7 +375,7 @@ Admin -> Tweaks -> Streaming -> Preview visible OFF -> PUBLICAR CAMBIOS
 
 ---
 
-## 6. Deploy esperado
+## 7. Deploy esperado
 
 Flujo correcto para una etapa nueva:
 
@@ -349,24 +389,24 @@ Flujo correcto para una etapa nueva:
 8. Actualizar handoff local + Google Doc.
 9. Confirmar tag semver.
 
-Para `v0.23.0`:
+Para `v0.24.0`:
 
-- Rama usada: `etapa-19-gamepad-dpad-gyro-toggle`.
-- Commit funcional: `f386de6 feat: add discoverable light controls`.
-- Pages run: `26709528030`.
-- Auto-tag run: `26709528025`.
+- Rama usada: `etapa-20-mobile-split-touch-joystick`.
+- Commit funcional: `b9aaeb5 feat: add mobile split touch joystick`.
+- Pages run: `26718658099`.
+- Auto-tag run: `26718658101`.
 
 ---
 
-## 7. Riesgos y pendientes
+## 8. Riesgos y pendientes
 
 - Audio en navegadores: no puede sonar antes de la primera interaccion real por
   politicas de autoplay. Esto es esperado.
 - Mobile ahora usa calidad desktop; si aparece fatiga en dispositivos low-end,
   evaluar un toggle admin futuro de calidad, pero no volver a degradar por
   defecto.
-- Giroscopio requiere permiso del navegador en iOS/Safari y puede no estar
-  disponible en escritorio. El fallback sigue siendo boton + teclado/gamepad.
+- Split-touch aparece solo con el boton amarillo activo. Sin ese boton, mobile
+  no debe capturar la escena; teclado/gamepad siguen funcionando.
 - `proyecto28.cl` no es canonico hasta cerrar DNS/certificado/redirect.
 - Google OAuth consent screen puede seguir en Testing; al agregar emails a
   Strapi, tambien agregarlos como test users en Google Cloud.
@@ -379,7 +419,7 @@ Para `v0.23.0`:
 
 ---
 
-## 8. Google Doc
+## 9. Google Doc
 
 Respaldo oficial:
 
@@ -391,13 +431,13 @@ Regla:
 - No usar el Handoff:Kaiyi para esta etapa.
 - Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 - Revision Google Doc post-insercion:
-  `AFwiY1_M65irDmXxCAFQwsIj_CiiocHnRXZ1upSVVD_ohGtFf8Uz0gThgsiwV7yYB4e3PKJRuSDD4uju9trnENqz3Brslp68s6-eWg0ezYM`.
+  `AFwiY1-BMO5OtT6yc2WVyVX425LMXusp_GiQwApeM6ybJMpz5PXwR3WSbL4wOUzPsAL5-Am0bVXXLkQ1b8tFPe5fxp7vcxfainCRwUvUYNc`.
 - Titulo/anchor:
 
 ```text
-2026-05-31 10:03 UTC - v0.23.0 discoverable-light-controls
+2026-05-31 16:58 UTC - v0.24.0 split-touch-joystick
 ```
 
 ---
 
-Fin del handoff `v0.23.0`.
+Fin del handoff `v0.24.0`.

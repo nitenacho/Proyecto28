@@ -1,8 +1,8 @@
 # HANDOFF V2 - Proyecto 28
 
-> Ultima actualizacion: 2026-05-31 (Etapa 19 Control discoverable + gyro/gamepad - `v0.23.0`)
+> Ultima actualizacion: 2026-05-31 (Etapa 20 Split-screen touch joystick - `v0.24.0`)
 > Branch esperado: `main`
-> Tag activo esperado tras cierre: `v0.23.0`
+> Tag activo esperado tras cierre: `v0.24.0`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
 
@@ -13,7 +13,7 @@ operacion detallada, leer `RUNBOOK.md`.
 
 ## 1. Estado ejecutivo
 
-Etapas 1-19 cerradas. Proyecto28 queda como web 3D interactiva con:
+Etapas 1-20 cerradas. Proyecto28 queda como web 3D interactiva con:
 
 - Vite + Three.js + GSAP.
 - Strapi Cloud como CMS.
@@ -34,14 +34,18 @@ Etapas 1-19 cerradas. Proyecto28 queda como web 3D interactiva con:
 - Boton minimo en HUD para tomar/soltar control de la luz y descubrir el
   mini-juego sin conocer WASD.
 - Gamepad con stick izquierdo, D-pad/flechas y boton inferior para salto.
-- Mobile con giroscopio al activar control y toque tactil para saltar.
+- Mobile con Split-Screen Touch al activar el boton amarillo: joystick dinamico
+  izquierdo anclado al primer toque y zona derecha dedicada a salto inmediato.
+- El giroscopio y el salto tactil global fueron retirados para liberar la
+  escena mobile y mantener la experiencia igual de completa que desktop.
 
 Ultimo codigo funcional esperado:
 
-- `v0.23.0` - Control discoverable + gyro/gamepad.
+- `v0.24.0` - Split-screen touch joystick.
 
 Tags/commits recientes:
 
+- `v0.24.0` - `b9aaeb5` split-screen touch joystick.
 - `v0.23.0` - `f386de6` control discoverable + gyro/gamepad.
 - `v0.22.0` - `936717b` mobile parity + audio interactivo.
 - `v0.21.0` - Pacman de luz + color admin.
@@ -72,7 +76,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- tag `v0.23.0`
+- tag `v0.24.0`
 - build Vite OK
 - build Strapi OK
 
@@ -102,29 +106,55 @@ Esperado:
 - inconcha owner permitido
 - yk8arts editor permitido
 
-Validado postdeploy `v0.23.0`:
+Validado postdeploy `v0.24.0`:
 
-- GitHub Pages run `26709528030` OK para `f386de6`.
-- Auto-tag run `26709528025` OK.
-- Produccion sirve `assets/index-CfbiJP66.js` con:
-  - `p28-control-toggle`
-  - `DeviceOrientationEvent`
-  - `Controlar luz`
-  - `Soltar luz`
+- GitHub Pages run `26718658099` OK para `b9aaeb5`.
+- Auto-tag run `26718658101` OK; tag `v0.24.0`.
+- Produccion sirve `assets/index-yCREtV-Q.js` con:
+  - `p28-touch-controls`
+  - `p28-touch-zone-left`
+  - `p28-joystick`
+  - `p28-touch-jump-hint`
   - `setExternalMoveVector`
   - `p28-sphere-best-time-ms-v1`
-- Strapi Cloud `/api/site-setting` incluye:
-  - `gameLightColor: "red"`
-  - `audioEnabled: true`
-  - `audioPreset: "midi"`
-  - `audioMasterVolume: 0.24`
-  - `audioHoverVolume: 0.2`
-  - `audioInteractionVolume: 0.18`
-  - `updatedAt: 2026-05-31T09:29:14.831Z`
+- Produccion ya no contiene `DeviceOrientationEvent` ni
+  `isLightControlSafeTarget`.
+- Strapi Cloud postdeploy:
+  - `/admin` => `200`
+  - `/api/projects?populate=*` => `200` (`6` proyectos)
+  - `/api/site-setting` => `200`
+  - `/api/admin-whitelists` => `403`
+  - `/api/auth/check?email=inconcha@gmail.com` => owner permitido
+  - `/api/auth/check?email=yk8arts@gmail.com` => editor permitido
 
 ---
 
-## 4. Cambios v0.23.0
+## 4. Cambios v0.24.0
+
+Archivos principales:
+
+- `src/ui/touchControls.js`: nueva capa inferior mobile/coarse pointer con dos
+  zonas invisibles, joystick dinamico izquierdo y salto derecho inmediato.
+- `src/main.js`: integra la capa tactil solo cuando el boton amarillo activa la
+  luz; elimina giroscopio mobile y salto global sobre toda la escena.
+- `README.md`, `PLAN-PROYECTO28-V2.md`, `CHANGELOG.md` y handoffs: estado
+  operativo actualizado.
+
+Comportamiento importante:
+
+- El boton amarillo del HUD sigue siendo la entrada al juego oculto.
+- Al activarlo en mobile aparece una zona inferior sutil:
+  - mitad izquierda: el primer toque fija el centro del joystick;
+  - `touchmove`/`pointermove` calcula vector X/Z normalizado con zona muerta;
+  - mitad derecha: cualquier toque ejecuta salto en `pointerdown`.
+- Al soltar el boton o perder control, la capa tactil desaparece y el vector se
+  resetea a cero.
+- La escena mobile vuelve a quedar libre para inspeccion/taps fuera de las
+  zonas inferiores.
+
+---
+
+## 5. Cambios v0.23.0
 
 Archivos principales:
 
@@ -149,7 +179,7 @@ Comportamiento importante:
 
 ---
 
-## 5. Archivos fuente de verdad
+## 6. Archivos fuente de verdad
 
 - `README.md` - vision general, dev local, contenido, etapas.
 - `ADMIN-URLS.md` - URLs para administrar sitio, CMS, GitHub, Google, DNS y
@@ -165,7 +195,7 @@ Comportamiento importante:
 
 ---
 
-## 6. Operacion clave
+## 7. Operacion clave
 
 ### Admin y publish
 
@@ -203,11 +233,12 @@ usa Unreal conectar `unrealStreamURL` + `unrealLevelName`. Ver `RUNBOOK.md`.
 
 ---
 
-## 7. Pendientes conocidos
+## 8. Pendientes conocidos
 
 - Audio: requiere primera interaccion real antes de sonar.
-- Giroscopio: requiere permiso del navegador en iOS/Safari; no todos los
-  escritorios exponen `DeviceOrientationEvent`.
+- Mobile split-touch: la capa aparece solo con el boton amarillo activo; si se
+  intenta controlar sin ese boton, el juego debe seguir respondiendo por
+  teclado/gamepad.
 - Mobile con calidad desktop puede exigir mas GPU en equipos muy viejos.
 - `proyecto28.cl` sigue secundario; `.com` es canonico.
 - Google Cloud consent screen puede seguir en Testing; si se agregan correos a
@@ -220,7 +251,7 @@ usa Unreal conectar `unrealStreamURL` + `unrealLevelName`. Ver `RUNBOOK.md`.
 
 ---
 
-## 8. Google Doc
+## 9. Google Doc
 
 El respaldo final debe quedar en el Google Doc oficial, sin usar el
 Handoff:Kaiyi:
@@ -229,12 +260,12 @@ https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/
 
 Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 Revision Google Doc post-insercion:
-`AFwiY1_M65irDmXxCAFQwsIj_CiiocHnRXZ1upSVVD_ohGtFf8Uz0gThgsiwV7yYB4e3PKJRuSDD4uju9trnENqz3Brslp68s6-eWg0ezYM`.
+`AFwiY1-BMO5OtT6yc2WVyVX425LMXusp_GiQwApeM6ybJMpz5PXwR3WSbL4wOUzPsAL5-Am0bVXXLkQ1b8tFPe5fxp7vcxfainCRwUvUYNc`.
 
 Titulo/anchor para este cierre:
 
 ```text
-2026-05-31 10:03 UTC - v0.23.0 discoverable-light-controls
+2026-05-31 16:58 UTC - v0.24.0 split-touch-joystick
 ```
 
 ---

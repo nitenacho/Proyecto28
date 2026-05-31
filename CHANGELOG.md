@@ -32,12 +32,35 @@ o a un fix puntual entre etapas.
 
 ### Verified
 - `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- Bundle local `dist/assets/index-gCm6b1gG.js` contiene
+  `p28-touch-controls`, `p28-touch-zone-left`, `p28-joystick`,
+  `p28-touch-jump-hint`; no contiene `DeviceOrientationEvent` ni
+  `isLightControlSafeTarget`.
 - Chrome CDP mobile `390x844`: boton amarillo cambia
   `aria-pressed:false -> true`; `.p28-touch-controls` queda activo; joystick se
   ancla en la mitad izquierda; nub responde a vector `34,-22`; zona derecha
   dispara pulso de salto; `body/html == 478`, sin overflow horizontal.
 - Screenshot headless mobile confirma joystick minimo abajo izquierda, indicador
   de salto discreto abajo derecha y HUD intacto.
+- GitHub Pages run `26718658099` OK para `b9aaeb5`.
+- Auto-tag run `26718658101` OK; tag `v0.24.0`.
+- Produccion postdeploy:
+  - `https://proyecto28.com` => `200`
+  - `https://proyecto28.com/robots.txt` => `200`
+  - `https://proyecto28.com/sitemap.xml` => `200`
+  - bundle `assets/index-yCREtV-Q.js` contiene `p28-touch-controls`,
+    `p28-touch-zone-left`, `p28-joystick` y `p28-touch-jump-hint`.
+  - bundle vivo no contiene `DeviceOrientationEvent` ni
+    `isLightControlSafeTarget`.
+- Strapi Cloud postdeploy:
+  - `/admin` => `200`
+  - `/api/projects?populate=*` => `200` (`6` proyectos)
+  - `/api/site-setting` => `200`
+  - `/api/admin-whitelists` => `403`
+  - `/api/auth/check?email=inconcha@gmail.com` =>
+    `{ allowed:true, role:"owner" }`
+  - `/api/auth/check?email=yk8arts@gmail.com` =>
+    `{ allowed:true, role:"editor" }`
 
 ## [0.23.0] — 2026-05-31 — Etapa 19: Control discoverable + gyro/gamepad
 
@@ -1392,7 +1415,10 @@ Feedback del owner sobre `v0.14.0` en iOS Safari real:
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.24.0...HEAD
+[0.24.0]: https://github.com/nitenacho/Proyecto28/compare/v0.23.0...v0.24.0
+[0.23.0]: https://github.com/nitenacho/Proyecto28/compare/v0.22.0...v0.23.0
+[0.22.0]: https://github.com/nitenacho/Proyecto28/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/nitenacho/Proyecto28/compare/v0.20.4...v0.21.0
 [0.20.4]: https://github.com/nitenacho/Proyecto28/compare/v0.20.3...v0.20.4
 [0.20.3]: https://github.com/nitenacho/Proyecto28/compare/v0.20.2...v0.20.3
