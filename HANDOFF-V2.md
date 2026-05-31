@@ -223,7 +223,11 @@ Handoff:Kaiyi:
 
 https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/edit
 
-Titulo esperado para este cierre:
+Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
+Revision Google Doc post-insercion:
+`AFwiY19mqPWmJBzPup_n5adbiB1dPowVET1SxxFj9M-8XIH5oDXXI4KHyA7ihYotx0pmTC1t3KDHLbTnHAFrJFPlXQ6y7sDEBF9sKSlcR84`.
+
+Titulo/anchor para este cierre:
 
 ```text
 2026-05-31 09:29 UTC - v0.22.0 mobile-audio-controls

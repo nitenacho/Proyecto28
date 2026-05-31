@@ -335,7 +335,10 @@ Regla:
 
 - Actualizar el tab de Proyecto28/Handoff vigente al final del documento.
 - No usar el Handoff:Kaiyi para esta etapa.
-- Titulo esperado:
+- Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
+- Revision Google Doc post-insercion:
+  `AFwiY19mqPWmJBzPup_n5adbiB1dPowVET1SxxFj9M-8XIH5oDXXI4KHyA7ihYotx0pmTC1t3KDHLbTnHAFrJFPlXQ6y7sDEBF9sKSlcR84`.
+- Titulo/anchor:
 
 ```text
 2026-05-31 09:29 UTC - v0.22.0 mobile-audio-controls
