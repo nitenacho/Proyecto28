@@ -26,6 +26,11 @@ Headless CMS that owns the content shown in the frontend:
       `gameFallDuration` — tweaks del juego de plataformas (Etapas 4–6)
     - `gameLightColor` — color publicable de la luz controlable (`cyan`,
       `red`, `green`) usado por el mini-juego de recoleccion (Etapa 17)
+    - `audioEnabled` — activa/desactiva sonidos WebAudio interactivos
+    - `audioPreset` — timbre sintetizado (`midi`, `glass`, `soft`)
+    - `audioMasterVolume` — volumen master 0..1
+    - `audioHoverVolume` — volumen de notas al pasar sobre bloques 0..1
+    - `audioInteractionVolume` — volumen de sonidos de UI/juego 0..1
     - `adminButtonVisible` — toggle del botón secreto bajo el logo
     - `pixelStreamingEnabled` — master switch global de streaming
     - `pixelStreamingPreviewEnabled` — muestra/oculta el preview fallback sobre el cubo

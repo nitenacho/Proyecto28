@@ -6,6 +6,7 @@
 
 import * as THREE from 'three';
 import { loadContent } from './data/cms.js';
+import { createInteractionAudio } from './audio/interactionAudio.js';
 import { createScene } from './scene/scene.js';
 import { createControllableLight } from './game/light.js';
 import { createCollectibleSpheres } from './game/collectibles.js';
@@ -15,6 +16,7 @@ import { mountCubeA11y } from './ui/cubeA11y.js';
 import { mountTweaks } from './ui/tweaks.js';
 import { mountAdminButton } from './ui/adminButton.js';
 import { mountHud } from './ui/hud.js';
+import { mountSystemControls } from './ui/systemControls.js';
 import { initGoogleAuth, signIn, signOut, getCurrentUser } from './auth/google.js';
 import { checkWhitelist } from './auth/whitelist.js';
 import { publishTweaksSnapshot } from './admin/publish.js';
@@ -63,6 +65,8 @@ async function boot() {
   entranceTimeline(sceneCtx.tiles);
   const defaults = site.defaults;
   const hud = mountHud();
+  const interactionAudio = createInteractionAudio(site.audio);
+  mountSystemControls({ audio: interactionAudio });
   const collectibles = createCollectibleSpheres({
     scene: sceneCtx.scene,
     tiles: sceneCtx.tiles,
@@ -121,6 +125,7 @@ async function boot() {
       writeBestSphereTime(sphereRun.bestMs);
       hud.setBestTime(sphereRun.bestMs);
     }
+    interactionAudio.playInteraction('victory');
     controlLight.flashVictory();
   }
 
@@ -131,6 +136,7 @@ async function boot() {
     if (picked > 0) {
       sphereRun.collected = Math.min(collectibles.total, sphereRun.collected + picked);
       hud.setCollectibles(sphereRun.collected, collectibles.total);
+      interactionAudio.playInteraction('collect');
     }
     if (sphereRun.collected >= collectibles.total) {
       finishSphereRun(nowMs);
@@ -148,9 +154,11 @@ async function boot() {
     onActiveTileChange(tile) {
       activeTile = tile;
       streamOverlay.setActiveTile(tile);
+      if (tile) interactionAudio.playBlock(tile);
     },
     onRespawn(n) {
       hud.setFallCount(n);
+      interactionAudio.playInteraction('fall');
       resetSphereRun();
     },
     onRespawnComplete() {
@@ -158,8 +166,12 @@ async function boot() {
     },
     onControlModeChange(controlled) {
       lightControlled = controlled;
-      if (controlled) startSphereRun();
-      else resetSphereRun();
+      if (controlled) {
+        interactionAudio.playInteraction('control');
+        startSphereRun();
+      } else {
+        resetSphereRun();
+      }
     },
   });
   const popup = createPopup();
@@ -186,6 +198,11 @@ async function boot() {
     streamingEnabled: site.streaming.enabled,
     streamingPreviewEnabled: site.streaming.previewEnabled,
     streamingMode: normalizeStreamingMode(site.streaming.mode),
+    audioEnabled: site.audio.enabled,
+    audioPreset: site.audio.preset,
+    audioMasterVolume: site.audio.masterVolume,
+    audioHoverVolume: site.audio.hoverVolume,
+    audioInteractionVolume: site.audio.interactionVolume,
     adminButtonVisible: site.admin.buttonVisible,
   };
   let publishedBaseline = { ...tweakDefaults };
@@ -240,6 +257,13 @@ async function boot() {
       site.streaming.previewEnabled = !!state.streamingPreviewEnabled;
       site.streaming.mode        = normalizeStreamingMode(state.streamingMode);
       streamOverlay.setStreamingConfig(site.streaming);
+      // Audio interactivo — sintetizador WebAudio configurable desde Tweaks/Strapi.
+      site.audio.enabled            = !!state.audioEnabled;
+      site.audio.preset             = state.audioPreset;
+      site.audio.masterVolume       = state.audioMasterVolume;
+      site.audio.hoverVolume        = state.audioHoverVolume;
+      site.audio.interactionVolume  = state.audioInteractionVolume;
+      interactionAudio.setConfig(site.audio);
       // Admin — mutación in place + sincroniza visibilidad del botón en vivo (Etapa 8).
       site.admin.buttonVisible   = !!state.adminButtonVisible;
       if (adminButton) adminButton.setVisible(site.admin.buttonVisible);
@@ -317,6 +341,23 @@ async function boot() {
           { type: 'slider', key: 'gameMouseFollowDelay', label: 'Delay mouse-follow', min: 0,   max: 3,   step: 0.1, unit: 's' },
           { type: 'slider', key: 'gameFallDuration',    label: 'Duración caída',     min: 0.2, max: 3,   step: 0.1, unit: 's' },
           { type: 'slider', key: 'gameShadowSize',       label: 'Tamaño sombra',     min: 0.15, max: 1.2, step: 0.05 },
+        ],
+      },
+      {
+        label: 'Audio',
+        items: [
+          { type: 'toggle', key: 'audioEnabled', label: 'Sonido interactivo' },
+          {
+            type: 'select', key: 'audioPreset', label: 'Timbre',
+            options: [
+              { value: 'midi',  label: 'MIDI moderno' },
+              { value: 'glass', label: 'Cristal' },
+              { value: 'soft',  label: 'Suave' },
+            ],
+          },
+          { type: 'slider', key: 'audioMasterVolume',      label: 'Volumen master',   min: 0, max: 1, step: 0.01 },
+          { type: 'slider', key: 'audioHoverVolume',       label: 'Volumen bloques',  min: 0, max: 1, step: 0.01 },
+          { type: 'slider', key: 'audioInteractionVolume', label: 'Volumen acciones', min: 0, max: 1, step: 0.01 },
         ],
       },
       {
@@ -578,6 +619,7 @@ async function boot() {
       }
       return;
     }
+    interactionAudio.playInteraction('tap');
     if (downXY.type === 'touch') {
       const now = performance.now();
       const same = lastTap.tileId === tile.id && (now - lastTap.t) < DOUBLE_TAP_MS;
@@ -633,14 +675,19 @@ async function boot() {
     if (focusPopup) popup.focus();
   }
 
-  routeBackEl.addEventListener('click', closeRouteOverlay);
+  routeBackEl.addEventListener('click', () => {
+    interactionAudio.playInteraction('ui');
+    closeRouteOverlay();
+  });
 
   mountCubeA11y({
     tiles: sceneCtx.tiles,
     onFocusTile(tile) {
+      interactionAudio.playBlock(tile);
       focusTileForKeyboard(tile, false);
     },
     onOpenTile(tile) {
+      interactionAudio.playInteraction('tap');
       focusTileForKeyboard(tile, true);
     },
     onClear() {
@@ -692,6 +739,7 @@ async function boot() {
     updateSphereRun(now, t);
     const hits = raycaster.intersectObjects(sceneCtx.tiles, false);
     const pointerHit = hits.length ? hits[0].object : null;
+    if (pointerInsideViewport && pointerHit) interactionAudio.playBlock(pointerHit);
     const hit = resolveHoverTarget(pointerHit, now);
     applyHoverTarget(hit);
 

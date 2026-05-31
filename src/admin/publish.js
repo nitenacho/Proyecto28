@@ -25,6 +25,11 @@ const PUBLISHABLE_KEYS = new Set([
   'streamingEnabled',
   'streamingPreviewEnabled',
   'streamingMode',
+  'audioEnabled',
+  'audioPreset',
+  'audioMasterVolume',
+  'audioHoverVolume',
+  'audioInteractionVolume',
   'adminButtonVisible',
 ]);
 

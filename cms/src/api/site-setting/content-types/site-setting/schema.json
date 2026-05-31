@@ -121,6 +121,38 @@
       "max": 1.2,
       "description": "Tamaño base del anillo de sombra bajo la luz controlable."
     },
+    "audioEnabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Activa o desactiva el sintetizador WebAudio de hover e interacciones."
+    },
+    "audioPreset": {
+      "type": "enumeration",
+      "default": "midi",
+      "enum": ["midi", "glass", "soft"],
+      "description": "Timbre del audio interactivo: teclado MIDI moderno, cristal o suave."
+    },
+    "audioMasterVolume": {
+      "type": "decimal",
+      "default": 0.24,
+      "min": 0,
+      "max": 1,
+      "description": "Volumen master del audio interactivo."
+    },
+    "audioHoverVolume": {
+      "type": "decimal",
+      "default": 0.2,
+      "min": 0,
+      "max": 1,
+      "description": "Volumen de notas al pasar sobre bloques."
+    },
+    "audioInteractionVolume": {
+      "type": "decimal",
+      "default": 0.18,
+      "min": 0,
+      "max": 1,
+      "description": "Volumen de sonidos minimalistas de interacciones."
+    },
     "adminButtonVisible": {
       "type": "boolean",
       "default": false,

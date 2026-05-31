@@ -60,6 +60,13 @@ const CMS_URL = (import.meta.env.VITE_CMS_URL || '').replace(/\/$/, '');
  * @property {Object} admin                      Toggles admin (Etapas 7-9)
  * @property {boolean} admin.buttonVisible       Botón secreto bajo el logo
  *
+ * @property {Object} audio                      Audio interactivo (Etapa 18)
+ * @property {boolean} audio.enabled
+ * @property {'midi'|'glass'|'soft'} audio.preset
+ * @property {number} audio.masterVolume
+ * @property {number} audio.hoverVolume
+ * @property {number} audio.interactionVolume
+ *
  * @property {Object} streaming                  Pixel Streaming (Etapa 11)
  * @property {boolean} streaming.enabled         Master switch global
  * @property {boolean} streaming.previewEnabled  Muestra fallback/preview sin stream activo
@@ -145,6 +152,13 @@ function normalizeSite(s) {
     },
     admin: {
       buttonVisible: a.adminButtonVisible ?? fb.admin.buttonVisible,
+    },
+    audio: {
+      enabled: a.audioEnabled ?? fb.audio.enabled,
+      preset: ['midi', 'glass', 'soft'].includes(a.audioPreset) ? a.audioPreset : fb.audio.preset,
+      masterVolume: num(parseFloat(a.audioMasterVolume), fb.audio.masterVolume),
+      hoverVolume: num(parseFloat(a.audioHoverVolume), fb.audio.hoverVolume),
+      interactionVolume: num(parseFloat(a.audioInteractionVolume), fb.audio.interactionVolume),
     },
     streaming: {
       enabled: a.pixelStreamingEnabled ?? fb.streaming.enabled,

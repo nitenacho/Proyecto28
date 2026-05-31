@@ -1,12 +1,12 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-05-30 — `v0.21.0` Etapa 17 Pacman de luz + color admin
+> **Última actualización operativa:** 2026-05-31 — `v0.22.0` Etapa 18 Mobile parity + audio interactivo
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-17 cerradas. `v0.21.0` agrega mini-juego de recoleccion sobre cubos oscuros, HUD de esferas/timer/mejor tiempo, feedback dorado de victoria y color de luz publicable desde Strapi.
+> **Status:** En ejecución — etapas 1-18 cerradas. `v0.22.0` recupera calidad visual desktop en mobile y agrega fullscreen/mute + audio WebAudio configurable desde Strapi.
 
-## Estado del plan al 2026-05-30 America/Santiago
+## Estado del plan al 2026-05-31 America/Santiago
 
 | Etapa | Estado | Tag | Commit |
 |---|---|---|---|
@@ -35,6 +35,7 @@
 | 15 — Performance + a11y | ✅ Cerrada | `v0.19.0` | — |
 | 16 — Documentación final | ✅ Cerrada | `v0.20.0` | — |
 | 17 — Pacman de luz + color admin | ✅ Cerrada | `v0.21.0` | — |
+| 18 — Mobile parity + audio interactivo | ✅ Cerrada | `v0.22.0` | — |
 
 ## Decisiones tomadas durante la ejecución (resoluciones al §1)
 
@@ -52,6 +53,8 @@
   `SiteSetting` y reflejados en `src/data/fallback.js`. Ajustables vía
   panel de tweaks una vez exista (Etapas 7+). Etapa 17 agrega recoleccion de
   esferas, cronometro, mejor tiempo local y color de luz `cyan/red/green`.
+  Etapa 18 agrega audio interactivo configurable (`midi/glass/soft` + volumenes)
+  y restaura calidad visual desktop en mobile.
 - **§1.6 Admin Strapi:** ✅ Admin operativo. Fix aplicado: `Project` no usa
   Draft & Publish para evitar el choque entre el campo editable `status` y el
   `status` interno de Strapi v5.
@@ -920,7 +923,7 @@ Tweaks → Strapi + `PublishLog`; Discord queda opcional vía webhook si existe
 ## 7. CRITERIOS DE ACEPTACIÓN GLOBALES (Definition of Done)
 
 Antes de tag `v1.0.0`:
-- [ ] Todas las etapas 1-16 completadas y mergeadas a main
+- [ ] Todas las etapas 1-18 completadas y mergeadas a main
 - [ ] Lighthouse perf ≥85 desktop / ≥70 mobile
 - [ ] Lighthouse a11y ≥95
 - [ ] Funciona en Chrome / Firefox / Safari / Edge
@@ -928,7 +931,7 @@ Antes de tag `v1.0.0`:
 - [ ] Admin puede ajustar tweaks → publicar → ver reflejado
 - [ ] No-admin no ve botón admin ni rueda de tweaks
 - [x] Pixel Streaming activable/desactivable sin romper UX en primer corte iframe/fallback
-- [ ] Contador de luces caídas funciona
+- [x] Contador de luces caídas funciona
 - [ ] CHANGELOG.md actualizado con todas las versiones
 - [ ] HANDOFF-V2.md escrito y aprobado por user
 - [ ] Backup de Strapi Cloud descargado

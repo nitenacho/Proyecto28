@@ -96,6 +96,18 @@ desktop/gamepad:
 - `Admin -> Tweaks -> Juego -> Color luz` permite elegir `Gema cyan`,
   `Gema rojiza` o `Gema verde`, publicable en Strapi como `gameLightColor`.
 
+Etapa 18 mejora la experiencia mobile y suma capa de audio:
+
+- mobile vuelve a usar la misma calidad visual de desktop: cubos redondeados,
+  sombras, antialias y bloom/post-processing;
+- dos botones muy pequenos quedan disponibles sobre la escena:
+  pantalla completa y mute local;
+- `src/audio/interactionAudio.js` sintetiza tonos WebAudio sutiles tipo MIDI
+  moderno al pasar sobre bloques y en interacciones del juego;
+- `Admin -> Tweaks -> Audio` permite publicar en Strapi `audioEnabled`,
+  `audioPreset`, `audioMasterVolume`, `audioHoverVolume` y
+  `audioInteractionVolume`.
+
 ### Performance y accesibilidad
 
 Etapa 15 endurece el boot final antes de v1:
@@ -103,8 +115,9 @@ Etapa 15 endurece el boot final antes de v1:
 - `vite.config.js` separa `three`, `three-addons`, `gsap` y `streaming`.
 - Pixel Streaming usa `createLazyStreamOverlay`: el chunk `streaming-*` no se
   descarga si `Preview visible` está apagado y no hay stream válido.
-- Mobile/reduced-motion usa modo ligero: geometría simple, pixel ratio acotado,
-  sin sombras caras y sin bloom/post-processing.
+- Mobile ya no baja la calidad de modelos/render: comparte geometría
+  redondeada, sombras y bloom con desktop; reduced-motion sigue controlado por
+  las timelines de animación.
 - Los cubos tienen navegación por teclado: `Tab` recorre proyectos, `Enter`
   abre el popup y `Escape` cierra.
 - El panel Tweaks publica `Streaming > Preview visible`, que permite controlar
@@ -151,7 +164,8 @@ desde `/admin`:
   flotante, URL de redirección por color.
 - **Ajustes del sitio** — logo (P28 / NEIT / EST), placement por defecto del
   popup, estilo de tiles, inclinación / rotación / drift de cámara, toggles
-  del HUD (grilla, scanlines, viewfinder), juego, Admin y Pixel Streaming.
+  del HUD (grilla, scanlines, viewfinder), juego, Audio, Admin y Pixel
+  Streaming.
 - **Admin whitelist** — correos autorizados para abrir Tweaks y publicar
   cambios (`owner` / `editor`). Esta colección queda editable desde Strapi
   Admin y privada para el público.
@@ -244,3 +258,4 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 15 — Performance + a11y | ✅ Cerrado — Lighthouse + responsive + teclado | `v0.19.0` |
 | 16 — Documentación final | ✅ Cerrado — runbook + handoff V2 + assets | `v0.20.0` |
 | 17 — Pacman de luz + color admin | ✅ Cerrado — esferas, timer, best time y Strapi `gameLightColor` | `v0.21.0` |
+| 18 — Mobile parity + audio interactivo | ✅ Cerrado — calidad desktop en mobile, fullscreen/mute y audio Strapi | `v0.22.0` |

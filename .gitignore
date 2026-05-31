@@ -4,3 +4,5 @@ dist/
 *.local
 claude-design-export/
 claude-design-export.zip
+artifacts/
+dev-server*.log

@@ -10,6 +10,35 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.22.0] — 2026-05-31 — Etapa 18: Mobile parity + audio interactivo
+
+### Added
+- Botones discretos sobre la escena para pantalla completa y mute local.
+- Motor `src/audio/interactionAudio.js` basado en WebAudio: tonos sintetizados
+  tipo teclado MIDI moderno al pasar por bloques y sonidos minimalistas en
+  tap, control, recoleccion, victoria, caida y UI.
+- Seccion `Audio` en Tweaks/Admin con `audioEnabled`, `audioPreset`,
+  `audioMasterVolume`, `audioHoverVolume` y `audioInteractionVolume`.
+- Campos SiteSetting equivalentes en Strapi, defaults de bootstrap y soporte en
+  `/api/publish`.
+
+### Changed
+- Mobile deja de usar el modo visual reducido: ahora comparte con desktop
+  geometria redondeada, antialias, sombras y bloom/post-processing.
+- CSS mobile mantiene el viewfinder y recupera blur/saturacion en popup/stream
+  para que la version chica no se vea simplificada frente a desktop.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- `cd cms; npm run build` OK. Warning existente de Strapi/Node:
+  `DEP0187 fs.existsSync`.
+- Dev server local `http://127.0.0.1:5173/` responde `200`.
+- Chrome CDP smoke desktop `1365x768`: WebGL activo, canvas full viewport,
+  HUD/status/controles dentro del viewport.
+- Chrome CDP smoke mobile `390x844`: WebGL activo, canvas full viewport,
+  mobile con bloom/sombras/cubos redondeados, HUD/status/controles dentro del
+  viewport y sin overflow horizontal (`body/html == 390`).
+
 ## [0.21.0] — 2026-05-30 — Etapa 17: Pacman de luz + color admin
 
 ### Added

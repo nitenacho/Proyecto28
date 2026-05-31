@@ -39,6 +39,13 @@ export const FALLBACK_SITE = {
   admin: {
     buttonVisible: true,        // v0.12.0: botón admin visible por default (Etapa 8)
   },
+  audio: {
+    enabled: true,
+    preset: 'midi',
+    masterVolume: 0.24,
+    hoverVolume: 0.20,
+    interactionVolume: 0.18,
+  },
   streaming: {
     enabled: false,
     previewEnabled: false,
