@@ -42,6 +42,21 @@ o a un fix puntual entre etapas.
   y una pulsacion simulada de D-pad derecho activa el control de la luz.
 - Chrome CDP smoke mobile: boton activo, evento de orientacion simulado aceptado,
   touch jump sin error y HUD dentro del viewport CSS.
+- GitHub Pages run `26709528030` OK para `f386de6`.
+- Auto-tag run `26709528025` OK; tag `v0.23.0`.
+- Produccion postdeploy:
+  - `https://proyecto28.com` => `200`
+  - `https://proyecto28.com/robots.txt` => `200`
+  - `https://proyecto28.com/sitemap.xml` => `200`
+  - bundle `assets/index-CfbiJP66.js` contiene `p28-control-toggle`,
+    `DeviceOrientationEvent`, `Controlar luz`, `Soltar luz`,
+    `setExternalMoveVector` y `p28-sphere-best-time-ms-v1`.
+- Strapi Cloud postdeploy:
+  - `/api/projects?populate=*` => `200`
+  - `/api/site-setting` => `200`
+  - `/api/admin-whitelists` => `403`
+  - `/api/site-setting` conserva `gameLightColor:"red"` y audio `midi`.
+  - `updatedAt` => `2026-05-31T09:29:14.831Z`.
 
 ## [0.22.0] — 2026-05-31 — Etapa 18: Mobile parity + audio interactivo
 

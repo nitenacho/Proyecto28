@@ -1,16 +1,18 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-05-31 (Etapa 18 Mobile parity + audio interactivo - `v0.22.0`)
-> **Tag activo esperado tras cierre:** `v0.22.0`
+> **Ultima actualizacion:** 2026-05-31 (Etapa 19 Control discoverable + gyro/gamepad - `v0.23.0`)
+> **Tag activo esperado tras cierre:** `v0.23.0`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
 
-Etapas 1-18 cerradas. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
+Etapas 1-19 cerradas. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
 sync Claude Design, hardening performance/a11y, mini-juego Pacman de luz y una
-capa de audio interactivo configurable desde Strapi.
+capa de audio interactivo configurable desde Strapi. La luz ahora se puede
+tomar/soltar desde un boton minimo en HUD, acepta D-pad/flechas de gamepad y en
+mobile se controla con giroscopio + toque para saltar.
 
 ---
 
@@ -21,6 +23,9 @@ Estado vigente esperado tras cierre:
 - `v0.22.0`: mobile vuelve a usar calidad visual de desktop; se agregan botones
   pequenos de fullscreen/mute; el sitio sintetiza audio WebAudio tipo MIDI en
   hover de bloques e interacciones; Strapi SiteSetting incluye `audio*`.
+- `v0.23.0`: el HUD del mini-juego incluye boton minimo para controlar/soltar
+  la luz; gamepad acepta D-pad/flechas; mobile puede usar giroscopio y toque
+  tactil para salto.
 - `v0.21.0`: mini-juego de esferas para la luz, cronometro, mejor tiempo local
   y color de luz `gameLightColor`.
 - Dominio canonico: `https://proyecto28.com`.
@@ -52,7 +57,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- ultimo tag `v0.22.0`
+- ultimo tag `v0.23.0`
 - build Vite OK
 - build Strapi OK
 
@@ -62,13 +67,58 @@ Lectura obligatoria:
 2. `ADMIN-URLS.md` - URLs para administrar todos los servicios.
 3. `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
 4. `DEPLOY.md` - GitHub Pages, Strapi, OAuth, Pixel Streaming, releases.
-5. `CHANGELOG.md` - `[0.22.0]`.
-6. `PLAN-PROYECTO28-V2.md` - Etapa 18 cerrada.
+5. `CHANGELOG.md` - `[0.23.0]`.
+6. `PLAN-PROYECTO28-V2.md` - Etapa 19 cerrada.
 7. `cms/README.md` - SiteSetting incluye `gameLightColor` y `audio*`.
 
 ---
 
-## 2. Cambios v0.22.0
+## 2. Cambios v0.23.0
+
+### Control discoverable
+
+- `src/ui/hud.js` agrega `.p28-control-toggle`: boton pequeno junto a
+  `Caidas`, `Esferas`, `Tiempo` y `Mejor`.
+- El boton alterna `aria-pressed` y texto accesible entre `Controlar luz` y
+  `Soltar luz`.
+- Click/tap sobre el boton llama `controlLight.toggleControl()`.
+- Mientras el boton mantiene el control bloqueado, el movimiento del mouse ya
+  no saca la luz del modo fisico; el jugador debe soltarla con el mismo boton.
+
+### Gamepad ampliado
+
+- `src/game/light.js` mantiene stick izquierdo y boton 0 para salto.
+- Nuevo soporte para botones standard D-pad:
+  - 12 arriba;
+  - 13 abajo;
+  - 14 izquierda;
+  - 15 derecha.
+- Fallback para D-pad expuesto como ejes `axes[6]` / `axes[7]`.
+- El vector de movimiento normaliza teclado, stick, D-pad y sensores externos.
+
+### Mobile gyro + touch jump
+
+- `src/main.js` agrega deteccion mobile/coarse pointer.
+- Al activar el boton del HUD en mobile, se solicita
+  `DeviceOrientationEvent.requestPermission()` cuando el navegador lo exige.
+- El giroscopio se calibra con la primera orientacion recibida y aplica zona
+  muerta para que la luz no tiemble.
+- En modo controlado, tocar la escena hace saltar la luz.
+- El touch jump ignora objetivos UI: boton de control, fullscreen/mute, Tweaks,
+  Admin, popup y route overlay.
+
+### Archivos tocados
+
+- `src/game/light.js`
+- `src/main.js`
+- `src/ui/hud.js`
+- `README.md`
+- `CHANGELOG.md`
+- `PLAN-PROYECTO28-V2.md`
+
+---
+
+## 3. Cambios v0.22.0
 
 ### Mobile parity visual
 
@@ -140,46 +190,44 @@ Archivos tocados:
 
 ---
 
-## 3. Validacion realizada antes del cierre
+## 4. Validacion realizada antes del cierre
 
 ### Local
 
 ```powershell
-npm run build
-cd cms
 npm run build
 ```
 
 Resultado:
 
 - Frontend OK. Warning existente: chunk `three` >500 kB.
-- Strapi OK. Warning existente de Node/Strapi: `DEP0187 fs.existsSync`.
+- No hubo cambios en `cms/**`; Strapi no requiere rebuild para esta etapa.
 
 Servidor local:
 
 - `http://127.0.0.1:5173/` responde `HTTP 200`.
 - Dev server Vite levantado desde:
   `C:/Users/incon/Downloads/EscritorioNobita/Proyectos_Claude/Claude_P28/Proyecto28`.
+- Bundle local `dist/assets/index-BlBVVWk8.js` contiene:
+  - `p28-control-toggle`
+  - `DeviceOrientationEvent`
+  - `Controlar luz`
+  - `Soltar luz`
+  - `setExternalMoveVector`
+  - `toggleControl`
 
 Chrome CDP smoke:
 
-- Desktop `1365x768`:
-  - WebGL activo;
-  - canvas full viewport;
-  - HUD/status/controles dentro del viewport.
-- Mobile `390x844`:
-  - WebGL activo;
-  - canvas full viewport;
-  - cubos redondeados + sombras + bloom visibles;
-  - HUD/status/controles dentro del viewport;
-  - `body/html == 390`, sin overflow horizontal.
-
-Capturas locales ignoradas por git:
-
-```text
-artifacts/qa/etapa18-desktop-cdp.png
-artifacts/qa/etapa18-mobile-cdp.png
-```
+- Desktop `1440x900`:
+  - boton HUD existe;
+  - click cambia `aria-pressed:false -> true`;
+  - D-pad derecho simulado activa el control de la luz;
+  - HUD visible y discreto.
+- Mobile/headless:
+  - boton queda activo;
+  - `DeviceOrientationEvent` simulado no rompe;
+  - touch jump no genera errores;
+  - HUD cabe dentro del viewport CSS.
 
 ### Produccion/Strapi predeploy
 
@@ -194,36 +242,37 @@ artifacts/qa/etapa18-mobile-cdp.png
 - `/api/auth/check?email=yk8arts@gmail.com` =>
   `{ allowed:true, role:"editor" }`
 
-### Produccion postdeploy v0.22.0
+### Produccion postdeploy v0.23.0
 
-- Commit desplegado por Pages: `936717b`.
-- GitHub Pages run: `26708867215` => success.
-- Auto-tag run: `26708867220` => success.
-- Tag: `v0.22.0`.
+- Commit desplegado por Pages: `f386de6`.
+- GitHub Pages run: `26709528030` => success.
+- Auto-tag run: `26709528025` => success.
+- Tag: `v0.23.0`.
 - Produccion:
   - `https://proyecto28.com` => `200`
   - `https://proyecto28.com/robots.txt` => `200`
   - `https://proyecto28.com/sitemap.xml` => `200`
 - Bundle vivo:
-  - asset `assets/index-BwOh2oIH.js`
-  - contiene `p28-audio-muted-v1`
-  - contiene `audioPreset`
-  - contiene `MIDI moderno`
-  - contiene `p28-system-controls`
-  - contiene `RoundedBoxGeometry`
-  - contiene `UnrealBloomPass`
+  - asset `assets/index-CfbiJP66.js`
+  - contiene `p28-control-toggle`
+  - contiene `DeviceOrientationEvent`
+  - contiene `Controlar luz`
+  - contiene `Soltar luz`
+  - contiene `setExternalMoveVector`
+  - contiene `p28-sphere-best-time-ms-v1`
 - Strapi Cloud postdeploy:
+  - `/api/projects?populate=*` => `200`
+  - `/api/site-setting` => `200`
+  - `/api/admin-whitelists` => `403`
   - `/api/site-setting` incluye:
+    - `gameLightColor: "red"`
     - `audioEnabled: true`
     - `audioPreset: "midi"`
-    - `audioMasterVolume: 0.24`
-    - `audioHoverVolume: 0.2`
-    - `audioInteractionVolume: 0.18`
   - `updatedAt` => `2026-05-31T09:29:14.831Z`
 
 ---
 
-## 4. Operacion clave
+## 5. Operacion clave
 
 ### Admin / Tweaks / publicar
 
@@ -254,21 +303,24 @@ Valores `audioPreset` aceptados:
 - `glass`
 - `soft`
 
-### Como probar el mini-juego + audio
+### Como probar el mini-juego + audio/input
 
 1. Abrir `https://proyecto28.com`.
 2. Hacer hard refresh si el navegador conserva assets viejos.
 3. Hacer una primera interaccion real (click/tecla/boton) para desbloquear
    audio del navegador.
 4. Pasar el mouse por los bloques: debe sonar una nota sutil por bloque.
-5. Controlar la luz con `W/A/S/D`, flechas o gamepad.
+5. Controlar la luz con el boton pequeno del HUD, `W/A/S/D`, flechas,
+   stick izquierdo o D-pad/flechas de gamepad.
 6. Las esferas deben aparecer solo mientras la luz esta controlada.
-7. Recolectar cada esfera por cercania.
-8. Confirmar contador `Esferas`, `Tiempo` y `Mejor`.
-9. Al terminar todas, el timer queda detenido, la luz brilla dorado 1 segundo
+7. En mobile, activar el boton y permitir sensores si el navegador lo pide;
+   inclinar el telefono mueve la luz y tocar la escena salta.
+8. Recolectar cada esfera por cercania.
+9. Confirmar contador `Esferas`, `Tiempo` y `Mejor`.
+10. Al terminar todas, el timer queda detenido, la luz brilla dorado 1 segundo
    y suena feedback de victoria.
-10. Mover el mouse o caer al vacio debe reiniciar timer/contador y ocultar o
-    reaparecer esferas segun corresponda.
+11. Soltar desde el boton o caer al vacio debe reiniciar timer/contador y
+    ocultar o reaparecer esferas segun corresponda.
 
 ### Pixel Streaming
 
@@ -283,7 +335,7 @@ Admin -> Tweaks -> Streaming -> Preview visible OFF -> PUBLICAR CAMBIOS
 
 ---
 
-## 5. Deploy esperado
+## 6. Deploy esperado
 
 Flujo correcto para una etapa nueva:
 
@@ -297,22 +349,24 @@ Flujo correcto para una etapa nueva:
 8. Actualizar handoff local + Google Doc.
 9. Confirmar tag semver.
 
-Para `v0.22.0`:
+Para `v0.23.0`:
 
-- Rama usada: `etapa-18-mobile-audio-controls`.
-- Commit funcional: `936717b feat: add mobile parity and interactive audio`.
-- Pages run: `26708867215`.
-- Auto-tag run: `26708867220`.
+- Rama usada: `etapa-19-gamepad-dpad-gyro-toggle`.
+- Commit funcional: `f386de6 feat: add discoverable light controls`.
+- Pages run: `26709528030`.
+- Auto-tag run: `26709528025`.
 
 ---
 
-## 6. Riesgos y pendientes
+## 7. Riesgos y pendientes
 
 - Audio en navegadores: no puede sonar antes de la primera interaccion real por
   politicas de autoplay. Esto es esperado.
 - Mobile ahora usa calidad desktop; si aparece fatiga en dispositivos low-end,
   evaluar un toggle admin futuro de calidad, pero no volver a degradar por
   defecto.
+- Giroscopio requiere permiso del navegador en iOS/Safari y puede no estar
+  disponible en escritorio. El fallback sigue siendo boton + teclado/gamepad.
 - `proyecto28.cl` no es canonico hasta cerrar DNS/certificado/redirect.
 - Google OAuth consent screen puede seguir en Testing; al agregar emails a
   Strapi, tambien agregarlos como test users en Google Cloud.
@@ -325,7 +379,7 @@ Para `v0.22.0`:
 
 ---
 
-## 7. Google Doc
+## 8. Google Doc
 
 Respaldo oficial:
 
@@ -337,13 +391,13 @@ Regla:
 - No usar el Handoff:Kaiyi para esta etapa.
 - Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 - Revision Google Doc post-insercion:
-  `AFwiY19mqPWmJBzPup_n5adbiB1dPowVET1SxxFj9M-8XIH5oDXXI4KHyA7ihYotx0pmTC1t3KDHLbTnHAFrJFPlXQ6y7sDEBF9sKSlcR84`.
+  `AFwiY1_M65irDmXxCAFQwsIj_CiiocHnRXZ1upSVVD_ohGtFf8Uz0gThgsiwV7yYB4e3PKJRuSDD4uju9trnENqz3Brslp68s6-eWg0ezYM`.
 - Titulo/anchor:
 
 ```text
-2026-05-31 09:29 UTC - v0.22.0 mobile-audio-controls
+2026-05-31 10:03 UTC - v0.23.0 discoverable-light-controls
 ```
 
 ---
 
-Fin del handoff `v0.22.0`.
+Fin del handoff `v0.23.0`.

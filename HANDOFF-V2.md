@@ -1,8 +1,8 @@
 # HANDOFF V2 - Proyecto 28
 
-> Ultima actualizacion: 2026-05-31 (Etapa 18 Mobile parity + audio interactivo - `v0.22.0`)
+> Ultima actualizacion: 2026-05-31 (Etapa 19 Control discoverable + gyro/gamepad - `v0.23.0`)
 > Branch esperado: `main`
-> Tag activo esperado tras cierre: `v0.22.0`
+> Tag activo esperado tras cierre: `v0.23.0`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
 
@@ -13,7 +13,7 @@ operacion detallada, leer `RUNBOOK.md`.
 
 ## 1. Estado ejecutivo
 
-Etapas 1-18 cerradas. Proyecto28 queda como web 3D interactiva con:
+Etapas 1-19 cerradas. Proyecto28 queda como web 3D interactiva con:
 
 - Vite + Three.js + GSAP.
 - Strapi Cloud como CMS.
@@ -31,13 +31,18 @@ Etapas 1-18 cerradas. Proyecto28 queda como web 3D interactiva con:
 - Botones pequenos de pantalla completa y mute local.
 - Audio WebAudio sintetizado para hover de bloques e interacciones, configurable
   desde `Admin -> Tweaks -> Audio` y Strapi (`audio*`).
+- Boton minimo en HUD para tomar/soltar control de la luz y descubrir el
+  mini-juego sin conocer WASD.
+- Gamepad con stick izquierdo, D-pad/flechas y boton inferior para salto.
+- Mobile con giroscopio al activar control y toque tactil para saltar.
 
 Ultimo codigo funcional esperado:
 
-- `v0.22.0` - Mobile parity + audio interactivo.
+- `v0.23.0` - Control discoverable + gyro/gamepad.
 
 Tags/commits recientes:
 
+- `v0.23.0` - `f386de6` control discoverable + gyro/gamepad.
 - `v0.22.0` - `936717b` mobile parity + audio interactivo.
 - `v0.21.0` - Pacman de luz + color admin.
 - `v0.20.4` - restauracion de disponibilidad del admin Strapi.
@@ -67,7 +72,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- tag `v0.22.0`
+- tag `v0.23.0`
 - build Vite OK
 - build Strapi OK
 
@@ -97,18 +102,19 @@ Esperado:
 - inconcha owner permitido
 - yk8arts editor permitido
 
-Validado postdeploy `v0.22.0`:
+Validado postdeploy `v0.23.0`:
 
-- GitHub Pages run `26708867215` OK para `936717b`.
-- Auto-tag run `26708867220` OK.
-- Produccion sirve `assets/index-BwOh2oIH.js` con:
-  - `p28-audio-muted-v1`
-  - `audioPreset`
-  - `MIDI moderno`
-  - `p28-system-controls`
-  - `RoundedBoxGeometry`
-  - `UnrealBloomPass`
+- GitHub Pages run `26709528030` OK para `f386de6`.
+- Auto-tag run `26709528025` OK.
+- Produccion sirve `assets/index-CfbiJP66.js` con:
+  - `p28-control-toggle`
+  - `DeviceOrientationEvent`
+  - `Controlar luz`
+  - `Soltar luz`
+  - `setExternalMoveVector`
+  - `p28-sphere-best-time-ms-v1`
 - Strapi Cloud `/api/site-setting` incluye:
+  - `gameLightColor: "red"`
   - `audioEnabled: true`
   - `audioPreset: "midi"`
   - `audioMasterVolume: 0.24`
@@ -118,32 +124,28 @@ Validado postdeploy `v0.22.0`:
 
 ---
 
-## 4. Cambios v0.22.0
+## 4. Cambios v0.23.0
 
 Archivos principales:
 
-- `src/scene/scene.js`: elimina modo visual reducido por mobile/coarse pointer;
-  usa geometria redondeada, sombras, antialias y bloom en mobile y desktop.
-- `src/styles/app.css`: mobile mantiene viewfinder y recupera blur/saturacion
-  de popup/stream card.
-- `src/audio/interactionAudio.js`: sintetizador WebAudio con presets
-  `midi`, `glass`, `soft`, notas por bloque y feedback minimalista de juego/UI.
-- `src/ui/systemControls.js`: botones pequenos de fullscreen y mute local.
-- `src/main.js`: monta audio/controles, dispara sonidos en hover de bloques,
-  tap, control, pickup, caida y victoria.
-- `src/data/*`, `src/admin/publish.js` y `cms/**`: campos `audio*` en
-  fallback, normalizador, publicacion, schema Strapi y bootstrap.
+- `src/game/light.js`: control lock explicito, API `toggleControl`,
+  `setExternalMoveVector`, `jump`, soporte D-pad standard y fallback de ejes.
+- `src/ui/hud.js`: boton minimo `.p28-control-toggle` con `aria-pressed`.
+- `src/main.js`: integra boton HUD, giroscopio mobile y touch jump sin
+  interferir con controles UI.
 - `README.md`, `PLAN-PROYECTO28-V2.md`, `CHANGELOG.md` y handoffs:
   estado operativo actualizado.
 
 Comportamiento importante:
 
-- El audio no suena antes de la primera interaccion real del usuario por
-  politicas de autoplay del navegador.
-- El mute es local por navegador (`p28-audio-muted-v1`).
-- `audioEnabled` en Strapi permite apagar globalmente el sintetizador.
-- Mobile queda visualmente al nivel de desktop; si un celular tiene gamepad, el
-  mini-juego sigue siendo jugable.
+- El boton del HUD entra/sale del modo controlado y hace visible el juego
+  oculto sin depender de teclado.
+- Con control bloqueado por boton, mover el mouse no libera la luz.
+- D-pad/flechas de gamepad mueven la luz igual que el stick.
+- En mobile, el primer evento de orientacion calibra el giroscopio; tocar la
+  escena salta la luz.
+- Si el navegador no permite sensores, teclado/gamepad y boton siguen
+  funcionando.
 
 ---
 
@@ -204,6 +206,8 @@ usa Unreal conectar `unrealStreamURL` + `unrealLevelName`. Ver `RUNBOOK.md`.
 ## 7. Pendientes conocidos
 
 - Audio: requiere primera interaccion real antes de sonar.
+- Giroscopio: requiere permiso del navegador en iOS/Safari; no todos los
+  escritorios exponen `DeviceOrientationEvent`.
 - Mobile con calidad desktop puede exigir mas GPU en equipos muy viejos.
 - `proyecto28.cl` sigue secundario; `.com` es canonico.
 - Google Cloud consent screen puede seguir en Testing; si se agregan correos a
@@ -225,12 +229,12 @@ https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/
 
 Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 Revision Google Doc post-insercion:
-`AFwiY19mqPWmJBzPup_n5adbiB1dPowVET1SxxFj9M-8XIH5oDXXI4KHyA7ihYotx0pmTC1t3KDHLbTnHAFrJFPlXQ6y7sDEBF9sKSlcR84`.
+`AFwiY1_M65irDmXxCAFQwsIj_CiiocHnRXZ1upSVVD_ohGtFf8Uz0gThgsiwV7yYB4e3PKJRuSDD4uju9trnENqz3Brslp68s6-eWg0ezYM`.
 
 Titulo/anchor para este cierre:
 
 ```text
-2026-05-31 09:29 UTC - v0.22.0 mobile-audio-controls
+2026-05-31 10:03 UTC - v0.23.0 discoverable-light-controls
 ```
 
 ---
