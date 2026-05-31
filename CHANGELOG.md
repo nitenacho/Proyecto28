@@ -10,6 +10,35 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.24.0] — 2026-05-31 — Etapa 20: Split-screen touch joystick
+
+### Added
+- Nuevo modulo `src/ui/touchControls.js` para mobile/coarse pointer: capa
+  inferior con dos zonas tactiles, solo activa mientras el boton amarillo del
+  HUD mantiene la luz controlada.
+- Zona izquierda con joystick dinamico: el primer toque fija el ancla, el
+  arrastre calcula vector X/Z normalizado con radio maximo y zona muerta, y el
+  nub sigue el dedo con feedback minimo.
+- Zona derecha dedicada a salto inmediato en `pointerdown`, compatible con
+  saltos multiples tipo Kirby.
+
+### Changed
+- Mobile deja de usar giroscopio como input del juego oculto.
+- El salto tactil global se elimina: tocar el resto de la pantalla ya no salta,
+  dejando libre la escena para popup/inspeccion cuando no se toca la zona de
+  salto.
+- Se evita agregar Nipple.js u otra dependencia: el joystick dinamico se
+  implementa con Pointer Events para mantener el bundle pequeno y controlado.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- Chrome CDP mobile `390x844`: boton amarillo cambia
+  `aria-pressed:false -> true`; `.p28-touch-controls` queda activo; joystick se
+  ancla en la mitad izquierda; nub responde a vector `34,-22`; zona derecha
+  dispara pulso de salto; `body/html == 478`, sin overflow horizontal.
+- Screenshot headless mobile confirma joystick minimo abajo izquierda, indicador
+  de salto discreto abajo derecha y HUD intacto.
+
 ## [0.23.0] — 2026-05-31 — Etapa 19: Control discoverable + gyro/gamepad
 
 ### Added

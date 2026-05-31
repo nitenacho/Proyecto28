@@ -113,10 +113,22 @@ Etapa 19 hace mas descubrible el juego oculto y amplia inputs:
 - el HUD compacto suma un boton minimo para tomar o soltar control de la luz;
 - el control por gamepad acepta stick izquierdo, D-pad/flechas del pad y boton
   inferior para salto;
-- en mobile, activar el control desde el HUD habilita giroscopio si el navegador
-  lo permite; tocar la escena hace saltar la luz;
+- en mobile, la siguiente etapa reemplaza el giroscopio por split-screen touch;
 - el modo bloqueado por boton mantiene la luz controlada aunque se mueva el
   mouse, hasta que el jugador vuelva a soltarla.
+
+Etapa 20 reemplaza el input mobile del juego por split-screen touch:
+
+- al pulsar el boton amarillo del HUD aparece una capa tactil inferior,
+  invisible salvo feedback minimo;
+- la mitad izquierda del espacio inferior crea un joystick dinamico donde el
+  jugador toca por primera vez, y mueve la luz con vector X/Z normalizado;
+- la mitad derecha dispara salto inmediato en `touchstart`/`pointerdown`,
+  soportando saltos multiples tipo Kirby;
+- tocar el resto de la pantalla ya no hace saltar la luz, por lo que queda libre
+  para inspeccionar cubos o usar UI;
+- se implemento sin dependencia externa tipo Nipple.js para mantener bundle y
+  comportamiento exactos.
 
 ### Performance y accesibilidad
 
@@ -270,3 +282,4 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 17 — Pacman de luz + color admin | ✅ Cerrado — esferas, timer, best time y Strapi `gameLightColor` | `v0.21.0` |
 | 18 — Mobile parity + audio interactivo | ✅ Cerrado — calidad desktop en mobile, fullscreen/mute y audio Strapi | `v0.22.0` |
 | 19 — Control discoverable + gyro/gamepad | ✅ Cerrado — boton HUD, D-pad y giroscopio mobile | `v0.23.0` |
+| 20 — Split-screen touch joystick | ✅ Cerrado — joystick dinamico izquierdo y salto derecho mobile | `v0.24.0` |

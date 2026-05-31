@@ -17,6 +17,7 @@ import { mountTweaks } from './ui/tweaks.js';
 import { mountAdminButton } from './ui/adminButton.js';
 import { mountHud } from './ui/hud.js';
 import { mountSystemControls } from './ui/systemControls.js';
+import { mountTouchControls } from './ui/touchControls.js';
 import { initGoogleAuth, signIn, signOut, getCurrentUser } from './auth/google.js';
 import { checkWhitelist } from './auth/whitelist.js';
 import { publishTweaksSnapshot } from './admin/publish.js';
@@ -29,9 +30,6 @@ const bootEl = document.getElementById('boot');
 const coordModule = document.getElementById('coord-module');
 const brandNameEl = document.getElementById('brand-name');
 const BEST_TIME_KEY = 'p28-sphere-best-time-ms-v1';
-const MOBILE_CONTROL_QUERY = '(pointer: coarse), (max-width: 1024px), (max-aspect-ratio: 1/1)';
-const GYRO_TILT_RANGE = 18;
-const GYRO_DEADZONE = 0.08;
 
 function normalizeStreamingMode(mode) {
   return mode === 'per-cube' || mode === 'dedicated' ? 'per-cube' : 'shared';
@@ -60,17 +58,6 @@ function writeBestSphereTime(ms) {
   catch { /* localStorage can be unavailable in private contexts. */ }
 }
 
-function isMobileControlSurface() {
-  const coarse = window.matchMedia?.(MOBILE_CONTROL_QUERY)?.matches;
-  return !!coarse || navigator.maxTouchPoints > 0;
-}
-
-function normalizeTiltAxis(value) {
-  if (!Number.isFinite(value)) return 0;
-  const normalized = THREE.MathUtils.clamp(value / GYRO_TILT_RANGE, -1, 1);
-  return Math.abs(normalized) < GYRO_DEADZONE ? 0 : normalized;
-}
-
 async function boot() {
   const { site, projects, grid, source } = await loadContent();
   console.log(`[p28] content source: ${source}`);
@@ -89,6 +76,8 @@ async function boot() {
   let activeTile = null;
   let lightControlled = false;
   let controlLight = null;
+  let touchControls = null;
+  let touchControlsRequested = false;
   const sphereRun = {
     active: false,
     complete: false,
@@ -103,60 +92,9 @@ async function boot() {
   hud.setBestTime(sphereRun.bestMs);
   hud.setControlActive(false);
 
-  const gyroControl = {
-    enabled: false,
-    baseBeta: null,
-    baseGamma: null,
-  };
-
-  function handleGyroOrientation(e) {
-    if (!gyroControl.enabled || !lightControlled) return;
-    const beta = Number(e.beta);
-    const gamma = Number(e.gamma);
-    if (!Number.isFinite(beta) || !Number.isFinite(gamma)) return;
-
-    if (gyroControl.baseBeta === null || gyroControl.baseGamma === null) {
-      gyroControl.baseBeta = beta;
-      gyroControl.baseGamma = gamma;
-    }
-
-    const rawX = gamma - gyroControl.baseGamma;
-    const rawZ = beta - gyroControl.baseBeta;
-    controlLight.setExternalMoveVector(
-      normalizeTiltAxis(rawX),
-      normalizeTiltAxis(rawZ),
-      true,
-    );
-  }
-
-  async function enableGyroControl() {
-    if (!isMobileControlSurface() || typeof window.DeviceOrientationEvent === 'undefined') {
-      return false;
-    }
-
-    const orientationEvent = window.DeviceOrientationEvent;
-    if (typeof orientationEvent.requestPermission === 'function') {
-      try {
-        const state = await orientationEvent.requestPermission();
-        if (state !== 'granted') return false;
-      } catch {
-        return false;
-      }
-    }
-
-    gyroControl.enabled = true;
-    gyroControl.baseBeta = null;
-    gyroControl.baseGamma = null;
-    window.addEventListener('deviceorientation', handleGyroOrientation, true);
-    controlLight.setExternalMoveVector(0, 0, false);
-    return true;
-  }
-
-  function disableGyroControl() {
-    gyroControl.enabled = false;
-    gyroControl.baseBeta = null;
-    gyroControl.baseGamma = null;
-    window.removeEventListener('deviceorientation', handleGyroOrientation, true);
+  function setTouchControlsActive(active) {
+    touchControlsRequested = !!active;
+    if (touchControls) touchControls.setActive(touchControlsRequested && lightControlled);
     if (controlLight) {
       controlLight.setExternalMoveVector(0, 0, false);
     }
@@ -242,24 +180,35 @@ async function boot() {
     onControlModeChange(controlled) {
       lightControlled = controlled;
       hud.setControlActive(controlled);
+      if (touchControls) touchControls.setActive(touchControlsRequested && controlled);
       if (controlled) {
         interactionAudio.playInteraction('control');
         startSphereRun();
       } else {
-        disableGyroControl();
+        setTouchControlsActive(false);
         resetSphereRun();
       }
     },
   });
+  touchControls = mountTouchControls({
+    onMove(x, z, active) {
+      if (!controlLight || !lightControlled || !touchControlsRequested) return;
+      controlLight.setExternalMoveVector(x, z, active);
+    },
+    onJump() {
+      if (!controlLight || !lightControlled || !touchControlsRequested) return;
+      interactionAudio.resume();
+      if (controlLight.jump()) interactionAudio.playInteraction('tap');
+    },
+  });
   hud.onControlToggle(() => {
     interactionAudio.resume();
+    const wantsTouchControls = !controlLight.isControlActive();
+    touchControlsRequested = wantsTouchControls;
     const active = controlLight.toggleControl();
     hud.setControlActive(active);
-    if (active) {
-      enableGyroControl();
-    } else {
-      disableGyroControl();
-    }
+    if (!active) touchControlsRequested = false;
+    if (touchControls) touchControls.setActive(active && touchControlsRequested);
   });
   const popup = createPopup();
 
@@ -683,17 +632,9 @@ async function boot() {
   let downXY = { x: 0, y: 0, type: 'mouse' };
   let lastTap = { tileId: null, t: 0 };
 
-  function isLightControlSafeTarget(targetEl) {
-    return !!targetEl?.closest?.('.p28-control-toggle, .p28-system-controls, .twk-panel, .twk-fab, .admin-btn, .popup, #route-overlay');
-  }
-
   window.addEventListener('pointerdown', (e) => {
     downXY = { x: e.clientX, y: e.clientY, type: e.pointerType || 'mouse' };
     setPointerFromEvent(e);
-    if (downXY.type === 'touch' && lightControlled && !isLightControlSafeTarget(e.target)) {
-      if (controlLight.jump()) interactionAudio.playInteraction('tap');
-      e.preventDefault();
-    }
   });
 
   window.addEventListener('pointerup', (e) => {
@@ -701,7 +642,6 @@ async function boot() {
     const dy = Math.abs(e.clientY - downXY.y);
     if (dx > TAP_THRESHOLD_PX || dy > TAP_THRESHOLD_PX) return;   // drag, no tap
     setPointerFromEvent(e);
-    if (downXY.type === 'touch' && lightControlled && !isLightControlSafeTarget(e.target)) return;
     raycaster.setFromCamera(pointer, sceneCtx.camera);
     const hits = raycaster.intersectObjects(sceneCtx.tiles, false);
     const tile = hits.length ? hits[0].object : null;
