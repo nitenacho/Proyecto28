@@ -1,19 +1,21 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-05-31 (Etapa 20 Split-screen touch joystick - `v0.24.0`)
-> **Tag activo esperado tras cierre:** `v0.24.0`
+> **Ultima actualizacion:** 2026-05-31 (Etapa 21 Loader, logo CMS y freshness mobile - `v0.25.0`)
+> **Tag activo esperado tras cierre:** `v0.25.0`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
 
-Etapas 1-20 cerradas. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
+Etapas 1-21 cerradas. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
 sync Claude Design, hardening performance/a11y, mini-juego Pacman de luz y una
 capa de audio interactivo configurable desde Strapi. La luz ahora se puede
 tomar/soltar desde un boton minimo en HUD, acepta D-pad/flechas de gamepad y en
 mobile usa pantalla dividida tactil: joystick dinamico izquierdo y zona derecha
-de salto inmediato.
+de salto inmediato. El boot screen ahora muestra progreso sutil, mobile pide
+contenido Strapi fresco sin cache, y el logo del header puede venir desde una
+imagen `brandLogoImage` en Strapi.
 
 ---
 
@@ -21,6 +23,9 @@ de salto inmediato.
 
 Estado vigente esperado tras cierre:
 
+- `v0.25.0`: loader de progreso sutil, requests Strapi con `cache: no-store`
+  + `_p28ts`, URLs de media versionadas, `brandLogoImage` en SiteSetting y
+  pixel hints para logo/popup images.
 - `v0.24.0`: mobile reemplaza giroscopio + toque global por Split-Screen Touch
   solo al presionar el boton amarillo: joystick dinamico izquierdo y salto
   dedicado derecho, con la escena libre fuera de esa zona inferior.
@@ -60,7 +65,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- ultimo tag `v0.24.0`
+- ultimo tag `v0.25.0`
 - build Vite OK
 - build Strapi OK
 
@@ -70,13 +75,58 @@ Lectura obligatoria:
 2. `ADMIN-URLS.md` - URLs para administrar todos los servicios.
 3. `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
 4. `DEPLOY.md` - GitHub Pages, Strapi, OAuth, Pixel Streaming, releases.
-5. `CHANGELOG.md` - `[0.24.0]`.
-6. `PLAN-PROYECTO28-V2.md` - Etapa 20 cerrada.
-7. `cms/README.md` - SiteSetting incluye `gameLightColor` y `audio*`.
+5. `CHANGELOG.md` - `[0.25.0]`.
+6. `PLAN-PROYECTO28-V2.md` - Etapa 21 cerrada.
+7. `cms/README.md` - SiteSetting incluye `brandLogoImage`, `gameLightColor`
+   y `audio*`.
 
 ---
 
-## 2. Cambios v0.24.0
+## 2. Cambios v0.25.0
+
+### Loader + feedback de carga
+
+- `index.html` agrega porcentaje y barra fina en el boot screen.
+- `src/main.js` reporta hitos: conexión Strapi, contenido listo, escena,
+  controles y listo.
+- Si Strapi demora, el usuario ve avance progresivo en lugar de una pantalla
+  muda.
+
+### Mobile freshness Strapi
+
+- `src/data/cms.js` usa `fetch(..., { cache: 'no-store' })`.
+- Cada request publica agrega `_p28ts` para evitar cache viejo en mobile.
+- Las URLs de media agregan `?v=` con `hash`/`updatedAt` cuando Strapi lo
+  entrega.
+
+### Logo + pixelaje en Strapi
+
+- `SiteSetting` incorpora `brandLogoImage` para cambiar el logo/icono del
+  header desde Strapi.
+- Recomendacion logo: PNG/WebP transparente `512 x 512 px`, zona segura central
+  80%, menos de `300 KB`.
+- `Project.image` y `Project.popupImage` incluyen descripciones con
+  recomendacion `1600 x 900 px` (`16:9`), minimo `1200 x 675 px`.
+- El popup prioriza `popupImage` y rellena el marco `16:9` con
+  `object-fit: cover`.
+
+### Archivos tocados
+
+- `index.html`
+- `src/data/cms.js`
+- `src/data/fallback.js`
+- `src/main.js`
+- `src/ui/popup.js`
+- `src/styles/app.css`
+- `src/styles/three-host.css`
+- `cms/src/api/site-setting/content-types/site-setting/schema.json`
+- `cms/src/api/project/content-types/project/schema.json`
+- `README.md`
+- `cms/README.md`
+- `CHANGELOG.md`
+- `PLAN-PROYECTO28-V2.md`
+
+## 3. Cambios v0.24.0
 
 ### Split-screen touch joystick
 
@@ -109,7 +159,7 @@ Lectura obligatoria:
 
 ---
 
-## 3. Cambios v0.23.0
+## 4. Cambios v0.23.0
 
 ### Control discoverable
 
@@ -154,7 +204,7 @@ Lectura obligatoria:
 
 ---
 
-## 4. Cambios v0.22.0
+## 5. Cambios v0.22.0
 
 ### Mobile parity visual
 
@@ -226,45 +276,44 @@ Archivos tocados:
 
 ---
 
-## 5. Validacion realizada antes del cierre
+## 6. Validacion realizada antes del cierre
 
-### Local
+### Local v0.25.0
 
 ```powershell
+npm run build
+cd cms
 npm run build
 ```
 
 Resultado:
 
 - Frontend OK. Warning existente: chunk `three` >500 kB.
-- No hubo cambios en `cms/**`; Strapi no requiere rebuild para esta etapa.
+- Strapi admin build OK. Warning heredado: `DEP0187 fs.existsSync`.
 
 Servidor local:
 
-- `http://127.0.0.1:5173/` responde `HTTP 200`.
-- Dev server Vite levantado desde:
+- `http://127.0.0.1:5174/` responde `HTTP 200` con `VITE_CMS_URL` real.
+- Dev server Vite QA levantado desde:
   `C:/Users/incon/Downloads/EscritorioNobita/Proyectos_Claude/Claude_P28/Proyecto28`.
-- Bundle local `dist/assets/index-gCm6b1gG.js` contiene:
-  - `p28-touch-controls`
-  - `p28-touch-zone-left`
-  - `p28-joystick`
-  - `p28-touch-jump-hint`
-  - `setExternalMoveVector`
-- Bundle local no contiene:
-  - `DeviceOrientationEvent`
-  - `isLightControlSafeTarget`
 
 Chrome CDP smoke:
 
 - Mobile `390x844`:
-  - boton amarillo cambia `aria-pressed:false -> true`;
-  - `.p28-touch-controls` queda activo;
-  - joystick se ancla al primer toque en la mitad izquierda;
-  - nub responde a vector `34,-22`;
-  - zona derecha dispara pulso de salto inmediato;
-  - `body/html == 478`, sin overflow horizontal.
-- Screenshot headless mobile confirma joystick minimo abajo izquierda, indicador
-  de salto discreto abajo derecha y HUD intacto.
+  - carga desde `cms`;
+  - `/api/site-setting` y `/api/projects` incluyen `_p28ts`;
+  - `body/html == 390`, sin overflow horizontal;
+  - popup visible.
+- Desktop `1440x900`:
+  - carga desde `cms`;
+  - requests Strapi incluyen `_p28ts`;
+  - `body/html == 1440`, sin overflow horizontal;
+  - popup visible.
+- Popup mobile con imagen real `Invasión`:
+  - `object-fit: cover`;
+  - ratio `16 / 9`;
+  - URL de media versionada `?v=invasion1_d43ddbe31e`;
+  - sin overflow horizontal.
 
 ### Produccion/Strapi predeploy
 
@@ -311,7 +360,7 @@ Chrome CDP smoke:
 
 ---
 
-## 6. Operacion clave
+## 7. Operacion clave
 
 ### Admin / Tweaks / publicar
 
@@ -375,7 +424,7 @@ Admin -> Tweaks -> Streaming -> Preview visible OFF -> PUBLICAR CAMBIOS
 
 ---
 
-## 7. Deploy esperado
+## 8. Deploy esperado
 
 Flujo correcto para una etapa nueva:
 
@@ -398,7 +447,7 @@ Para `v0.24.0`:
 
 ---
 
-## 8. Riesgos y pendientes
+## 9. Riesgos y pendientes
 
 - Audio en navegadores: no puede sonar antes de la primera interaccion real por
   politicas de autoplay. Esto es esperado.
@@ -419,7 +468,7 @@ Para `v0.24.0`:
 
 ---
 
-## 9. Google Doc
+## 10. Google Doc
 
 Respaldo oficial:
 

@@ -1005,7 +1005,7 @@ body {
   }
   .popup-title { font-size: 22px; }
   .popup-desc { font-size: 13px; margin-bottom: 14px; }
-  .popup-image-wrap { aspect-ratio: 21 / 9; margin-bottom: 12px; }
+  .popup-image-wrap { aspect-ratio: 16 / 9; margin-bottom: 12px; }
   .popup-actions { gap: 8px; flex-wrap: nowrap; }
   .popup-actions .btn-primary { min-width: 0; }
   .btn-primary { padding: 12px 14px; font-size: 12px; }

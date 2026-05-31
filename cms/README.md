@@ -6,7 +6,7 @@ Headless CMS that owns the content shown in the frontend:
   - `slot` — fixed grid position (Rectangle 4–9)
   - `projectId`, `title`, `status`, `color` (cyan/copper)
   - `description`, `tags[]`
-  - `image` — image shown inside the popup
+  - `image` — general/fallback image, recommended `1600 x 900 px` (`16:9`)
   - `model3D` — `.glb` / `.gltf` floating above the cube on hover
   - `modelShape` — procedural fallback if no model3D is uploaded
   - `redirectURL` — link the "Explorar proyecto" button + cube click follow
@@ -14,18 +14,23 @@ Headless CMS that owns the content shown in the frontend:
     - `unrealStreamURL` — Pixel Streaming signaling URL per cube
     - `unrealLevelName` — UE Level/SubLevel when using shared instance
     - `unrealEnabled` — toggle streaming for this cube
-    - `popupImage` — separate image for the enhanced popup (Etapa 10)
+    - `popupImage` — separate image for the enhanced popup (recommended
+      `1600 x 900 px`, minimum `1200 x 675 px`)
     - `popupBody` — richtext markdown shown in the popup
     - `popupCTALabel` — text of the redirect button/area
     - `videoLoop` — optional looping video as alternative to UE stream
 - **Site Setting** (singleton) — defaults for the Tweaks panel
-  - logo, popup placement, tile style, camera tilt/yaw/drift, HUD toggles
+  - logo text, `brandLogoImage`, popup placement, tile style, camera
+    tilt/yaw/drift, HUD toggles
   - **v2 (Etapa 2) fields:**
     - `gameLightSpeed`, `gameLightJumpHeight`, `gameLightJumpCount`,
       `gameLightGravity`, `gameLightVelocityCurve`, `gameMouseFollowDelay`,
       `gameFallDuration` — tweaks del juego de plataformas (Etapas 4–6)
     - `gameLightColor` — color publicable de la luz controlable (`cyan`,
       `red`, `green`) usado por el mini-juego de recoleccion (Etapa 17)
+    - `brandLogoImage` — logo/icono del header desde Strapi. Recomendado:
+      PNG o WebP transparente, `512 x 512 px`, zona segura central 80%,
+      menos de `300 KB`
     - `audioEnabled` — activa/desactiva sonidos WebAudio interactivos
     - `audioPreset` — timbre sintetizado (`midi`, `glass`, `soft`)
     - `audioMasterVolume` — volumen master 0..1
@@ -147,11 +152,15 @@ Once Strapi Cloud is up, all texts / images / 3D models / popup defaults are
 editable from the admin panel (`/admin`):
 
 - **Projects** → edit description / tags / `redirectURL` / upload images and
-  `.glb` models per cube.
+  `.glb` models per cube. For full popup coverage use `popupImage` at
+  `1600 x 900 px` (`16:9`); the frontend fills the frame with
+  `object-fit: cover`.
 - **Site Setting** → change the default Tweaks state shown when a visitor
-  first loads the page.
+  first loads the page, and upload `brandLogoImage` for the header mark.
 
-Changes show up on the frontend on the next page load (no cache layer yet).
+Changes show up on the frontend on the next page load. Since `v0.25.0`, the
+frontend requests Strapi JSON with `cache: no-store` plus a `_p28ts` cache
+buster so mobile browsers do not keep stale CMS content.
 
 ---
 

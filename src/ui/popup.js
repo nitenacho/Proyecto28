@@ -33,7 +33,8 @@ export function createPopup() {
     statusEl.textContent   = project.status;
     subtitleEl.textContent = `▮ Proyecto · ${project.id.replace('.', ' · ')}`;
 
-    if (project.imageURL) {
+    const popupImageURL = project.popupImageURL || project.imageURL;
+    if (popupImageURL) {
       img.loading = 'lazy';
       img.decoding = 'async';
       img.fetchPriority = 'low';
@@ -47,7 +48,7 @@ export function createPopup() {
         imgWrap.hidden = true;
         img.removeAttribute('src');
       };
-      img.src = project.imageURL;
+      img.src = popupImageURL;
     } else {
       img.onload = img.onerror = null;
       img.removeAttribute('src');

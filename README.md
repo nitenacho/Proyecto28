@@ -184,10 +184,10 @@ desde `/admin`:
 
 - **Proyectos** (1 por cubo) — textos, imagen del popup, modelo `.glb`
   flotante, URL de redirección por color.
-- **Ajustes del sitio** — logo (P28 / NEIT / EST), placement por defecto del
-  popup, estilo de tiles, inclinación / rotación / drift de cámara, toggles
-  del HUD (grilla, scanlines, viewfinder), juego, Audio, Admin y Pixel
-  Streaming.
+- **Ajustes del sitio** — logo textual (P28 / NEIT / EST), imagen de logo
+  `brandLogoImage`, placement por defecto del popup, estilo de tiles,
+  inclinación / rotación / drift de cámara, toggles del HUD (grilla,
+  scanlines, viewfinder), juego, Audio, Admin y Pixel Streaming.
 - **Admin whitelist** — correos autorizados para abrir Tweaks y publicar
   cambios (`owner` / `editor`). Esta colección queda editable desde Strapi
   Admin y privada para el público.
@@ -197,6 +197,15 @@ El usuario final puede sobreescribir todos los ajustes en tiempo real desde
 el panel "Tweaks". Los admins autorizados por Google + whitelist pueden usar
 `PUBLICAR CAMBIOS` para persistir el snapshot en Strapi `SiteSetting`; si no
 publican, los cambios viven sólo en su sesión.
+
+Recomendaciones de media visibles en Strapi:
+
+- Logo de marca: PNG o WebP transparente, `512 x 512 px`, zona segura central
+  de 80%, menos de `300 KB`.
+- Imagen principal de popup: `1600 x 900 px` (`16:9`), minimo
+  `1200 x 675 px`, JPG/WebP para foto o PNG si requiere transparencia.
+- Mantener textos/logos importantes lejos de los bordes: el frontend usa
+  `object-fit: cover` para llenar todo el marco del popup.
 
 ## Agregar un proyecto nuevo
 
@@ -283,3 +292,4 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 18 — Mobile parity + audio interactivo | ✅ Cerrado — calidad desktop en mobile, fullscreen/mute y audio Strapi | `v0.22.0` |
 | 19 — Control discoverable + gyro/gamepad | ✅ Cerrado — boton HUD, D-pad y giroscopio mobile | `v0.23.0` |
 | 20 — Split-screen touch joystick | ✅ Cerrado — joystick dinamico izquierdo y salto derecho mobile | `v0.24.0` |
+| 21 — Loader + logo CMS + freshness mobile | ✅ Cerrado — progreso sutil, Strapi no-store/cache-buster, logo media y pixel hints | `v0.25.0` |

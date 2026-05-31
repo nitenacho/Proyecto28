@@ -36,6 +36,7 @@ const CMS_URL = (import.meta.env.VITE_CMS_URL || '').replace(/\/$/, '');
  * @typedef {Object} SiteContent
  * @property {Object} defaults                  Defaults v1 del Tweaks panel
  * @property {string} defaults.logo
+ * @property {string|null} defaults.logoImageURL
  * @property {'side'|'cursor'|'corner'} defaults.popupPlacement
  * @property {string} defaults.tileStyle
  * @property {number} defaults.tilt
@@ -77,7 +78,12 @@ const CMS_URL = (import.meta.env.VITE_CMS_URL || '').replace(/\/$/, '');
 
 async function fetchJSON(path) {
   if (!CMS_URL) throw new Error('VITE_CMS_URL not set');
-  const res = await fetch(`${CMS_URL}${path}`);
+  const url = new URL(`${CMS_URL}${path}`);
+  url.searchParams.set('_p28ts', String(Date.now()));
+  const res = await fetch(url.toString(), {
+    cache: 'no-store',
+    headers: { accept: 'application/json' },
+  });
   if (!res.ok) throw new Error(`CMS ${path}: ${res.status}`);
   return res.json();
 }
@@ -85,9 +91,14 @@ async function fetchJSON(path) {
 function mediaURL(media) {
   if (!media) return null;
   // Strapi v5: media has { url } (relative or absolute) at top level when populated
-  const url = media.url || media.data?.attributes?.url || null;
+  const asset = media.data?.attributes || media;
+  const url = asset.url || null;
   if (!url) return null;
-  return url.startsWith('http') ? url : `${CMS_URL}${url}`;
+  const resolved = url.startsWith('http') ? url : `${CMS_URL}${url}`;
+  const version = asset.hash || asset.updatedAt || asset.id || asset.documentId;
+  if (!version) return resolved;
+  const sep = resolved.includes('?') ? '&' : '?';
+  return `${resolved}${sep}v=${encodeURIComponent(String(version))}`;
 }
 
 /** @returns {Project} */
@@ -129,6 +140,7 @@ function normalizeSite(s) {
   return {
     defaults: {
       logo: a.defaultLogo || fb.defaults.logo,
+      logoImageURL: mediaURL(a.brandLogoImage) || null,
       popupPlacement: a.defaultPopupPlacement || fb.defaults.popupPlacement,
       tileStyle: a.defaultTileStyle || fb.defaults.tileStyle,
       tilt: num(a.cameraTilt, fb.defaults.tilt),

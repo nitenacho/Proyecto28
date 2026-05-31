@@ -17,6 +17,13 @@
       "default": "PROYECTO 28",
       "enum": ["PROYECTO 28", "NEIT.", "ESTUDIO 028"]
     },
+    "brandLogoImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"],
+      "description": "Logo/ícono visible junto al nombre en el header. Recomendado: PNG o WebP transparente, 512 x 512 px, zona segura central 80%, menos de 300 KB."
+    },
     "defaultPopupPlacement": {
       "type": "enumeration",
       "default": "cursor",

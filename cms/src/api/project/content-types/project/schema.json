@@ -77,7 +77,7 @@
       "multiple": false,
       "required": false,
       "allowedTypes": ["images"],
-      "description": "Imagen minimalista mostrada dentro del popup (16:9 idealmente)."
+      "description": "Imagen general/fallback del proyecto. Recomendado: 1600 x 900 px (16:9), JPG/WebP para foto o PNG si requiere transparencia, menos de 1 MB."
     },
     "model3D": {
       "type": "media",
@@ -117,7 +117,7 @@
       "multiple": false,
       "required": false,
       "allowedTypes": ["images"],
-      "description": "Imagen del popup mejorado (Etapa 10). Separada de 'image' que sigue siendo la imagen general del cubo."
+      "description": "Imagen principal del popup. Recomendado: 1600 x 900 px (16:9), mínimo 1200 x 675 px. Mantener textos/logos importantes lejos de los bordes para llenar todo el espacio sin cortes visibles."
     },
     "popupBody": {
       "type": "richtext",

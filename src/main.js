@@ -29,10 +29,26 @@ const canvas = document.getElementById('c');
 const bootEl = document.getElementById('boot');
 const coordModule = document.getElementById('coord-module');
 const brandNameEl = document.getElementById('brand-name');
+const brandMarkEl = document.querySelector('.brand-mark');
 const BEST_TIME_KEY = 'p28-sphere-best-time-ms-v1';
 
 function normalizeStreamingMode(mode) {
   return mode === 'per-cube' || mode === 'dedicated' ? 'per-cube' : 'shared';
+}
+
+function setBootProgress(value, label) {
+  window.p28SetBootProgress?.(value, label);
+}
+
+function applyBrandLogo(logoImageURL) {
+  if (!brandMarkEl) return;
+  if (logoImageURL) {
+    brandMarkEl.style.backgroundImage = `url(${JSON.stringify(logoImageURL)})`;
+    brandMarkEl.classList.add('brand-mark-custom');
+    return;
+  }
+  brandMarkEl.style.backgroundImage = '';
+  brandMarkEl.classList.remove('brand-mark-custom');
 }
 
 function applyHudVisibility({ showGrid, showScanlines, showViewfinder }) {
@@ -59,12 +75,18 @@ function writeBestSphereTime(ms) {
 }
 
 async function boot() {
+  setBootProgress(12, 'Conectando Strapi');
   const { site, projects, grid, source } = await loadContent();
   console.log(`[p28] content source: ${source}`);
+  setBootProgress(source === 'cms' ? 34 : 28, source === 'cms' ? 'Contenido Strapi listo' : 'Fallback local activo');
 
+  setBootProgress(46, 'Preparando escena');
   const sceneCtx = await createScene({ canvas, grid, projects });
   entranceTimeline(sceneCtx.tiles);
+  setBootProgress(66, 'Activando controles');
   const defaults = site.defaults;
+  const { logoImageURL, ...tweakableDefaults } = defaults;
+  applyBrandLogo(logoImageURL);
   const hud = mountHud();
   const interactionAudio = createInteractionAudio(site.audio);
   mountSystemControls({ audio: interactionAudio });
@@ -221,7 +243,7 @@ async function boot() {
   // de site.game / site.streaming / site.admin que el usuario puede ajustar
   // en vivo (Etapa 6 polish + Etapa 7 cierre).
   const tweakDefaults = {
-    ...defaults,
+    ...tweakableDefaults,
     gameLightSpeed: site.game.lightSpeed,
     gameJumpHeight: site.game.jumpHeight,
     gameJumpCount: site.game.jumpCount,
@@ -264,7 +286,7 @@ async function boot() {
     ],
     onChange(state) {
       // Brand
-      brandNameEl.textContent = state.logo;
+      if (brandNameEl) brandNameEl.textContent = state.logo;
       // Popup placement
       popup.setPlacement(state.popupPlacement);
       // HUD toggles
@@ -810,6 +832,7 @@ async function boot() {
   requestAnimationFrame(animate);
 
   // Hide boot splash
+  setBootProgress(100, 'Listo');
   setTimeout(() => {
     bootEl.classList.add('gone');
     setTimeout(() => bootEl.remove(), 700);

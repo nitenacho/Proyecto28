@@ -88,6 +88,10 @@ pwsh -File cms/scripts/unwrap-onedrive.ps1
 5. Presionar `PUBLICAR CAMBIOS`.
 6. Recargar la pagina y confirmar que `/api/site-setting` refleja el cambio.
 
+Desde `v0.25.0`, el frontend pide `/api/site-setting` y `/api/projects` con
+`cache: no-store` y `_p28ts`; si mobile no ve cambios, primero hacer hard
+refresh y confirmar en DevTools que las requests incluyen `_p28ts`.
+
 Si aparece un error de token Google, cerrar sesion con `window.p28SignOut()` en
 DevTools y volver a entrar por `Admin`. Desde `v0.19.0` el frontend reintenta
 una vez con token fresco.
@@ -107,6 +111,10 @@ una vez con token fresco.
    - `title`, `status`, `description`, `tags`.
    - `redirectURL`.
    - `popupImage` o `image`.
+     Recomendado popup: `1600 x 900 px` (`16:9`), minimo `1200 x 675 px`,
+     JPG/WebP para foto o PNG si requiere transparencia. Mantener texto/logos
+     lejos de bordes porque el frontend rellena el marco con
+     `object-fit: cover`.
    - `popupBody` y `popupCTALabel`.
    - `model3D` si hay `.glb`/`.gltf`; si no, usar `modelShape`.
    - `unrealEnabled`, `unrealStreamURL`, `unrealLevelName` si el proyecto usa

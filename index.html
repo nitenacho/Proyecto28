@@ -47,8 +47,54 @@
 
   <div id="boot" role="status" aria-live="polite">
     <div class="ring"></div>
-    <div>Cargando módulo · 028 · Holograma</div>
+    <div class="boot-copy">
+      <div class="boot-label" id="boot-label">Cargando módulo · 028 · Holograma</div>
+      <div class="boot-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="8">
+        <span id="boot-progress-bar"></span>
+      </div>
+      <div class="boot-percent" id="boot-percent">8%</div>
+    </div>
   </div>
+  <script>
+    (function () {
+      var progress = 8;
+      var done = false;
+      var timer = null;
+
+      function clamp(value) {
+        return Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+      }
+
+      function render(value, label) {
+        progress = Math.max(progress, clamp(value));
+        var bar = document.getElementById('boot-progress-bar');
+        var meter = document.querySelector('#boot .boot-progress');
+        var percent = document.getElementById('boot-percent');
+        var labelEl = document.getElementById('boot-label');
+        if (bar) bar.style.transform = 'scaleX(' + (progress / 100) + ')';
+        if (meter) meter.setAttribute('aria-valuenow', String(progress));
+        if (percent) percent.textContent = progress + '%';
+        if (label && labelEl) labelEl.textContent = label;
+        if (progress >= 100) done = true;
+      }
+
+      window.p28SetBootProgress = render;
+
+      function tick() {
+        if (done) return;
+        var cap = 72;
+        var step = progress < 36 ? 4 : 1;
+        render(Math.min(cap, progress + step));
+        timer = window.setTimeout(tick, progress < 36 ? 260 : 420);
+      }
+
+      render(progress);
+      timer = window.setTimeout(tick, 280);
+      window.addEventListener('pagehide', function () {
+        if (timer) window.clearTimeout(timer);
+      }, { once: true });
+    })();
+  </script>
 
   <div class="scene-bg-grid"></div>
   <div class="scene-bg-scanlines" style="display:none"></div>

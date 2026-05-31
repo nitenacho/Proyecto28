@@ -1,10 +1,10 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-05-31 — `v0.24.0` Etapa 20 Split-screen touch joystick
+> **Última actualización operativa:** 2026-05-31 — `v0.25.0` Etapa 21 Loader, logo CMS y freshness mobile
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-20 cerradas. `v0.24.0` reemplaza el control mobile por pantalla dividida tactil: joystick dinamico izquierdo y salto dedicado derecho, habilitados solo por el boton amarillo del HUD.
+> **Status:** En ejecución — etapas 1-21 cerradas. `v0.25.0` agrega feedback sutil de carga, evita contenido Strapi stale en mobile y permite cambiar el logo del header desde una imagen en Strapi.
 
 ## Estado del plan al 2026-05-31 America/Santiago
 
@@ -38,6 +38,7 @@
 | 18 — Mobile parity + audio interactivo | ✅ Cerrada | `v0.22.0` | — |
 | 19 — Control discoverable + gyro/gamepad | ✅ Cerrada | `v0.23.0` | `f386de6` |
 | 20 — Split-screen touch joystick | ✅ Cerrada | `v0.24.0` | `b9aaeb5` |
+| 21 — Loader + logo CMS + freshness mobile | ✅ Cerrada | `v0.25.0` | — |
 
 ## Decisiones tomadas durante la ejecución (resoluciones al §1)
 
@@ -60,7 +61,8 @@
   HUD para tomar/soltar control de la luz, D-pad/flechas de gamepad, giroscopio
   mobile y toque tactil para saltar. Etapa 20 reemplaza giroscopio/touch global
   por split-screen touch: joystick dinamico izquierdo y salto dedicado derecho,
-  sin dependencia externa.
+  sin dependencia externa. Etapa 21 agrega loader de progreso, freshness de
+  Strapi en mobile y logo del header configurable con `brandLogoImage`.
 - **§1.6 Admin Strapi:** ✅ Admin operativo. Fix aplicado: `Project` no usa
   Draft & Publish para evitar el choque entre el campo editable `status` y el
   `status` interno de Strapi v5.

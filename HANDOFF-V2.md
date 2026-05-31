@@ -1,8 +1,8 @@
 # HANDOFF V2 - Proyecto 28
 
-> Ultima actualizacion: 2026-05-31 (Etapa 20 Split-screen touch joystick - `v0.24.0`)
+> Ultima actualizacion: 2026-05-31 (Etapa 21 Loader, logo CMS y freshness mobile - `v0.25.0`)
 > Branch esperado: `main`
-> Tag activo esperado tras cierre: `v0.24.0`
+> Tag activo esperado tras cierre: `v0.25.0`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
 
@@ -13,7 +13,7 @@ operacion detallada, leer `RUNBOOK.md`.
 
 ## 1. Estado ejecutivo
 
-Etapas 1-20 cerradas. Proyecto28 queda como web 3D interactiva con:
+Etapas 1-21 cerradas. Proyecto28 queda como web 3D interactiva con:
 
 - Vite + Three.js + GSAP.
 - Strapi Cloud como CMS.
@@ -38,13 +38,20 @@ Etapas 1-20 cerradas. Proyecto28 queda como web 3D interactiva con:
   izquierdo anclado al primer toque y zona derecha dedicada a salto inmediato.
 - El giroscopio y el salto tactil global fueron retirados para liberar la
   escena mobile y mantener la experiencia igual de completa que desktop.
+- Boot screen con progreso sutil mientras Strapi y la escena terminan de
+  cargar.
+- Strapi freshness en mobile: requests publicas con `cache: no-store` y
+  `_p28ts`, mas URLs de media versionadas.
+- Logo del header configurable desde Strapi `SiteSetting.brandLogoImage`;
+  `Project.popupImage` es la imagen prioritaria del popup.
 
 Ultimo codigo funcional esperado:
 
-- `v0.24.0` - Split-screen touch joystick.
+- `v0.25.0` - Loader, logo CMS y freshness mobile.
 
 Tags/commits recientes:
 
+- `v0.25.0` - loader + logo CMS + cache-buster Strapi mobile.
 - `v0.24.0` - `b9aaeb5` split-screen touch joystick.
 - `v0.23.0` - `f386de6` control discoverable + gyro/gamepad.
 - `v0.22.0` - `936717b` mobile parity + audio interactivo.
@@ -76,7 +83,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- tag `v0.24.0`
+- tag `v0.25.0`
 - build Vite OK
 - build Strapi OK
 
@@ -106,6 +113,19 @@ Esperado:
 - inconcha owner permitido
 - yk8arts editor permitido
 
+Validado local `v0.25.0`:
+
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- `cd cms; npm run build` OK. Warning heredado de Strapi/Node:
+  `DEP0187 fs.existsSync`.
+- Chrome headless con `VITE_CMS_URL` real:
+  - mobile `390x844`: `body/html == 390`, carga desde `cms`,
+    `/api/site-setting` y `/api/projects` con `_p28ts`, popup visible.
+  - desktop `1440x900`: `body/html == 1440`, carga desde `cms`,
+    requests Strapi con `_p28ts`, popup visible.
+  - popup mobile con imagen real: `object-fit: cover`, ratio `16 / 9`, URL
+    versionada `?v=...`.
+
 Validado postdeploy `v0.24.0`:
 
 - GitHub Pages run `26718658099` OK para `b9aaeb5`.
@@ -129,7 +149,34 @@ Validado postdeploy `v0.24.0`:
 
 ---
 
-## 4. Cambios v0.24.0
+## 4. Cambios v0.25.0
+
+Archivos principales:
+
+- `index.html` y `src/styles/three-host.css`: boot screen con barra fina,
+  porcentaje y estados de progreso.
+- `src/data/cms.js`: `fetch` a Strapi con `cache: no-store`, `_p28ts` y
+  versionado de media por `hash`/`updatedAt`.
+- `src/main.js`: aplica `brandLogoImage` al `.brand-mark` sin persistirlo en
+  Tweaks/localStorage.
+- `src/ui/popup.js`: usa `popupImageURL || imageURL`.
+- `cms/src/api/site-setting/content-types/site-setting/schema.json`: nuevo
+  media field `brandLogoImage`.
+- `cms/src/api/project/content-types/project/schema.json`: descripciones de
+  pixelaje para imagenes de proyecto/popup.
+
+Comportamiento importante:
+
+- Si Strapi demora, el usuario ve progreso continuo y estados discretos en vez
+  de quedar sin feedback.
+- Mobile ya no depende del cache HTTP normal para contenido CMS: cada carga
+  pide JSON fresco y evita respuestas viejas.
+- El logo del header puede cambiarse desde Strapi subiendo una imagen
+  recomendada `512 x 512 px`, PNG/WebP transparente.
+- Para popups, subir `1600 x 900 px` (`16:9`, minimo `1200 x 675 px`) permite
+  usar todo el marco sin bandas; el frontend rellena con `object-fit: cover`.
+
+## 5. Cambios v0.24.0
 
 Archivos principales:
 
@@ -154,7 +201,7 @@ Comportamiento importante:
 
 ---
 
-## 5. Cambios v0.23.0
+## 6. Cambios v0.23.0
 
 Archivos principales:
 
@@ -179,7 +226,7 @@ Comportamiento importante:
 
 ---
 
-## 6. Archivos fuente de verdad
+## 7. Archivos fuente de verdad
 
 - `README.md` - vision general, dev local, contenido, etapas.
 - `ADMIN-URLS.md` - URLs para administrar sitio, CMS, GitHub, Google, DNS y
@@ -195,7 +242,7 @@ Comportamiento importante:
 
 ---
 
-## 7. Operacion clave
+## 8. Operacion clave
 
 ### Admin y publish
 
@@ -233,7 +280,7 @@ usa Unreal conectar `unrealStreamURL` + `unrealLevelName`. Ver `RUNBOOK.md`.
 
 ---
 
-## 8. Pendientes conocidos
+## 9. Pendientes conocidos
 
 - Audio: requiere primera interaccion real antes de sonar.
 - Mobile split-touch: la capa aparece solo con el boton amarillo activo; si se
@@ -251,7 +298,7 @@ usa Unreal conectar `unrealStreamURL` + `unrealLevelName`. Ver `RUNBOOK.md`.
 
 ---
 
-## 9. Google Doc
+## 10. Google Doc
 
 El respaldo final debe quedar en el Google Doc oficial, sin usar el
 Handoff:Kaiyi:

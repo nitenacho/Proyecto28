@@ -10,6 +10,36 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.25.0] — 2026-05-31 — Etapa 21: Loader, logo CMS y freshness mobile
+
+### Added
+- Indicador sutil de progreso en el boot screen: porcentaje, barra fina y
+  estados de carga mientras el sitio conecta con Strapi y prepara la escena.
+- Campo `brandLogoImage` en Strapi `SiteSetting` para cambiar el logo/icono
+  del header desde una imagen subida al CMS.
+- Descripciones de pixelaje en Strapi para `brandLogoImage`, `Project.image`
+  y `Project.popupImage`.
+
+### Changed
+- Las requests publicas a Strapi ahora usan `cache: no-store` y agregan
+  `_p28ts` como cache-buster para evitar contenido CMS viejo en mobile.
+- Las URLs de media agregan versionado por `hash`/`updatedAt` cuando Strapi lo
+  entrega, reduciendo imagenes stale en navegadores moviles.
+- El popup prioriza `popupImage` sobre `image` y las imagenes llenan el marco
+  `16:9` con `object-fit: cover` en desktop y mobile.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- `cd cms; npm run build` OK. Warning heredado de Strapi/Node:
+  `DEP0187 fs.existsSync`.
+- Chrome headless local con `VITE_CMS_URL` real:
+  - mobile `390x844`: carga desde `cms`, requests a `/api/site-setting` y
+    `/api/projects` incluyen `_p28ts`, `body/html == 390`, popup visible.
+  - desktop `1440x900`: carga desde `cms`, requests incluyen `_p28ts`,
+    `body/html == 1440`, popup visible.
+  - popup mobile con imagen real `Invasión`: `object-fit: cover`, ratio
+    `16 / 9`, URL de media versionada con `?v=...`, sin overflow horizontal.
+
 ## [0.24.0] — 2026-05-31 — Etapa 20: Split-screen touch joystick
 
 ### Added
@@ -1415,7 +1445,8 @@ Feedback del owner sobre `v0.14.0` en iOS Safari real:
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.24.0...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.25.0...HEAD
+[0.25.0]: https://github.com/nitenacho/Proyecto28/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/nitenacho/Proyecto28/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/nitenacho/Proyecto28/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/nitenacho/Proyecto28/compare/v0.21.0...v0.22.0

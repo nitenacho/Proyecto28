@@ -13,6 +13,7 @@ export const FALLBACK_SITE = {
   ],
   defaults: {
     logo: 'PROYECTO 28',
+    logoImageURL: null,
     popupPlacement: 'cursor',
     tileStyle: 'cyan-copper',
     tilt: 49,                 // v0.9.2: ajuste fino del owner
