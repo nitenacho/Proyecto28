@@ -198,10 +198,12 @@ el panel "Tweaks". Los admins autorizados por Google + whitelist pueden usar
 `PUBLICAR CAMBIOS` para persistir el snapshot en Strapi `SiteSetting`; si no
 publican, los cambios viven sólo en su sesión.
 
-Desde `v0.25.1`, produccion tambien define la URL publica del CMS en runtime y
-la capa de datos reintenta requests Strapi con timeout/cache-buster. Para QA
-mobile se puede leer `document.documentElement.dataset.p28ContentSource` y
-confirmar que vale `cms`.
+Desde `v0.25.4`, produccion registra un freshness worker (`/p28-sw.js`) para
+que la URL limpia `proyecto28.com` pida HTML fresco con cache-buster interno,
+aun cuando GitHub Pages/Cloudflare entreguen `Cache-Control: max-age=600`. La
+capa de datos mantiene Strapi fuera del worker y reintenta requests con
+timeout/cache-buster. Para QA mobile se puede leer
+`document.documentElement.dataset.p28ContentSource` y confirmar que vale `cms`.
 
 Recomendaciones de media visibles en Strapi:
 
@@ -299,3 +301,4 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 20 — Split-screen touch joystick | ✅ Cerrado — joystick dinamico izquierdo y salto derecho mobile | `v0.24.0` |
 | 21 — Loader + logo CMS + freshness mobile | ✅ Cerrado — progreso sutil, Strapi no-store/cache-buster, logo media y pixel hints | `v0.25.0` |
 | 21 hotfix — Loader 1/28 + CMS mobile hardening | ✅ Cerrado — mensaje `Cargando proyecto N/28`, runtime CMS fallback y QA `Random: Museo MAC` | `v0.25.1` |
+| 21 hotfix 2 — Fresh navigation + popup images mobile | ✅ Cerrado — Service Worker network-first, Strapi fuera del worker e imagenes popup estables | `v0.25.4` |

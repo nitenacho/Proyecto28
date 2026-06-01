@@ -1,10 +1,10 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-06-01 — `v0.25.1` Patch loader 1/28 y CMS mobile hardening
+> **Última actualización operativa:** 2026-06-01 — `v0.25.4` Patch navegación fresca y popup images mobile
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-21 cerradas. `v0.25.1` refuerza mobile para leer CMS vivo, agrega fallback runtime de URL Strapi y cambia el loader a `Cargando proyecto N/28`.
+> **Status:** En ejecución — etapas 1-21 cerradas. `v0.25.4` agrega Service Worker network-first para reducir cache viejo en `proyecto28.com`, mantiene Strapi fuera del worker y estabiliza imagenes de popup en mobile.
 
 ## Estado del plan al 2026-05-31 America/Santiago
 
@@ -40,6 +40,7 @@
 | 20 — Split-screen touch joystick | ✅ Cerrada | `v0.24.0` | `b9aaeb5` |
 | 21 — Loader + logo CMS + freshness mobile | ✅ Cerrada | `v0.25.0` | — |
 | 21 hotfix — Loader 1/28 + CMS mobile hardening | ✅ Cerrada | `v0.25.1` | `0d0bbac` |
+| 21 hotfix 2 — Fresh navigation + popup images mobile | ✅ Cerrada | `v0.25.4` | `05b0d31` |
 
 ## Decisiones tomadas durante la ejecución (resoluciones al §1)
 
@@ -65,7 +66,10 @@
   sin dependencia externa. Etapa 21 agrega loader de progreso, freshness de
   Strapi en mobile y logo del header configurable con `brandLogoImage`.
   `v0.25.1` refuerza esa ruta con URL CMS runtime, reintentos/timeout y QA
-  explicita de `Rectangle 7 -> Random: Museo MAC` en mobile.
+  explicita de `Rectangle 7 -> Random: Museo MAC` en mobile. `v0.25.4`
+  agrega worker de navegacion fresca para la URL limpia `proyecto28.com`,
+  mantiene Strapi fuera del worker y corrige imagenes de popup que parpadeaban
+  y desaparecian en navegadores mobile.
 - **§1.6 Admin Strapi:** ✅ Admin operativo. Fix aplicado: `Project` no usa
   Draft & Publish para evitar el choque entre el campo editable `status` y el
   `status` interno de Strapi v5.

@@ -88,17 +88,24 @@ pwsh -File cms/scripts/unwrap-onedrive.ps1
 5. Presionar `PUBLICAR CAMBIOS`.
 6. Recargar la pagina y confirmar que `/api/site-setting` refleja el cambio.
 
-Desde `v0.25.1`, el frontend define la URL publica del CMS tambien en runtime
-(`window.__P28_CMS_URL__`) y pide `/api/site-setting` y `/api/projects` con
-`cache: no-store`, `_p28ts`, timeout y reintentos. Si mobile no ve cambios,
-confirmar en DevTools:
+Desde `v0.25.4`, `proyecto28.com` registra `public/p28-sw.js` como freshness
+worker: las navegaciones de la URL limpia son network-first y el worker pide el
+HTML con cache-buster interno para reducir el delay del `max-age=600` de GitHub
+Pages/Cloudflare. El worker no intercepta Strapi; la capa CMS define la URL
+publica tambien en runtime (`window.__P28_CMS_URL__`) y pide
+`/api/site-setting` y `/api/projects` con `cache: no-store`, `_p28ts`, timeout
+y reintentos. Si mobile no ve cambios, confirmar en DevTools:
 
 ```js
 document.documentElement.dataset.p28ContentSource
+navigator.serviceWorker?.controller?.scriptURL
 ```
 
 El valor sano es `cms`; si aparece `fallback`, revisar consola y confirmar que
-las requests Strapi incluyen `_p28ts`.
+las requests Strapi incluyen `_p28ts`. Si la URL normal parece vieja pero una
+URL con query funciona, abrir una vez `https://proyecto28.com/?mobile-cms-test=...`
+para instalar el worker fresco; las siguientes navegaciones limpias deberian ir
+network-first.
 
 Si aparece un error de token Google, cerrar sesion con `window.p28SignOut()` en
 DevTools y volver a entrar por `Admin`. Desde `v0.19.0` el frontend reintenta

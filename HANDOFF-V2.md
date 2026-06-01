@@ -1,8 +1,8 @@
 # HANDOFF V2 - Proyecto 28
 
-> Ultima actualizacion: 2026-06-01 (Patch loader 1/28 y CMS mobile hardening - `v0.25.1`)
+> Ultima actualizacion: 2026-06-01 (Patch fresh navigation + popup images mobile - `v0.25.4`)
 > Branch esperado: `main`
-> Tag activo esperado tras cierre: `v0.25.1`
+> Tag activo esperado tras cierre: `v0.25.4`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
 
@@ -13,7 +13,7 @@ operacion detallada, leer `RUNBOOK.md`.
 
 ## 1. Estado ejecutivo
 
-Etapas 1-21 cerradas y patch `v0.25.1` aplicado. Proyecto28 queda como web 3D interactiva con:
+Etapas 1-21 cerradas y patch `v0.25.4` aplicado. Proyecto28 queda como web 3D interactiva con:
 
 - Vite + Three.js + GSAP.
 - Strapi Cloud como CMS.
@@ -43,15 +43,21 @@ Etapas 1-21 cerradas y patch `v0.25.1` aplicado. Proyecto28 queda como web 3D in
 - Strapi freshness en mobile: requests publicas con `cache: no-store` y
   `_p28ts`, mas URLs de media versionadas, runtime CMS fallback y
   reintentos/timeout.
+- Freshness worker en `public/p28-sw.js` para que `proyecto28.com` pida HTML
+  fresco con cache-buster interno aun cuando GitHub Pages/Cloudflare entreguen
+  `max-age=600`. El worker no intercepta Strapi.
+- Popup images mobile estables: el popup mantiene imagenes cargadas al
+  reutilizar `img.src` en Safari/WhatsApp.
 - Logo del header configurable desde Strapi `SiteSetting.brandLogoImage`;
   `Project.popupImage` es la imagen prioritaria del popup.
 
 Ultimo codigo funcional esperado:
 
-- `v0.25.1` - Loader 1/28 y CMS mobile hardening.
+- `v0.25.4` - Fresh navigation + popup images mobile.
 
 Tags/commits recientes:
 
+- `v0.25.4` - Service Worker network-first + popup image persistence.
 - `v0.25.1` - loader `Cargando proyecto N/28` + runtime CMS fallback.
 - `v0.25.0` - loader + logo CMS + cache-buster Strapi mobile.
 - `v0.24.0` - `b9aaeb5` split-screen touch joystick.
@@ -85,7 +91,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- tag `v0.25.1`
+- tag `v0.25.4`
 - build Vite OK
 - build Strapi OK
 
@@ -149,6 +155,21 @@ Validado postdeploy `v0.25.1`:
   - `/api/auth/check?email=inconcha@gmail.com` => owner permitido
   - `/api/auth/check?email=yk8arts@gmail.com` => editor permitido
 
+Validado postdeploy `v0.25.4`:
+
+- Produccion sirve `assets/index-D70WiNam.js`.
+- HTML y `/p28-sw.js` contienen `v0.25.4-20260601-fresh-nav-popup-image`.
+- Tag activo `v0.25.4` apunta a `05b0d31`.
+- Smoke mobile vivo en URL limpia `https://proyecto28.com`, viewport
+  `390x844`:
+  - `data-p28-content-source="cms"`;
+  - Service Worker activo `/p28-sw.js?build=v0.25.4...`;
+  - `028.C · Random: Museo MAC · PROTOTIPO`;
+  - no aparece `Saturno Engine`;
+  - popup `028.F · Extrasolar 1er lugar`;
+  - imagen `extrasolarframe_854244c860.png` queda visible con clase `loaded`,
+    `opacity: 1`, rect `352 x 198 px`, tambien varios segundos despues.
+
 Validado postdeploy `v0.24.0`:
 
 - GitHub Pages run `26718658099` OK para `b9aaeb5`.
@@ -172,7 +193,29 @@ Validado postdeploy `v0.24.0`:
 
 ---
 
-## 4. Cambios v0.25.1
+## 4. Cambios v0.25.4
+
+Archivos principales:
+
+- `index.html`: registra `/p28-sw.js?build=v0.25.4...` solo en
+  `proyecto28.com` y recarga una vez cuando el worker toma control.
+- `public/p28-sw.js`: network-first para navegaciones/documentos; no toca
+  Strapi.
+- `src/data/cms.js`: timeout CMS `8s`, proyectos CMS criticos, site-setting
+  tolerante a fallos temporales.
+- `src/ui/popup.js`: imagenes de popup eager/high priority, mantiene `loaded`
+  si se reutiliza la misma URL.
+
+Comportamiento importante:
+
+- La URL limpia `proyecto28.com` queda protegida contra HTML viejo despues de
+  instalar el worker fresco. Si un navegador conserva una copia previa, abrir
+  una vez una URL con query instala el worker y las siguientes navegaciones
+  limpias son network-first.
+- El caso vivo validado es `Rectangle 7 -> Random: Museo MAC` y popup
+  `Extrasolar 1er lugar` con imagen estable.
+
+## 5. Cambios v0.25.1
 
 Archivos principales:
 
@@ -189,7 +232,7 @@ Comportamiento importante:
   inspeccionable: `document.documentElement.dataset.p28ContentSource`.
 - El caso vivo validado es `Rectangle 7 -> Random: Museo MAC` desde Strapi.
 
-## 5. Cambios v0.25.0
+## 6. Cambios v0.25.0
 
 Archivos principales:
 
@@ -216,7 +259,7 @@ Comportamiento importante:
 - Para popups, subir `1600 x 900 px` (`16:9`, minimo `1200 x 675 px`) permite
   usar todo el marco sin bandas; el frontend rellena con `object-fit: cover`.
 
-## 6. Cambios v0.24.0
+## 7. Cambios v0.24.0
 
 Archivos principales:
 
@@ -241,7 +284,7 @@ Comportamiento importante:
 
 ---
 
-## 7. Cambios v0.23.0
+## 8. Cambios v0.23.0
 
 Archivos principales:
 
@@ -266,7 +309,7 @@ Comportamiento importante:
 
 ---
 
-## 8. Archivos fuente de verdad
+## 9. Archivos fuente de verdad
 
 - `README.md` - vision general, dev local, contenido, etapas.
 - `ADMIN-URLS.md` - URLs para administrar sitio, CMS, GitHub, Google, DNS y
@@ -282,7 +325,7 @@ Comportamiento importante:
 
 ---
 
-## 9. Operacion clave
+## 10. Operacion clave
 
 ### Admin y publish
 
@@ -320,7 +363,7 @@ usa Unreal conectar `unrealStreamURL` + `unrealLevelName`. Ver `RUNBOOK.md`.
 
 ---
 
-## 10. Pendientes conocidos
+## 11. Pendientes conocidos
 
 - Audio: requiere primera interaccion real antes de sonar.
 - Mobile split-touch: la capa aparece solo con el boton amarillo activo; si se
@@ -338,7 +381,7 @@ usa Unreal conectar `unrealStreamURL` + `unrealLevelName`. Ver `RUNBOOK.md`.
 
 ---
 
-## 11. Google Doc
+## 12. Google Doc
 
 El respaldo final debe quedar en el Google Doc oficial, sin usar el
 Handoff:Kaiyi:
@@ -347,12 +390,12 @@ https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/
 
 Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 Revision Google Doc post-insercion:
-`AFwiY19eCUG7b2d6asJ64pB5mY7azoWUC7InHRHRM7sdaXaCcIbpD6kKBO-WAGl_tYCLOtVz1R05LXvA6ZzR9egqIbC13jl5W7WahBMfYVU`.
+`AFwiY18mieU6dFaYrrpnTxg1obFkI6Kn0VddToK0zpuJv2_embzeG6os_ZhMzdPxHXurL9GUkZbOkoLxy0rPKSKlX_JlG-pYJKOK06KNqz0`.
 
 Titulo/anchor para este cierre:
 
 ```text
-2026-06-01 04:10 UTC - v0.25.1 loader-project-count-mobile-cms
+2026-06-01 05:30 UTC - v0.25.4 fresh-navigation-popup-images
 ```
 
 ---

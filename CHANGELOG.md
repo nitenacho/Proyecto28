@@ -10,6 +10,48 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.25.4] — 2026-06-01 — Patch: navegación fresca y popup images mobile
+
+### Added
+- Nuevo `public/p28-sw.js` en producción para que las navegaciones de
+  `proyecto28.com` sean network-first y pidan el HTML fresco con un
+  cache-buster interno, sin mostrar querystring al usuario.
+
+### Changed
+- `index.html` registra el freshness worker solo en `proyecto28.com` y recarga
+  una vez cuando el worker toma control para reducir el delay del cache
+  `max-age=600` de GitHub Pages/Cloudflare.
+- `src/data/cms.js` sube el timeout CMS a `8s` y permite usar proyectos CMS
+  aunque `site-setting` falle temporalmente; si `/api/projects` responde, ya
+  no cae al demo inicial por un timeout secundario.
+- `src/ui/popup.js` carga imagenes de popup en modo eager/high priority y no
+  quita la clase `loaded` cuando reutiliza una imagen ya cargada.
+
+### Fixed
+- `https://proyecto28.com` sin querystring queda protegido contra HTML viejo
+  tras el primer control del Service Worker; las navegaciones siguientes piden
+  copia fresca con delay minimo.
+- En mobile, la imagen del popup deja de aparecer un instante y desaparecer
+  cuando Safari/WhatsApp reutiliza el mismo `img.src`.
+- Se evita que el Service Worker intercepte las llamadas cross-origin a Strapi;
+  la capa CMS mantiene `_p28ts` y `cache: no-store` como fuente de freshness.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- Produccion `https://proyecto28.com/?deploy-final=...`:
+  - HTML contiene `v0.25.4-20260601-fresh-nav-popup-image`;
+  - bundle vivo `assets/index-D70WiNam.js`;
+  - `/p28-sw.js` contiene `v0.25.4-20260601-fresh-nav-popup-image`;
+  - `Cache-Control` del HTML sigue `max-age=600`, mitigado por el worker.
+- Smoke mobile vivo `390x844` en URL limpia `https://proyecto28.com`:
+  - `document.documentElement.dataset.p28ContentSource === "cms"`;
+  - Service Worker activo: `/p28-sw.js?build=v0.25.4...`;
+  - `028.C · Random: Museo MAC · PROTOTIPO`;
+  - no aparece `Saturno Engine`;
+  - popup `028.F · Extrasolar 1er lugar` mantiene imagen
+    `extrasolarframe_854244c860.png` visible con clase `loaded`,
+    `opacity: 1`, `352 x 198 px`, tambien varios segundos despues.
+
 ## [0.25.1] — 2026-06-01 — Patch: loader 1/28 y CMS mobile hardening
 
 ### Changed
@@ -1519,7 +1561,8 @@ Feedback del owner sobre `v0.14.0` en iOS Safari real:
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.25.1...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.25.4...HEAD
+[0.25.4]: https://github.com/nitenacho/Proyecto28/compare/v0.25.1...v0.25.4
 [0.25.1]: https://github.com/nitenacho/Proyecto28/compare/v0.25.0...v0.25.1
 [0.25.0]: https://github.com/nitenacho/Proyecto28/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/nitenacho/Proyecto28/compare/v0.23.0...v0.24.0

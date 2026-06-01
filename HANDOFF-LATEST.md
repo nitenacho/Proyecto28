@@ -1,13 +1,13 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-06-01 (Patch loader 1/28 y CMS mobile hardening - `v0.25.1`)
-> **Tag activo esperado tras cierre:** `v0.25.1`
+> **Ultima actualizacion:** 2026-06-01 (Patch fresh navigation + popup images mobile - `v0.25.4`)
+> **Tag activo esperado tras cierre:** `v0.25.4`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
 
-Etapas 1-21 cerradas y patch `v0.25.1` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
+Etapas 1-21 cerradas y patch `v0.25.4` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
 sync Claude Design, hardening performance/a11y, mini-juego Pacman de luz y una
 capa de audio interactivo configurable desde Strapi. La luz ahora se puede
@@ -15,7 +15,9 @@ tomar/soltar desde un boton minimo en HUD, acepta D-pad/flechas de gamepad y en
 mobile usa pantalla dividida tactil: joystick dinamico izquierdo y zona derecha
 de salto inmediato. El boot screen ahora muestra `Cargando proyecto N/28`,
 mobile pide contenido Strapi fresco con reintentos/timeout, y el logo del
-header puede venir desde una imagen `brandLogoImage` en Strapi.
+header puede venir desde una imagen `brandLogoImage` en Strapi. La URL limpia
+`proyecto28.com` queda protegida con un freshness worker network-first, y las
+imagenes de popup mobile ya no desaparecen al reutilizar un asset cargado.
 
 ---
 
@@ -23,6 +25,9 @@ header puede venir desde una imagen `brandLogoImage` en Strapi.
 
 Estado vigente esperado tras cierre:
 
+- `v0.25.4`: `public/p28-sw.js` fuerza navegaciones frescas para la URL limpia,
+  mantiene Strapi fuera del worker, y corrige popup images mobile que
+  parpadeaban/desaparecian.
 - `v0.25.1`: loader principal `Cargando proyecto N/28`, URL CMS runtime,
   reintentos/timeout de Strapi y QA mobile confirmando `Rectangle 7 ->
   Random: Museo MAC` desde CMS vivo.
@@ -68,7 +73,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- ultimo tag `v0.25.1`
+- ultimo tag `v0.25.4`
 - build Vite OK
 - build Strapi OK
 
@@ -79,13 +84,43 @@ Lectura obligatoria:
 3. `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
 4. `DEPLOY.md` - GitHub Pages, Strapi, OAuth, Pixel Streaming, releases.
 5. `CHANGELOG.md` - `[0.25.1]`.
-6. `PLAN-PROYECTO28-V2.md` - Etapa 21 + patch `v0.25.1` cerrados.
+6. `PLAN-PROYECTO28-V2.md` - Etapa 21 + patches `v0.25.1`/`v0.25.4` cerrados.
 7. `cms/README.md` - SiteSetting incluye `brandLogoImage`, `gameLightColor`
    y `audio*`.
 
 ---
 
-## 2. Cambios v0.25.1
+## 2. Cambios v0.25.4
+
+### Fresh navigation para proyecto28.com
+
+- Nuevo `public/p28-sw.js` en produccion. El worker toma control de
+  `proyecto28.com` y responde navegaciones con una request network-first que
+  agrega un cache-buster interno, sin cambiar la URL visible.
+- `index.html` registra el worker solo en el dominio canonico y recarga una
+  vez cuando el worker toma control. Esto reduce el impacto del
+  `Cache-Control: max-age=600` que sigue entregando GitHub Pages/Cloudflare.
+- El worker no intercepta llamadas cross-origin a Strapi. La capa CMS conserva
+  `_p28ts`, `cache: no-store`, timeout y reintentos.
+
+### CMS y popup mobile
+
+- `src/data/cms.js` aumenta timeout a `8s` y evita caer al demo inicial si
+  `projects` responde pero `site-setting` se demora.
+- `src/ui/popup.js` carga imagenes visibles con prioridad alta y mantiene la
+  clase `loaded` cuando el navegador reutiliza el mismo `img.src`.
+- Caso validado: URL limpia `https://proyecto28.com`, mobile `390x844`,
+  `data-p28-content-source="cms"`, `028.C -> Random: Museo MAC`, popup
+  `028.F -> Extrasolar 1er lugar` con imagen visible y estable.
+
+### Archivos tocados
+
+- `index.html`
+- `public/p28-sw.js`
+- `src/data/cms.js`
+- `src/ui/popup.js`
+
+## 3. Cambios v0.25.1
 
 ### Loader proyecto 1/28
 
@@ -111,7 +146,7 @@ Lectura obligatoria:
 - `src/data/cms.js`
 - `src/styles/three-host.css`
 
-## 3. Cambios v0.25.0
+## 4. Cambios v0.25.0
 
 ### Loader + feedback de carga
 
@@ -155,7 +190,7 @@ Lectura obligatoria:
 - `CHANGELOG.md`
 - `PLAN-PROYECTO28-V2.md`
 
-## 4. Cambios v0.24.0
+## 5. Cambios v0.24.0
 
 ### Split-screen touch joystick
 
@@ -188,7 +223,7 @@ Lectura obligatoria:
 
 ---
 
-## 5. Cambios v0.23.0
+## 6. Cambios v0.23.0
 
 ### Control discoverable
 
@@ -233,7 +268,7 @@ Lectura obligatoria:
 
 ---
 
-## 6. Cambios v0.22.0
+## 7. Cambios v0.22.0
 
 ### Mobile parity visual
 
@@ -305,9 +340,9 @@ Archivos tocados:
 
 ---
 
-## 7. Validacion realizada antes del cierre
+## 8. Validacion realizada antes del cierre
 
-### Local v0.25.1
+### Local v0.25.4
 
 ```powershell
 npm run build
@@ -319,6 +354,8 @@ Resultado:
 
 - Frontend OK. Warning existente: chunk `three` >500 kB.
 - Strapi admin build OK. Warning heredado: `DEP0187 fs.existsSync`.
+- Build local `v0.25.4` genera `assets/index-BnMu5fn2.js` y copia
+  `public/p28-sw.js` a `dist/p28-sw.js`.
 
 Servidor local:
 
@@ -346,6 +383,12 @@ Chrome CDP smoke:
   - ratio `16 / 9`;
   - URL de media versionada `?v=invasion1_d43ddbe31e`;
   - sin overflow horizontal.
+- Popup mobile local con `028.F`:
+  - titulo `Extrasolar 1er lugar`;
+  - imagen `extrasolarframe_854244c860.png` con clase `loaded`;
+  - `opacity: 1`;
+  - rect `352 x 198 px`;
+  - se mantiene visible varios segundos despues.
 
 ### Produccion/Strapi predeploy
 
@@ -360,29 +403,35 @@ Chrome CDP smoke:
 - `/api/auth/check?email=yk8arts@gmail.com` =>
   `{ allowed:true, role:"editor" }`
 
-### Produccion postdeploy v0.25.1
+### Produccion postdeploy v0.25.4
 
-- Commit desplegado por Pages: `0d0bbac`.
-- GitHub Pages run: `26728302642` => success.
-- Auto-tag run: `26728302645` => success.
-- Tag: `v0.25.1`.
+- Commit funcional: `d88f583 fix: force fresh navigations and persist popup images`.
+- Commit hotfix: `ddd62aa fix: keep Strapi API outside freshness worker`.
+- Commit version worker: `05b0d31 chore: align freshness worker build id`.
+- Tag activo: `v0.25.4`.
 - Produccion:
   - `https://proyecto28.com` => `200`
   - `https://proyecto28.com/robots.txt` => `200`
   - `https://proyecto28.com/sitemap.xml` => `200`
 - Bundle vivo:
-  - asset `assets/index-DHAPg2y2.js`
+  - asset `assets/index-D70WiNam.js`
+  - HTML vivo contiene `v0.25.4-20260601-fresh-nav-popup-image`
+  - `/p28-sw.js` contiene `v0.25.4-20260601-fresh-nav-popup-image`
   - contiene `_p28ts`
   - contiene `p28ContentSource`
-  - contiene timeout CMS
+  - contiene timeout CMS `8000`
   - HTML vivo contiene `Cargando proyecto 1/28`
   - HTML vivo contiene `__P28_CMS_URL__`
 - Smoke mobile vivo `390x844`:
   - carga desde `cms`
+  - Service Worker activo: `/p28-sw.js?build=v0.25.4...`
   - requests `/api/site-setting` y `/api/projects` incluyen `_p28ts=...-0`
   - `028.C · Random: Museo MAC · PROTOTIPO`
-  - popup `Random: Museo MAC`
   - no aparece `Saturno Engine`
+  - popup `028.F · Extrasolar 1er lugar`
+  - imagen de popup `extrasolarframe_854244c860.png` visible con clase
+    `loaded`, `opacity: 1`, rect `352 x 198 px`, estable varios segundos
+    despues
   - `body/html == 390`, sin overflow horizontal
 - Strapi Cloud postdeploy:
   - `/admin` => `200`
@@ -397,7 +446,7 @@ Chrome CDP smoke:
 
 ---
 
-## 8. Operacion clave
+## 9. Operacion clave
 
 ### Admin / Tweaks / publicar
 
@@ -461,7 +510,7 @@ Admin -> Tweaks -> Streaming -> Preview visible OFF -> PUBLICAR CAMBIOS
 
 ---
 
-## 9. Deploy esperado
+## 10. Deploy esperado
 
 Flujo correcto para una etapa nueva:
 
@@ -475,16 +524,17 @@ Flujo correcto para una etapa nueva:
 8. Actualizar handoff local + Google Doc.
 9. Confirmar tag semver.
 
-Para `v0.25.1`:
+Para `v0.25.4`:
 
-- Rama usada: `etapa-22-loader-project-count-mobile-cms`.
-- Commit funcional: `0d0bbac fix: harden mobile CMS freshness and loader copy`.
-- Pages run: `26728302642`.
-- Auto-tag run: `26728302645`.
+- Rama usada: `main`.
+- Commit funcional: `d88f583 fix: force fresh navigations and persist popup images`.
+- Commit hotfix: `ddd62aa fix: keep Strapi API outside freshness worker`.
+- Commit final build id: `05b0d31 chore: align freshness worker build id`.
+- Tag manual final: `v0.25.4` apuntando a `05b0d31`.
 
 ---
 
-## 10. Riesgos y pendientes
+## 11. Riesgos y pendientes
 
 - Audio en navegadores: no puede sonar antes de la primera interaccion real por
   politicas de autoplay. Esto es esperado.
@@ -505,7 +555,7 @@ Para `v0.25.1`:
 
 ---
 
-## 11. Google Doc
+## 12. Google Doc
 
 Respaldo oficial:
 
@@ -517,13 +567,13 @@ Regla:
 - No usar el Handoff:Kaiyi para esta etapa.
 - Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 - Revision Google Doc post-insercion:
-`AFwiY19eCUG7b2d6asJ64pB5mY7azoWUC7InHRHRM7sdaXaCcIbpD6kKBO-WAGl_tYCLOtVz1R05LXvA6ZzR9egqIbC13jl5W7WahBMfYVU`.
+`AFwiY18mieU6dFaYrrpnTxg1obFkI6Kn0VddToK0zpuJv2_embzeG6os_ZhMzdPxHXurL9GUkZbOkoLxy0rPKSKlX_JlG-pYJKOK06KNqz0`.
 - Titulo/anchor:
 
 ```text
-2026-06-01 04:10 UTC - v0.25.1 loader-project-count-mobile-cms
+2026-06-01 05:30 UTC - v0.25.4 fresh-navigation-popup-images
 ```
 
 ---
 
-Fin del handoff `v0.25.1`.
+Fin del handoff `v0.25.4`.
