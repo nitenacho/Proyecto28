@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta name="theme-color" content="#000000" />
   <meta name="description" content="PROYECTO 28 — Laboratorio 3D interactivo" />
   <link rel="canonical" href="https://proyecto28.com/" />
@@ -19,6 +22,8 @@
   <link rel="icon" href="/assets/proyecto28-logo-isometric.png" type="image/png" />
   <script>
     (function () {
+      window.__P28_CMS_URL__ = 'https://honest-candy-800d1e4a92.strapiapp.com';
+
       function syncVisualViewport() {
         var vv = window.visualViewport;
         var root = document.documentElement;
@@ -48,33 +53,42 @@
   <div id="boot" role="status" aria-live="polite">
     <div class="ring"></div>
     <div class="boot-copy">
-      <div class="boot-label" id="boot-label">Cargando módulo · 028 · Holograma</div>
-      <div class="boot-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="8">
+      <div class="boot-label" id="boot-label">Cargando proyecto 1/28</div>
+      <div class="boot-stage" id="boot-stage">Iniciando</div>
+      <div class="boot-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
         <span id="boot-progress-bar"></span>
       </div>
-      <div class="boot-percent" id="boot-percent">8%</div>
+      <div class="boot-percent" id="boot-percent">0%</div>
     </div>
   </div>
   <script>
     (function () {
-      var progress = 8;
+      var progress = 0;
       var done = false;
       var timer = null;
+      var totalProjects = 28;
 
       function clamp(value) {
         return Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
       }
 
-      function render(value, label) {
+      function projectNumber(value) {
+        if (value >= 100) return totalProjects;
+        return Math.max(1, Math.min(totalProjects, Math.floor((value / 100) * totalProjects) + 1));
+      }
+
+      function render(value, detail) {
         progress = Math.max(progress, clamp(value));
         var bar = document.getElementById('boot-progress-bar');
         var meter = document.querySelector('#boot .boot-progress');
         var percent = document.getElementById('boot-percent');
         var labelEl = document.getElementById('boot-label');
+        var stageEl = document.getElementById('boot-stage');
         if (bar) bar.style.transform = 'scaleX(' + (progress / 100) + ')';
         if (meter) meter.setAttribute('aria-valuenow', String(progress));
         if (percent) percent.textContent = progress + '%';
-        if (label && labelEl) labelEl.textContent = label;
+        if (labelEl) labelEl.textContent = 'Cargando proyecto ' + projectNumber(progress) + '/' + totalProjects;
+        if (detail && stageEl) stageEl.textContent = detail;
         if (progress >= 100) done = true;
       }
 
@@ -83,9 +97,9 @@
       function tick() {
         if (done) return;
         var cap = 72;
-        var step = progress < 36 ? 4 : 1;
+        var step = progress < 36 ? 3 : 1;
         render(Math.min(cap, progress + step));
-        timer = window.setTimeout(tick, progress < 36 ? 260 : 420);
+        timer = window.setTimeout(tick, progress < 36 ? 220 : 380);
       }
 
       render(progress);

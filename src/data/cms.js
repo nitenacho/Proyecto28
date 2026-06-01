@@ -6,7 +6,10 @@
 
 import { FALLBACK_PROJECTS, FALLBACK_SITE, GRID_SLOTS } from './fallback.js';
 
-const CMS_URL = (import.meta.env.VITE_CMS_URL || '').replace(/\/$/, '');
+const RUNTIME_CMS_URL = typeof window !== 'undefined' ? window.__P28_CMS_URL__ : '';
+const CMS_URL = (import.meta.env.VITE_CMS_URL || RUNTIME_CMS_URL || '').replace(/\/$/, '');
+const FETCH_RETRY_DELAYS_MS = [0, 450, 1100];
+const FETCH_TIMEOUT_MS = 5000;
 
 /**
  * @typedef {Object} Project
@@ -76,16 +79,46 @@ const CMS_URL = (import.meta.env.VITE_CMS_URL || '').replace(/\/$/, '');
  * @property {Array<{value:string,label:string}>} logoOptions
  */
 
-async function fetchJSON(path) {
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchJSONOnce(path, attempt) {
   if (!CMS_URL) throw new Error('VITE_CMS_URL not set');
   const url = new URL(`${CMS_URL}${path}`);
-  url.searchParams.set('_p28ts', String(Date.now()));
-  const res = await fetch(url.toString(), {
-    cache: 'no-store',
-    headers: { accept: 'application/json' },
-  });
-  if (!res.ok) throw new Error(`CMS ${path}: ${res.status}`);
-  return res.json();
+  url.searchParams.set('_p28ts', `${Date.now()}-${attempt}`);
+  const controller = new AbortController();
+  const timeout = globalThis.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(url.toString(), {
+      cache: 'no-store',
+      credentials: 'omit',
+      mode: 'cors',
+      signal: controller.signal,
+      headers: { accept: 'application/json' },
+    });
+    if (!res.ok) throw new Error(`CMS ${path}: ${res.status}`);
+    return res.json();
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error(`CMS ${path}: timeout`);
+    throw err;
+  } finally {
+    globalThis.clearTimeout(timeout);
+  }
+}
+
+async function fetchJSON(path) {
+  let lastError = null;
+  for (let attempt = 0; attempt < FETCH_RETRY_DELAYS_MS.length; attempt += 1) {
+    const delay = FETCH_RETRY_DELAYS_MS[attempt];
+    if (delay) await sleep(delay);
+    try {
+      return await fetchJSONOnce(path, attempt);
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError || new Error(`CMS ${path}: unavailable`);
 }
 
 function mediaURL(media) {
@@ -193,9 +226,17 @@ export async function loadContent() {
     ]);
     const site = normalizeSite(siteRes.data || siteRes);
     const projects = (projRes.data || []).map(normalizeProject).filter((p) => p.slot);
+    if (typeof document !== 'undefined') {
+      document.documentElement.dataset.p28ContentSource = 'cms';
+      document.documentElement.dataset.p28CmsUpdatedAt = String(Date.now());
+    }
     return { site, projects, grid: GRID_SLOTS, source: 'cms' };
   } catch (err) {
     console.warn('[cms] failed, using fallback:', err.message);
+    if (typeof document !== 'undefined') {
+      document.documentElement.dataset.p28ContentSource = 'fallback';
+      document.documentElement.dataset.p28CmsError = err.message || 'unknown';
+    }
     return { site: FALLBACK_SITE, projects: FALLBACK_PROJECTS, grid: GRID_SLOTS, source: 'fallback' };
   }
 }

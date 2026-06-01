@@ -183,12 +183,20 @@ body { overscroll-behavior: none; }
   width: min(220px, calc(100vw - 56px));
 }
 #boot .boot-label,
+#boot .boot-stage,
 #boot .boot-percent {
   line-height: 1.5;
   text-align: center;
 }
 #boot .boot-label {
   max-width: 100%;
+  overflow-wrap: anywhere;
+}
+#boot .boot-stage {
+  max-width: 100%;
+  color: var(--ink-3);
+  font-size: 9px;
+  letter-spacing: 0.16em;
   overflow-wrap: anywhere;
 }
 #boot .boot-progress {
