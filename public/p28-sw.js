@@ -3,7 +3,6 @@
    applies the default GitHub Pages max-age header. */
 
 const P28_SW_VERSION = 'v0.25.2-20260601-fresh-nav-popup-image';
-const P28_CMS_HOST = 'honest-candy-800d1e4a92.strapiapp.com';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
@@ -53,29 +52,11 @@ async function freshNavigation(request) {
   }
 }
 
-function freshCMS(request) {
-  const url = new URL(request.url);
-  url.searchParams.set('_p28sw', `${Date.now()}`);
-  return fetch(url.toString(), {
-    cache: 'no-store',
-    credentials: 'omit',
-    mode: 'cors',
-    headers: { accept: 'application/json' },
-  });
-}
-
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
 
-  const url = new URL(request.url);
-
   if (request.mode === 'navigate' || request.destination === 'document') {
     event.respondWith(freshNavigation(request));
-    return;
-  }
-
-  if (url.hostname === P28_CMS_HOST && url.pathname.startsWith('/api/')) {
-    event.respondWith(freshCMS(request));
   }
 });

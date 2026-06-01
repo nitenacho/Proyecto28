@@ -9,7 +9,7 @@ import { FALLBACK_PROJECTS, FALLBACK_SITE, GRID_SLOTS } from './fallback.js';
 const RUNTIME_CMS_URL = typeof window !== 'undefined' ? window.__P28_CMS_URL__ : '';
 const CMS_URL = (import.meta.env.VITE_CMS_URL || RUNTIME_CMS_URL || '').replace(/\/$/, '');
 const FETCH_RETRY_DELAYS_MS = [0, 450, 1100];
-const FETCH_TIMEOUT_MS = 5000;
+const FETCH_TIMEOUT_MS = 8000;
 
 /**
  * @typedef {Object} Project
@@ -220,15 +220,28 @@ export async function loadContent() {
     return { site: FALLBACK_SITE, projects: FALLBACK_PROJECTS, grid: GRID_SLOTS, source: 'fallback' };
   }
   try {
-    const [siteRes, projRes] = await Promise.all([
+    const [siteResult, projectResult] = await Promise.allSettled([
       fetchJSON('/api/site-setting?populate=*'),
       fetchJSON('/api/projects?populate=*&pagination[pageSize]=50'),
     ]);
-    const site = normalizeSite(siteRes.data || siteRes);
-    const projects = (projRes.data || []).map(normalizeProject).filter((p) => p.slot);
+    if (projectResult.status !== 'fulfilled') {
+      throw projectResult.reason;
+    }
+
+    const site = siteResult.status === 'fulfilled'
+      ? normalizeSite(siteResult.value.data || siteResult.value)
+      : FALLBACK_SITE;
+    const projects = (projectResult.value.data || []).map(normalizeProject).filter((p) => p.slot);
+    if (!projects.length) throw new Error('CMS /api/projects: empty');
+
     if (typeof document !== 'undefined') {
       document.documentElement.dataset.p28ContentSource = 'cms';
       document.documentElement.dataset.p28CmsUpdatedAt = String(Date.now());
+      if (siteResult.status !== 'fulfilled') {
+        document.documentElement.dataset.p28CmsWarning = siteResult.reason?.message || 'site-setting unavailable';
+      } else {
+        delete document.documentElement.dataset.p28CmsWarning;
+      }
     }
     return { site, projects, grid: GRID_SLOTS, source: 'cms' };
   } catch (err) {
