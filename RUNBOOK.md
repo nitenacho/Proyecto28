@@ -88,9 +88,17 @@ pwsh -File cms/scripts/unwrap-onedrive.ps1
 5. Presionar `PUBLICAR CAMBIOS`.
 6. Recargar la pagina y confirmar que `/api/site-setting` refleja el cambio.
 
-Desde `v0.25.0`, el frontend pide `/api/site-setting` y `/api/projects` con
-`cache: no-store` y `_p28ts`; si mobile no ve cambios, primero hacer hard
-refresh y confirmar en DevTools que las requests incluyen `_p28ts`.
+Desde `v0.25.1`, el frontend define la URL publica del CMS tambien en runtime
+(`window.__P28_CMS_URL__`) y pide `/api/site-setting` y `/api/projects` con
+`cache: no-store`, `_p28ts`, timeout y reintentos. Si mobile no ve cambios,
+confirmar en DevTools:
+
+```js
+document.documentElement.dataset.p28ContentSource
+```
+
+El valor sano es `cms`; si aparece `fallback`, revisar consola y confirmar que
+las requests Strapi incluyen `_p28ts`.
 
 Si aparece un error de token Google, cerrar sesion con `window.p28SignOut()` en
 DevTools y volver a entrar por `Admin`. Desde `v0.19.0` el frontend reintenta

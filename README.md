@@ -198,6 +198,11 @@ el panel "Tweaks". Los admins autorizados por Google + whitelist pueden usar
 `PUBLICAR CAMBIOS` para persistir el snapshot en Strapi `SiteSetting`; si no
 publican, los cambios viven sólo en su sesión.
 
+Desde `v0.25.1`, produccion tambien define la URL publica del CMS en runtime y
+la capa de datos reintenta requests Strapi con timeout/cache-buster. Para QA
+mobile se puede leer `document.documentElement.dataset.p28ContentSource` y
+confirmar que vale `cms`.
+
 Recomendaciones de media visibles en Strapi:
 
 - Logo de marca: PNG o WebP transparente, `512 x 512 px`, zona segura central
@@ -293,3 +298,4 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 19 — Control discoverable + gyro/gamepad | ✅ Cerrado — boton HUD, D-pad y giroscopio mobile | `v0.23.0` |
 | 20 — Split-screen touch joystick | ✅ Cerrado — joystick dinamico izquierdo y salto derecho mobile | `v0.24.0` |
 | 21 — Loader + logo CMS + freshness mobile | ✅ Cerrado — progreso sutil, Strapi no-store/cache-buster, logo media y pixel hints | `v0.25.0` |
+| 21 hotfix — Loader 1/28 + CMS mobile hardening | ✅ Cerrado — mensaje `Cargando proyecto N/28`, runtime CMS fallback y QA `Random: Museo MAC` | `v0.25.1` |

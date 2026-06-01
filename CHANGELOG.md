@@ -10,6 +10,56 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.25.1] — 2026-06-01 — Patch: loader 1/28 y CMS mobile hardening
+
+### Changed
+- El mensaje principal del boot screen ahora avanza como
+  `Cargando proyecto N/28` hasta llegar a `28/28` al completar la carga.
+- El detalle tecnico de carga queda como linea secundaria discreta
+  (`Conectando Strapi`, `Contenido Strapi listo`, etc.).
+- `index.html` define `window.__P28_CMS_URL__` como respaldo runtime para que
+  produccion no dependa solo del valor embebido por `VITE_CMS_URL`.
+
+### Fixed
+- La carga publica de Strapi queda mas robusta en mobile: cada request usa
+  `_p28ts` con intento unico, `cache: no-store`, `credentials: omit`,
+  `mode: cors`, timeout de `5s` y tres intentos antes de caer a fallback.
+- Se agrega diagnostico en DOM con
+  `document.documentElement.dataset.p28ContentSource` para distinguir
+  rapidamente `cms` vs `fallback` en QA mobile.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- Chrome headless local sobre build preview `127.0.0.1:5174`, mobile
+  `390x844`:
+  - boot temprano: `Cargando proyecto 6/28`, detalle `Conectando Strapi`;
+  - `data-p28-content-source="cms"`;
+  - `028.C` muestra `Random: Museo MAC`;
+  - no aparece `Saturno Engine`;
+  - `body/html == 390`, sin overflow horizontal.
+- GitHub Pages run `26728302642` OK para `0d0bbac`.
+- Auto-tag run `26728302645` OK; tag `v0.25.1`.
+- Produccion postdeploy:
+  - `https://proyecto28.com` => `200`
+  - `https://proyecto28.com/robots.txt` => `200`
+  - `https://proyecto28.com/sitemap.xml` => `200`
+  - bundle vivo `assets/index-DHAPg2y2.js`;
+  - HTML vivo contiene `Cargando proyecto 1/28` y `__P28_CMS_URL__`;
+  - bundle vivo contiene `p28ContentSource` y timeout CMS.
+- Smoke mobile vivo `390x844`:
+  - fuente `cms`;
+  - requests a `/api/site-setting` y `/api/projects` responden `200` con
+    `_p28ts=...-0`;
+  - `028.C · Random: Museo MAC · PROTOTIPO`;
+  - popup `Random: Museo MAC`;
+  - no aparece `Saturno Engine`;
+  - `body/html == 390`, sin overflow horizontal.
+- Strapi Cloud postdeploy:
+  - `/admin` => `200`
+  - `/api/projects?populate=*` => `200`
+  - `/api/site-setting?populate=*` => `200`
+  - `/api/admin-whitelists` => `403`
+
 ## [0.25.0] — 2026-05-31 — Etapa 21: Loader, logo CMS y freshness mobile
 
 ### Added
@@ -1469,7 +1519,8 @@ Feedback del owner sobre `v0.14.0` en iOS Safari real:
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.25.0...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.25.1...HEAD
+[0.25.1]: https://github.com/nitenacho/Proyecto28/compare/v0.25.0...v0.25.1
 [0.25.0]: https://github.com/nitenacho/Proyecto28/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/nitenacho/Proyecto28/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/nitenacho/Proyecto28/compare/v0.22.0...v0.23.0

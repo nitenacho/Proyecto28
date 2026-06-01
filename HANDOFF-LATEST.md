@@ -1,21 +1,21 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-05-31 (Etapa 21 Loader, logo CMS y freshness mobile - `v0.25.0`)
-> **Tag activo esperado tras cierre:** `v0.25.0`
+> **Ultima actualizacion:** 2026-06-01 (Patch loader 1/28 y CMS mobile hardening - `v0.25.1`)
+> **Tag activo esperado tras cierre:** `v0.25.1`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
 
-Etapas 1-21 cerradas. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
+Etapas 1-21 cerradas y patch `v0.25.1` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
 sync Claude Design, hardening performance/a11y, mini-juego Pacman de luz y una
 capa de audio interactivo configurable desde Strapi. La luz ahora se puede
 tomar/soltar desde un boton minimo en HUD, acepta D-pad/flechas de gamepad y en
 mobile usa pantalla dividida tactil: joystick dinamico izquierdo y zona derecha
-de salto inmediato. El boot screen ahora muestra progreso sutil, mobile pide
-contenido Strapi fresco sin cache, y el logo del header puede venir desde una
-imagen `brandLogoImage` en Strapi.
+de salto inmediato. El boot screen ahora muestra `Cargando proyecto N/28`,
+mobile pide contenido Strapi fresco con reintentos/timeout, y el logo del
+header puede venir desde una imagen `brandLogoImage` en Strapi.
 
 ---
 
@@ -23,6 +23,9 @@ imagen `brandLogoImage` en Strapi.
 
 Estado vigente esperado tras cierre:
 
+- `v0.25.1`: loader principal `Cargando proyecto N/28`, URL CMS runtime,
+  reintentos/timeout de Strapi y QA mobile confirmando `Rectangle 7 ->
+  Random: Museo MAC` desde CMS vivo.
 - `v0.25.0`: loader de progreso sutil, requests Strapi con `cache: no-store`
   + `_p28ts`, URLs de media versionadas, `brandLogoImage` en SiteSetting y
   pixel hints para logo/popup images.
@@ -65,7 +68,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- ultimo tag `v0.25.0`
+- ultimo tag `v0.25.1`
 - build Vite OK
 - build Strapi OK
 
@@ -75,14 +78,40 @@ Lectura obligatoria:
 2. `ADMIN-URLS.md` - URLs para administrar todos los servicios.
 3. `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
 4. `DEPLOY.md` - GitHub Pages, Strapi, OAuth, Pixel Streaming, releases.
-5. `CHANGELOG.md` - `[0.25.0]`.
-6. `PLAN-PROYECTO28-V2.md` - Etapa 21 cerrada.
+5. `CHANGELOG.md` - `[0.25.1]`.
+6. `PLAN-PROYECTO28-V2.md` - Etapa 21 + patch `v0.25.1` cerrados.
 7. `cms/README.md` - SiteSetting incluye `brandLogoImage`, `gameLightColor`
    y `audio*`.
 
 ---
 
-## 2. Cambios v0.25.0
+## 2. Cambios v0.25.1
+
+### Loader proyecto 1/28
+
+- `index.html` cambia el mensaje principal del boot screen a
+  `Cargando proyecto N/28`.
+- El detalle de etapa queda como texto secundario discreto:
+  `Conectando Strapi`, `Contenido Strapi listo`, `Preparando escena`,
+  `Activando controles`, `Listo`.
+
+### CMS mobile hardening
+
+- `index.html` define `window.__P28_CMS_URL__` con la URL publica de Strapi
+  como respaldo runtime.
+- `src/data/cms.js` usa `_p28ts` con intento unico, `cache: no-store`,
+  `credentials: omit`, `mode: cors`, timeout de `5s` y tres intentos.
+- El HTML agrega meta no-cache para reducir HTML viejo en navegadores moviles.
+- `document.documentElement.dataset.p28ContentSource` deja trazabilidad de
+  `cms` vs `fallback` para QA mobile.
+
+### Archivos tocados
+
+- `index.html`
+- `src/data/cms.js`
+- `src/styles/three-host.css`
+
+## 3. Cambios v0.25.0
 
 ### Loader + feedback de carga
 
@@ -126,7 +155,7 @@ Lectura obligatoria:
 - `CHANGELOG.md`
 - `PLAN-PROYECTO28-V2.md`
 
-## 3. Cambios v0.24.0
+## 4. Cambios v0.24.0
 
 ### Split-screen touch joystick
 
@@ -159,7 +188,7 @@ Lectura obligatoria:
 
 ---
 
-## 4. Cambios v0.23.0
+## 5. Cambios v0.23.0
 
 ### Control discoverable
 
@@ -204,7 +233,7 @@ Lectura obligatoria:
 
 ---
 
-## 5. Cambios v0.22.0
+## 6. Cambios v0.22.0
 
 ### Mobile parity visual
 
@@ -276,9 +305,9 @@ Archivos tocados:
 
 ---
 
-## 6. Validacion realizada antes del cierre
+## 7. Validacion realizada antes del cierre
 
-### Local v0.25.0
+### Local v0.25.1
 
 ```powershell
 npm run build
@@ -293,17 +322,20 @@ Resultado:
 
 Servidor local:
 
-- `http://127.0.0.1:5174/` responde `HTTP 200` con `VITE_CMS_URL` real.
-- Dev server Vite QA levantado desde:
+- `http://127.0.0.1:5174/` responde `HTTP 200` sirviendo build preview.
+- QA usa la URL CMS runtime `window.__P28_CMS_URL__` desde:
   `C:/Users/incon/Downloads/EscritorioNobita/Proyectos_Claude/Claude_P28/Proyecto28`.
 
 Chrome CDP smoke:
 
 - Mobile `390x844`:
+  - boot temprano: `Cargando proyecto 6/28`, detalle `Conectando Strapi`;
   - carga desde `cms`;
-  - `/api/site-setting` y `/api/projects` incluyen `_p28ts`;
+  - `/api/site-setting` y `/api/projects` incluyen `_p28ts=...-0`;
   - `body/html == 390`, sin overflow horizontal;
-  - popup visible.
+  - `028.C` muestra `Random: Museo MAC`;
+  - popup `Random: Museo MAC`;
+  - no aparece `Saturno Engine`.
 - Desktop `1440x900`:
   - carga desde `cms`;
   - requests Strapi incluyen `_p28ts`;
@@ -328,27 +360,29 @@ Chrome CDP smoke:
 - `/api/auth/check?email=yk8arts@gmail.com` =>
   `{ allowed:true, role:"editor" }`
 
-### Produccion postdeploy v0.25.0
+### Produccion postdeploy v0.25.1
 
-- Commit desplegado por Pages: `cefbbe7`.
-- GitHub Pages run: `26719864051` => success.
-- Auto-tag run: `26719864045` => success.
-- Tag: `v0.25.0`.
+- Commit desplegado por Pages: `0d0bbac`.
+- GitHub Pages run: `26728302642` => success.
+- Auto-tag run: `26728302645` => success.
+- Tag: `v0.25.1`.
 - Produccion:
   - `https://proyecto28.com` => `200`
   - `https://proyecto28.com/robots.txt` => `200`
   - `https://proyecto28.com/sitemap.xml` => `200`
 - Bundle vivo:
-  - asset `assets/index-CSMZXJFR.js`
+  - asset `assets/index-DHAPg2y2.js`
   - contiene `_p28ts`
-  - contiene `brandLogoImage`
-  - contiene `no-store`
-  - contiene `popupImageURL`
-  - HTML vivo contiene `boot-progress`
+  - contiene `p28ContentSource`
+  - contiene timeout CMS
+  - HTML vivo contiene `Cargando proyecto 1/28`
+  - HTML vivo contiene `__P28_CMS_URL__`
 - Smoke mobile vivo `390x844`:
   - carga desde `cms`
-  - requests `/api/site-setting` y `/api/projects` incluyen `_p28ts`
-  - popup `Invasión` visible con imagen `cover` `16 / 9`
+  - requests `/api/site-setting` y `/api/projects` incluyen `_p28ts=...-0`
+  - `028.C · Random: Museo MAC · PROTOTIPO`
+  - popup `Random: Museo MAC`
+  - no aparece `Saturno Engine`
   - `body/html == 390`, sin overflow horizontal
 - Strapi Cloud postdeploy:
   - `/admin` => `200`
@@ -363,7 +397,7 @@ Chrome CDP smoke:
 
 ---
 
-## 7. Operacion clave
+## 8. Operacion clave
 
 ### Admin / Tweaks / publicar
 
@@ -427,7 +461,7 @@ Admin -> Tweaks -> Streaming -> Preview visible OFF -> PUBLICAR CAMBIOS
 
 ---
 
-## 8. Deploy esperado
+## 9. Deploy esperado
 
 Flujo correcto para una etapa nueva:
 
@@ -441,16 +475,16 @@ Flujo correcto para una etapa nueva:
 8. Actualizar handoff local + Google Doc.
 9. Confirmar tag semver.
 
-Para `v0.25.0`:
+Para `v0.25.1`:
 
-- Rama usada: `etapa-21-loader-logo-mobile-cms`.
-- Commit funcional: `cefbbe7 feat: add loader and CMS logo freshness`.
-- Pages run: `26719864051`.
-- Auto-tag run: `26719864045`.
+- Rama usada: `etapa-22-loader-project-count-mobile-cms`.
+- Commit funcional: `0d0bbac fix: harden mobile CMS freshness and loader copy`.
+- Pages run: `26728302642`.
+- Auto-tag run: `26728302645`.
 
 ---
 
-## 9. Riesgos y pendientes
+## 10. Riesgos y pendientes
 
 - Audio en navegadores: no puede sonar antes de la primera interaccion real por
   politicas de autoplay. Esto es esperado.
@@ -471,7 +505,7 @@ Para `v0.25.0`:
 
 ---
 
-## 10. Google Doc
+## 11. Google Doc
 
 Respaldo oficial:
 
@@ -483,13 +517,13 @@ Regla:
 - No usar el Handoff:Kaiyi para esta etapa.
 - Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 - Revision Google Doc post-insercion:
-  `AFwiY1_TXlf3FoswqooNxLXGtXcXZfEIrg8-6ShBAQRxVW-msmWHGrErSDaGxjF6-ipR_G9V3H42vYOPPJRDiE_dySqPTLCkhjLiNrRZVoo`.
+`AFwiY19eCUG7b2d6asJ64pB5mY7azoWUC7InHRHRM7sdaXaCcIbpD6kKBO-WAGl_tYCLOtVz1R05LXvA6ZzR9egqIbC13jl5W7WahBMfYVU`.
 - Titulo/anchor:
 
 ```text
-2026-05-31 17:50 UTC - v0.25.0 loader-logo-mobile-cms
+2026-06-01 04:10 UTC - v0.25.1 loader-project-count-mobile-cms
 ```
 
 ---
 
-Fin del handoff `v0.25.0`.
+Fin del handoff `v0.25.1`.

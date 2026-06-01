@@ -1,8 +1,8 @@
 # HANDOFF V2 - Proyecto 28
 
-> Ultima actualizacion: 2026-05-31 (Etapa 21 Loader, logo CMS y freshness mobile - `v0.25.0`)
+> Ultima actualizacion: 2026-06-01 (Patch loader 1/28 y CMS mobile hardening - `v0.25.1`)
 > Branch esperado: `main`
-> Tag activo esperado tras cierre: `v0.25.0`
+> Tag activo esperado tras cierre: `v0.25.1`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
 
@@ -13,7 +13,7 @@ operacion detallada, leer `RUNBOOK.md`.
 
 ## 1. Estado ejecutivo
 
-Etapas 1-21 cerradas. Proyecto28 queda como web 3D interactiva con:
+Etapas 1-21 cerradas y patch `v0.25.1` aplicado. Proyecto28 queda como web 3D interactiva con:
 
 - Vite + Three.js + GSAP.
 - Strapi Cloud como CMS.
@@ -38,19 +38,21 @@ Etapas 1-21 cerradas. Proyecto28 queda como web 3D interactiva con:
   izquierdo anclado al primer toque y zona derecha dedicada a salto inmediato.
 - El giroscopio y el salto tactil global fueron retirados para liberar la
   escena mobile y mantener la experiencia igual de completa que desktop.
-- Boot screen con progreso sutil mientras Strapi y la escena terminan de
-  cargar.
+- Boot screen con progreso sutil y mensaje `Cargando proyecto N/28` mientras
+  Strapi y la escena terminan de cargar.
 - Strapi freshness en mobile: requests publicas con `cache: no-store` y
-  `_p28ts`, mas URLs de media versionadas.
+  `_p28ts`, mas URLs de media versionadas, runtime CMS fallback y
+  reintentos/timeout.
 - Logo del header configurable desde Strapi `SiteSetting.brandLogoImage`;
   `Project.popupImage` es la imagen prioritaria del popup.
 
 Ultimo codigo funcional esperado:
 
-- `v0.25.0` - Loader, logo CMS y freshness mobile.
+- `v0.25.1` - Loader 1/28 y CMS mobile hardening.
 
 Tags/commits recientes:
 
+- `v0.25.1` - loader `Cargando proyecto N/28` + runtime CMS fallback.
 - `v0.25.0` - loader + logo CMS + cache-buster Strapi mobile.
 - `v0.24.0` - `b9aaeb5` split-screen touch joystick.
 - `v0.23.0` - `f386de6` control discoverable + gyro/gamepad.
@@ -83,7 +85,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- tag `v0.25.0`
+- tag `v0.25.1`
 - build Vite OK
 - build Strapi OK
 
@@ -113,29 +115,31 @@ Esperado:
 - inconcha owner permitido
 - yk8arts editor permitido
 
-Validado local `v0.25.0`:
+Validado local `v0.25.1`:
 
 - `npm run build` OK. Warning existente: chunk `three` >500 kB.
 - `cd cms; npm run build` OK. Warning heredado de Strapi/Node:
   `DEP0187 fs.existsSync`.
-- Chrome headless con `VITE_CMS_URL` real:
-  - mobile `390x844`: `body/html == 390`, carga desde `cms`,
-    `/api/site-setting` y `/api/projects` con `_p28ts`, popup visible.
+- Chrome headless sobre build preview `127.0.0.1:5174`:
+  - mobile `390x844`: boot temprano `Cargando proyecto 6/28`, carga desde
+    `cms`, `/api/site-setting` y `/api/projects` con `_p28ts=...-0`,
+    `028.C` muestra `Random: Museo MAC`, popup `Random: Museo MAC`, no aparece
+    `Saturno Engine`, `body/html == 390`.
   - desktop `1440x900`: `body/html == 1440`, carga desde `cms`,
     requests Strapi con `_p28ts`, popup visible.
   - popup mobile con imagen real: `object-fit: cover`, ratio `16 / 9`, URL
     versionada `?v=...`.
 
-Validado postdeploy `v0.25.0`:
+Validado postdeploy `v0.25.1`:
 
-- GitHub Pages run `26719864051` OK para `cefbbe7`.
-- Auto-tag run `26719864045` OK; tag `v0.25.0`.
-- Produccion sirve `assets/index-CSMZXJFR.js` con `_p28ts`,
-  `brandLogoImage`, `no-store` y `popupImageURL`; HTML contiene
-  `boot-progress`.
+- GitHub Pages run `26728302642` OK para `0d0bbac`.
+- Auto-tag run `26728302645` OK; tag `v0.25.1`.
+- Produccion sirve `assets/index-DHAPg2y2.js`; HTML contiene
+  `Cargando proyecto 1/28` y `__P28_CMS_URL__`; bundle contiene
+  `p28ContentSource` y timeout CMS.
 - Smoke mobile vivo `390x844`: carga desde `cms`, requests Strapi incluyen
-  `_p28ts`, popup `Invasión` visible con imagen `cover` `16 / 9`,
-  `body/html == 390`.
+  `_p28ts=...-0`, `028.C · Random: Museo MAC · PROTOTIPO`, popup
+  `Random: Museo MAC`, no aparece `Saturno Engine`, `body/html == 390`.
 - Strapi Cloud postdeploy:
   - `/admin` => `200`
   - `/api/projects?populate=*` => `200`
@@ -168,7 +172,24 @@ Validado postdeploy `v0.24.0`:
 
 ---
 
-## 4. Cambios v0.25.0
+## 4. Cambios v0.25.1
+
+Archivos principales:
+
+- `index.html`: mensaje principal `Cargando proyecto N/28`, detalle secundario
+  de etapa, meta no-cache y `window.__P28_CMS_URL__`.
+- `src/data/cms.js`: reintentos, timeout `5s`, `_p28ts` por intento,
+  `credentials: omit`, `mode: cors` y `data-p28-content-source`.
+- `src/styles/three-host.css`: estilo sutil para el detalle secundario del
+  loader.
+
+Comportamiento importante:
+
+- Si mobile conserva informacion vieja o cae a fallback, ahora hay una senal
+  inspeccionable: `document.documentElement.dataset.p28ContentSource`.
+- El caso vivo validado es `Rectangle 7 -> Random: Museo MAC` desde Strapi.
+
+## 5. Cambios v0.25.0
 
 Archivos principales:
 
@@ -195,7 +216,7 @@ Comportamiento importante:
 - Para popups, subir `1600 x 900 px` (`16:9`, minimo `1200 x 675 px`) permite
   usar todo el marco sin bandas; el frontend rellena con `object-fit: cover`.
 
-## 5. Cambios v0.24.0
+## 6. Cambios v0.24.0
 
 Archivos principales:
 
@@ -220,7 +241,7 @@ Comportamiento importante:
 
 ---
 
-## 6. Cambios v0.23.0
+## 7. Cambios v0.23.0
 
 Archivos principales:
 
@@ -245,7 +266,7 @@ Comportamiento importante:
 
 ---
 
-## 7. Archivos fuente de verdad
+## 8. Archivos fuente de verdad
 
 - `README.md` - vision general, dev local, contenido, etapas.
 - `ADMIN-URLS.md` - URLs para administrar sitio, CMS, GitHub, Google, DNS y
@@ -261,7 +282,7 @@ Comportamiento importante:
 
 ---
 
-## 8. Operacion clave
+## 9. Operacion clave
 
 ### Admin y publish
 
@@ -299,7 +320,7 @@ usa Unreal conectar `unrealStreamURL` + `unrealLevelName`. Ver `RUNBOOK.md`.
 
 ---
 
-## 9. Pendientes conocidos
+## 10. Pendientes conocidos
 
 - Audio: requiere primera interaccion real antes de sonar.
 - Mobile split-touch: la capa aparece solo con el boton amarillo activo; si se
@@ -317,7 +338,7 @@ usa Unreal conectar `unrealStreamURL` + `unrealLevelName`. Ver `RUNBOOK.md`.
 
 ---
 
-## 10. Google Doc
+## 11. Google Doc
 
 El respaldo final debe quedar en el Google Doc oficial, sin usar el
 Handoff:Kaiyi:
@@ -326,12 +347,12 @@ https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/
 
 Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 Revision Google Doc post-insercion:
-`AFwiY1_TXlf3FoswqooNxLXGtXcXZfEIrg8-6ShBAQRxVW-msmWHGrErSDaGxjF6-ipR_G9V3H42vYOPPJRDiE_dySqPTLCkhjLiNrRZVoo`.
+`AFwiY19eCUG7b2d6asJ64pB5mY7azoWUC7InHRHRM7sdaXaCcIbpD6kKBO-WAGl_tYCLOtVz1R05LXvA6ZzR9egqIbC13jl5W7WahBMfYVU`.
 
 Titulo/anchor para este cierre:
 
 ```text
-2026-05-31 17:50 UTC - v0.25.0 loader-logo-mobile-cms
+2026-06-01 04:10 UTC - v0.25.1 loader-project-count-mobile-cms
 ```
 
 ---
