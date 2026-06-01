@@ -22,7 +22,38 @@
   <link rel="icon" href="/assets/proyecto28-logo-isometric.png" type="image/png" />
   <script>
     (function () {
+      window.__P28_BUILD__ = 'v0.25.2-20260601-fresh-nav-popup-image';
       window.__P28_CMS_URL__ = 'https://honest-candy-800d1e4a92.strapiapp.com';
+
+      function registerFreshnessWorker() {
+        var isProduction = /(^|\.)proyecto28\.com$/i.test(window.location.hostname);
+        if (!isProduction || !('serviceWorker' in navigator)) return;
+        var reloadKey = 'p28-sw-reloaded-' + window.__P28_BUILD__;
+        var didReload = false;
+
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (didReload || window.sessionStorage.getItem(reloadKey)) return;
+          didReload = true;
+          window.sessionStorage.setItem(reloadKey, '1');
+          window.location.reload();
+        });
+
+        window.addEventListener('load', function () {
+          var swURL = '/p28-sw.js?build=' + encodeURIComponent(window.__P28_BUILD__);
+          navigator.serviceWorker.register(swURL, { scope: '/' })
+            .then(function (registration) {
+              if (registration.waiting) {
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+              }
+              return registration.update();
+            })
+            .catch(function (err) {
+              console.warn('[p28] freshness worker unavailable:', err && err.message ? err.message : err);
+            });
+        });
+      }
+
+      registerFreshnessWorker();
 
       function syncVisualViewport() {
         var vv = window.visualViewport;

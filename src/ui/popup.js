@@ -22,6 +22,7 @@ export function createPopup() {
   let activeProject = null;
   let closeTimer    = null;
   let placement     = 'side';
+  let currentImageURL = null;
 
   function show(project) {
     if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
@@ -35,21 +36,39 @@ export function createPopup() {
 
     const popupImageURL = project.popupImageURL || project.imageURL;
     if (popupImageURL) {
-      img.loading = 'lazy';
+      const sameImage = currentImageURL === popupImageURL && img.getAttribute('src') === popupImageURL;
+      currentImageURL = popupImageURL;
+      img.loading = 'eager';
       img.decoding = 'async';
-      img.fetchPriority = 'low';
+      img.fetchPriority = 'high';
       img.sizes = '(max-width: 1024px) 100vw, 380px';
       img.alt = project.title;
       imgWrap.hidden = false;
-      imgWrap.classList.remove('loaded', 'failed');
-      img.onload = () => imgWrap.classList.add('loaded');
+      imgWrap.classList.remove('failed');
+      if (!sameImage) imgWrap.classList.remove('loaded');
+      img.onload = () => {
+        if (currentImageURL !== popupImageURL) return;
+        imgWrap.classList.remove('failed');
+        imgWrap.hidden = false;
+        imgWrap.classList.add('loaded');
+      };
       img.onerror = () => {
+        if (currentImageURL !== popupImageURL) return;
         imgWrap.classList.add('failed');
         imgWrap.hidden = true;
         img.removeAttribute('src');
       };
-      img.src = popupImageURL;
+      if (!sameImage) img.src = popupImageURL;
+      if (img.complete && img.naturalWidth > 0) {
+        requestAnimationFrame(() => {
+          if (currentImageURL !== popupImageURL) return;
+          imgWrap.classList.remove('failed');
+          imgWrap.hidden = false;
+          imgWrap.classList.add('loaded');
+        });
+      }
     } else {
+      currentImageURL = null;
       img.onload = img.onerror = null;
       img.removeAttribute('src');
       imgWrap.hidden = true;
