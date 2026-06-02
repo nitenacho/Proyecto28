@@ -10,6 +10,51 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.25.5] — 2026-06-01 — Patch: popup fijo y luz anclada al seleccionar cubo
+
+### Added
+- Nuevo estado de popup fijado al seleccionar un cubo de proyecto: click,
+  tap mobile o Enter desde la navegación accesible fija el detalle y marca
+  `document.documentElement.dataset.p28PinnedProject` para QA.
+- La luz ahora se ancla suavemente al centro superior del cubo seleccionado
+  mientras el popup está fijado.
+
+### Changed
+- Click/tap sobre cubos deja de navegar directo; la navegación queda en el CTA
+  del popup para que el usuario pueda leer el detalle sin parpadeos.
+- Mientras el popup está fijado, `pointermove`, taps fuera, `pointerleave`,
+  mouse-follow y Escape ya no cierran ni cambian el popup.
+- La X del popup es la única acción que libera la selección fijada y devuelve
+  la luz a su modo flotante.
+- Build id y Service Worker suben a
+  `v0.25.5-20260601-pinned-popup-light`.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- Build local servido con `vite preview`, viewport mobile `390x844`:
+  - click accesible en `Random: Museo MAC` fija `p28PinnedProject="028.C"`;
+  - popup queda `.pinned.visible`;
+  - mouse move + Escape no lo cierran;
+  - click en X limpia `p28PinnedProject` y oculta el popup.
+- GitHub Actions:
+  - Pages run `26790907351` OK;
+  - Auto tag run `26790907349` OK;
+  - tag `v0.25.5` creado para `deaceb7`.
+- Produccion `https://proyecto28.com/?verify-pin=...`:
+  - HTML contiene `v0.25.5-20260601-pinned-popup-light`;
+  - `/p28-sw.js` contiene `v0.25.5-20260601-pinned-popup-light`.
+- Smoke mobile vivo `390x844`:
+  - `source="cms"`;
+  - Service Worker activo `p28-sw.js?build=v0.25.5...`;
+  - `028.C · Random: Museo MAC` fija el popup;
+  - mouse move + Escape mantienen popup visible;
+  - X libera el pin y deja `aria-hidden="true"`.
+- Strapi Cloud:
+  - `/admin` => `200`;
+  - `/api/projects?populate=*` => `200`;
+  - `/api/site-setting?populate=*` => `200`;
+  - `/api/admin-whitelists` => `403`.
+
 ## [0.25.4] — 2026-06-01 — Patch: navegación fresca y popup images mobile
 
 ### Added
@@ -1561,7 +1606,8 @@ Feedback del owner sobre `v0.14.0` en iOS Safari real:
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.25.4...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.25.5...HEAD
+[0.25.5]: https://github.com/nitenacho/Proyecto28/compare/v0.25.4...v0.25.5
 [0.25.4]: https://github.com/nitenacho/Proyecto28/compare/v0.25.1...v0.25.4
 [0.25.1]: https://github.com/nitenacho/Proyecto28/compare/v0.25.0...v0.25.1
 [0.25.0]: https://github.com/nitenacho/Proyecto28/compare/v0.24.0...v0.25.0

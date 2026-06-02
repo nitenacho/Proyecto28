@@ -111,6 +111,16 @@ Si aparece un error de token Google, cerrar sesion con `window.p28SignOut()` en
 DevTools y volver a entrar por `Admin`. Desde `v0.19.0` el frontend reintenta
 una vez con token fresco.
 
+Desde `v0.25.5`, seleccionar un cubo de proyecto con click/tap/Enter fija el
+popup y ancla la luz al centro superior del cubo. El popup fijado no se cierra
+por movimiento de mouse, tap fuera, `pointerleave` ni Escape; la X es la accion
+de cierre que libera la luz para volver a flotar. Para QA:
+
+```js
+document.documentElement.dataset.p28PinnedProject
+document.querySelector('#popup')?.classList.contains('pinned')
+```
+
 ---
 
 ## 3. Agregar un proyecto nuevo

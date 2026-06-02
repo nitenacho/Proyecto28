@@ -1,13 +1,13 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-06-01 (Patch fresh navigation + popup images mobile - `v0.25.4`)
-> **Tag activo esperado tras cierre:** `v0.25.4`
+> **Ultima actualizacion:** 2026-06-01 (Patch pinned popup + light anchor - `v0.25.5`)
+> **Tag activo esperado tras cierre:** `v0.25.5`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
 
-Etapas 1-21 cerradas y patch `v0.25.4` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
+Etapas 1-21 cerradas y patch `v0.25.5` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
 sync Claude Design, hardening performance/a11y, mini-juego Pacman de luz y una
 capa de audio interactivo configurable desde Strapi. La luz ahora se puede
@@ -18,6 +18,9 @@ mobile pide contenido Strapi fresco con reintentos/timeout, y el logo del
 header puede venir desde una imagen `brandLogoImage` en Strapi. La URL limpia
 `proyecto28.com` queda protegida con un freshness worker network-first, y las
 imagenes de popup mobile ya no desaparecen al reutilizar un asset cargado.
+Seleccionar un cubo de proyecto con click/tap/Enter ahora fija el popup y
+asienta la luz en el centro superior del cubo hasta que el usuario cierre con
+la X del popup.
 
 ---
 
@@ -25,6 +28,8 @@ imagenes de popup mobile ya no desaparecen al reutilizar un asset cargado.
 
 Estado vigente esperado tras cierre:
 
+- `v0.25.5`: click/tap/Enter sobre un cubo de proyecto fija el popup, ancla la
+  luz al centro del cubo y solo la X libera la seleccion para volver a flotar.
 - `v0.25.4`: `public/p28-sw.js` fuerza navegaciones frescas para la URL limpia,
   mantiene Strapi fuera del worker, y corrige popup images mobile que
   parpadeaban/desaparecian.
@@ -73,7 +78,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- ultimo tag `v0.25.4`
+- ultimo tag `v0.25.5`
 - build Vite OK
 - build Strapi OK
 
@@ -83,14 +88,37 @@ Lectura obligatoria:
 2. `ADMIN-URLS.md` - URLs para administrar todos los servicios.
 3. `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
 4. `DEPLOY.md` - GitHub Pages, Strapi, OAuth, Pixel Streaming, releases.
-5. `CHANGELOG.md` - `[0.25.1]`.
-6. `PLAN-PROYECTO28-V2.md` - Etapa 21 + patches `v0.25.1`/`v0.25.4` cerrados.
+5. `CHANGELOG.md` - `[0.25.5]`.
+6. `PLAN-PROYECTO28-V2.md` - Etapa 21 + patches `v0.25.1`/`v0.25.4`/`v0.25.5` cerrados.
 7. `cms/README.md` - SiteSetting incluye `brandLogoImage`, `gameLightColor`
    y `audio*`.
 
 ---
 
-## 2. Cambios v0.25.4
+## 2. Cambios v0.25.5
+
+### Popup fijo + luz anclada
+
+- Click/tap/Enter sobre un cubo de proyecto fija el popup y deja la luz
+  asentandose en el centro superior del cubo.
+- Mientras el popup esta fijado, `pointermove`, taps fuera, `pointerleave`,
+  mouse-follow y Escape no cambian ni cierran el detalle.
+- La X del popup es la unica accion que libera el estado fijado; al cerrar,
+  la luz vuelve a flotar y el popup queda oculto.
+- QA invisible: `document.documentElement.dataset.p28PinnedProject` indica el
+  proyecto fijado, por ejemplo `028.C`.
+- La navegacion directa desde click/tap en cubo queda reemplazada por el CTA
+  del popup, para que leer el detalle no dependa de hover estable.
+
+### Archivos tocados
+
+- `index.html`
+- `public/p28-sw.js`
+- `src/game/light.js`
+- `src/main.js`
+- `src/ui/popup.js`
+
+## 3. Cambios v0.25.4
 
 ### Fresh navigation para proyecto28.com
 
@@ -120,7 +148,7 @@ Lectura obligatoria:
 - `src/data/cms.js`
 - `src/ui/popup.js`
 
-## 3. Cambios v0.25.1
+## 4. Cambios v0.25.1
 
 ### Loader proyecto 1/28
 
@@ -146,7 +174,7 @@ Lectura obligatoria:
 - `src/data/cms.js`
 - `src/styles/three-host.css`
 
-## 4. Cambios v0.25.0
+## 5. Cambios v0.25.0
 
 ### Loader + feedback de carga
 
@@ -190,7 +218,7 @@ Lectura obligatoria:
 - `CHANGELOG.md`
 - `PLAN-PROYECTO28-V2.md`
 
-## 5. Cambios v0.24.0
+## 6. Cambios v0.24.0
 
 ### Split-screen touch joystick
 
@@ -223,7 +251,7 @@ Lectura obligatoria:
 
 ---
 
-## 6. Cambios v0.23.0
+## 7. Cambios v0.23.0
 
 ### Control discoverable
 
@@ -268,7 +296,7 @@ Lectura obligatoria:
 
 ---
 
-## 7. Cambios v0.22.0
+## 8. Cambios v0.22.0
 
 ### Mobile parity visual
 
@@ -340,9 +368,9 @@ Archivos tocados:
 
 ---
 
-## 8. Validacion realizada antes del cierre
+## 9. Validacion realizada antes del cierre
 
-### Local v0.25.4
+### Local v0.25.5
 
 ```powershell
 npm run build
@@ -354,7 +382,7 @@ Resultado:
 
 - Frontend OK. Warning existente: chunk `three` >500 kB.
 - Strapi admin build OK. Warning heredado: `DEP0187 fs.existsSync`.
-- Build local `v0.25.4` genera `assets/index-BnMu5fn2.js` y copia
+- Build local `v0.25.5` genera `assets/index-DyLe-wD1.js` y copia
   `public/p28-sw.js` a `dist/p28-sw.js`.
 
 Servidor local:
@@ -390,6 +418,12 @@ Chrome CDP smoke:
   - rect `352 x 198 px`;
   - se mantiene visible varios segundos despues.
 
+- Pinned popup local con `028.C`:
+  - `p28PinnedProject="028.C"`;
+  - popup `.pinned.visible`;
+  - mouse move + Escape no cierran el popup;
+  - click en X limpia `p28PinnedProject` y deja `aria-hidden="true"`.
+
 ### Produccion/Strapi predeploy
 
 - `https://proyecto28.com` => `200`
@@ -402,6 +436,31 @@ Chrome CDP smoke:
   `{ allowed:true, role:"owner" }`
 - `/api/auth/check?email=yk8arts@gmail.com` =>
   `{ allowed:true, role:"editor" }`
+
+### Produccion postdeploy v0.25.5
+
+- Commit funcional: `deaceb7 fix: pin light and popup on project select`.
+- Tag activo: `v0.25.5`.
+- GitHub Actions:
+  - Pages run `26790907351` OK;
+  - Auto tag run `26790907349` OK.
+- Produccion:
+  - `https://proyecto28.com` => `200`
+  - HTML vivo contiene `v0.25.5-20260601-pinned-popup-light`
+  - `/p28-sw.js` contiene `v0.25.5-20260601-pinned-popup-light`
+- Smoke mobile vivo `390x844`:
+  - carga desde `cms`;
+  - Service Worker activo: `/p28-sw.js?build=v0.25.5...`;
+  - `028.C · Random: Museo MAC`;
+  - seleccionar el cubo fija `p28PinnedProject="028.C"`;
+  - popup `Random: Museo MAC` queda `.pinned.visible`;
+  - mouse move + Escape no lo cierran;
+  - X libera el pin y deja el popup `aria-hidden="true"`.
+- Strapi Cloud postdeploy:
+  - `/admin` => `200`
+  - `/api/projects?populate=*` => `200`
+  - `/api/site-setting?populate=*` => `200`
+  - `/api/admin-whitelists` => `403`
 
 ### Produccion postdeploy v0.25.4
 
@@ -446,7 +505,7 @@ Chrome CDP smoke:
 
 ---
 
-## 9. Operacion clave
+## 10. Operacion clave
 
 ### Admin / Tweaks / publicar
 
@@ -510,7 +569,7 @@ Admin -> Tweaks -> Streaming -> Preview visible OFF -> PUBLICAR CAMBIOS
 
 ---
 
-## 10. Deploy esperado
+## 11. Deploy esperado
 
 Flujo correcto para una etapa nueva:
 
@@ -524,6 +583,13 @@ Flujo correcto para una etapa nueva:
 8. Actualizar handoff local + Google Doc.
 9. Confirmar tag semver.
 
+Para `v0.25.5`:
+
+- Rama usada: `main`.
+- Commit funcional: `deaceb7 fix: pin light and popup on project select`.
+- Tag automatico final: `v0.25.5`.
+- Build id: `v0.25.5-20260601-pinned-popup-light`.
+
 Para `v0.25.4`:
 
 - Rama usada: `main`.
@@ -534,7 +600,7 @@ Para `v0.25.4`:
 
 ---
 
-## 11. Riesgos y pendientes
+## 12. Riesgos y pendientes
 
 - Audio en navegadores: no puede sonar antes de la primera interaccion real por
   politicas de autoplay. Esto es esperado.
@@ -555,7 +621,7 @@ Para `v0.25.4`:
 
 ---
 
-## 12. Google Doc
+## 13. Google Doc
 
 Respaldo oficial:
 
@@ -567,13 +633,13 @@ Regla:
 - No usar el Handoff:Kaiyi para esta etapa.
 - Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 - Revision Google Doc post-insercion:
-`AFwiY18mieU6dFaYrrpnTxg1obFkI6Kn0VddToK0zpuJv2_embzeG6os_ZhMzdPxHXurL9GUkZbOkoLxy0rPKSKlX_JlG-pYJKOK06KNqz0`.
+`AFwiY1-wGfVWveJDvjXkU7TrEO53X0fySx1-bgYLKkoG4gyE1YNagjWknRgxvpgd35ycpdft0FWRp3P5fNgM29veTK-eLk8WJtYqU_v7aeQ`.
 - Titulo/anchor:
 
 ```text
-2026-06-01 05:30 UTC - v0.25.4 fresh-navigation-popup-images
+2026-06-02 00:45 UTC - v0.25.5 pinned-popup-light
 ```
 
 ---
 
-Fin del handoff `v0.25.4`.
+Fin del handoff `v0.25.5`.

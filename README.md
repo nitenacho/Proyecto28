@@ -205,6 +205,12 @@ capa de datos mantiene Strapi fuera del worker y reintenta requests con
 timeout/cache-buster. Para QA mobile se puede leer
 `document.documentElement.dataset.p28ContentSource` y confirmar que vale `cms`.
 
+Desde `v0.25.5`, click/tap/Enter sobre un cubo de proyecto fija el popup y
+ancla la luz al centro superior del cubo. Mientras está fijado, mover el mouse,
+tocar fuera o presionar Escape no cambia el detalle; la X del popup libera la
+selección y devuelve la luz a flotar. Para QA se puede leer
+`document.documentElement.dataset.p28PinnedProject`.
+
 Recomendaciones de media visibles en Strapi:
 
 - Logo de marca: PNG o WebP transparente, `512 x 512 px`, zona segura central
@@ -302,3 +308,4 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 21 — Loader + logo CMS + freshness mobile | ✅ Cerrado — progreso sutil, Strapi no-store/cache-buster, logo media y pixel hints | `v0.25.0` |
 | 21 hotfix — Loader 1/28 + CMS mobile hardening | ✅ Cerrado — mensaje `Cargando proyecto N/28`, runtime CMS fallback y QA `Random: Museo MAC` | `v0.25.1` |
 | 21 hotfix 2 — Fresh navigation + popup images mobile | ✅ Cerrado — Service Worker network-first, Strapi fuera del worker e imagenes popup estables | `v0.25.4` |
+| 21 hotfix 3 — Pinned popup + light anchor | ✅ Cerrado — click/tap fija popup y luz hasta cerrar con X | `v0.25.5` |
