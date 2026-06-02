@@ -5,6 +5,7 @@
 > Tag activo esperado tras cierre: `v0.26.0`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
+> Google Doc revision cierre: `AFwiY1-q2sRKejy3mEhBEeT0VwKev2mnHNxxfoOYJok9C6rE_ijXs9Xl3GpSuqPdXMTl1lPnilJqLTrh-9XZ3gfnJW4KQwtLHCzDlMnI0uE`
 
 Este handoff es el punto de entrada compacto para un nuevo agente. Para
 operacion detallada, leer `RUNBOOK.md`.
@@ -179,6 +180,24 @@ Validado local `v0.26.0`:
     `cameraLift>0`;
   - final: `floorLevel=1`, `systemLevel=1`, `stairVisible=false`, HUD
     `Piso01` y `Esferas00/06`.
+
+Validado postdeploy `v0.26.0`:
+
+- Commit funcional `5752efe feat: add floor ascension game loop`.
+- GitHub Pages run `26797380673` OK.
+- Auto-tag run `26797380660` OK; tag `v0.26.0`.
+- Produccion `https://proyecto28.com/?floor-test=...`, mobile `390x844`:
+  `source="cms"`, Service Worker activo
+  `/p28-sw.js?build=v0.26.0-20260602-floor-ascension`,
+  `Random: Museo MAC` visible, `p28FloorSphereGoal=6`,
+  `triggerAscension()` muestra escalera/transicion y finaliza en `Piso01`.
+- Strapi Cloud: `/admin` `200`, `/api/projects?populate=*` `200`,
+  `/api/site-setting?populate=*` `200`, `gameAscendSphereGoal=6`,
+  `gameFloorHeight=4.2`, `gameGhostFloors=3`,
+  `/api/admin-whitelists` `403`.
+- Google Doc `NOTAS_Proyecto28`, tab `t.7lpfc5ado1h`, actualizado con bloque
+  23 y revision
+  `AFwiY1-q2sRKejy3mEhBEeT0VwKev2mnHNxxfoOYJok9C6rE_ijXs9Xl3GpSuqPdXMTl1lPnilJqLTrh-9XZ3gfnJW4KQwtLHCzDlMnI0uE`.
 
 Validado postdeploy `v0.25.4`:
 

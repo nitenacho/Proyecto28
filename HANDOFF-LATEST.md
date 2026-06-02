@@ -6,6 +6,7 @@
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
+> **Google Doc revision cierre:** `AFwiY1-q2sRKejy3mEhBEeT0VwKev2mnHNxxfoOYJok9C6rE_ijXs9Xl3GpSuqPdXMTl1lPnilJqLTrh-9XZ3gfnJW4KQwtLHCzDlMnI0uE`
 
 Etapas 1-22 cerradas y `v0.26.0` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
@@ -37,6 +38,9 @@ Estado vigente esperado tras cierre:
 - `v0.26.0`: la luz/personaje come `gameAscendSphereGoal` esferas, genera una
   escalera y asciende de piso; el piso anterior queda visible en fondo como
   InstancedMesh/Grid Ventana con `gameFloorHeight` y `gameGhostFloors`.
+  Produccion verificada: Pages run `26797380673`, Auto-tag run `26797380660`,
+  commit `5752efe`, tag `v0.26.0`, Strapi expone `6/4.2/3` y Google Doc
+  actualizado en tab `t.7lpfc5ado1h`.
 - `v0.25.6`: click/tap cercano a un cubo de proyecto usa captura magnetica
   configurable (`gameTileCaptureRadius`) para fijar popup + luz sin exigir
   precision perfecta. QA: `p28TileCaptureMode="magnet"` y

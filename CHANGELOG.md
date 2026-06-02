@@ -42,6 +42,28 @@ o a un fix puntual entre etapas.
     `cameraLift>0`;
   - final: `floorLevel=1`, `systemLevel=1`, `stairVisible=false`,
     HUD `Piso01` y `Esferas00/06`.
+- GitHub Actions:
+  - Pages run `26797380673` OK;
+  - Auto tag run `26797380660` OK;
+  - tag `v0.26.0` creado para `5752efe`.
+- Produccion `https://proyecto28.com/?floor-test=...`:
+  - HTML y `/p28-sw.js` contienen
+    `v0.26.0-20260602-floor-ascension`;
+  - Service Worker activo
+    `/p28-sw.js?build=v0.26.0-20260602-floor-ascension`;
+  - mobile `390x844`: `source="cms"`, `Random: Museo MAC` visible,
+    `p28FloorSphereGoal=6`, ascenso con `stairVisible=true`,
+    `ascensionState="ascend"`, final `floorLevel=1`, `systemLevel=1`,
+    `ghostCount=1`, HUD `Piso01`.
+- Strapi Cloud:
+  - `/admin` => `200`;
+  - `/api/projects?populate=*` => `200`;
+  - `/api/site-setting?populate=*` => `200`;
+  - `SiteSetting.gameAscendSphereGoal=6`, `gameFloorHeight=4.2`,
+    `gameGhostFloors=3`;
+  - `/api/admin-whitelists` => `403`.
+- Google Doc `NOTAS_Proyecto28`, tab `t.7lpfc5ado1h`, actualizado con
+  revision `AFwiY1-q2sRKejy3mEhBEeT0VwKev2mnHNxxfoOYJok9C6rE_ijXs9Xl3GpSuqPdXMTl1lPnilJqLTrh-9XZ3gfnJW4KQwtLHCzDlMnI0uE`.
 
 ## [0.25.6] — 2026-06-02 — Patch: captura magnetica para popup + luz
 
