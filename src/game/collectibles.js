@@ -25,6 +25,8 @@ export function createCollectibleSpheres({ scene, tiles }) {
   });
 
   const spheres = [];
+  const sphereByTile = new Map();
+  let activeSphereSet = new Set();
   for (const tile of tiles) {
     if (tile.userData?.isProject) continue;
     const sphere = new THREE.Mesh(geometry, material);
@@ -41,19 +43,40 @@ export function createCollectibleSpheres({ scene, tiles }) {
     };
     group.add(sphere);
     spheres.push(sphere);
+    sphereByTile.set(tile, sphere);
+  }
+
+  function activeSpheres() {
+    return spheres.filter((sphere) => activeSphereSet.has(sphere));
+  }
+
+  function setActiveTiles(activeTiles = tiles) {
+    activeSphereSet = new Set(
+      activeTiles
+        .map((tile) => sphereByTile.get(tile))
+        .filter(Boolean),
+    );
+    for (const sphere of spheres) {
+      const active = activeSphereSet.has(sphere);
+      if (!active) {
+        sphere.userData.collected = true;
+        sphere.visible = false;
+      }
+    }
   }
 
   function setActive(active) {
     group.visible = !!active;
     for (const sphere of spheres) {
-      sphere.visible = !!active && !sphere.userData.collected;
+      sphere.visible = !!active && activeSphereSet.has(sphere) && !sphere.userData.collected;
     }
   }
 
   function reset() {
     for (const sphere of spheres) {
-      sphere.userData.collected = false;
-      sphere.visible = group.visible;
+      const active = activeSphereSet.has(sphere);
+      sphere.userData.collected = !active;
+      sphere.visible = group.visible && active;
       sphere.scale.setScalar(1);
     }
   }
@@ -61,7 +84,7 @@ export function createCollectibleSpheres({ scene, tiles }) {
   function collectNear(lightMesh) {
     if (!group.visible || !lightMesh) return 0;
     let picked = 0;
-    for (const sphere of spheres) {
+    for (const sphere of activeSpheres()) {
       if (sphere.userData.collected || !sphere.visible) continue;
       const dx = sphere.position.x - lightMesh.position.x;
       const dz = sphere.position.z - lightMesh.position.z;
@@ -75,7 +98,7 @@ export function createCollectibleSpheres({ scene, tiles }) {
 
   function update(timeSeconds) {
     if (!group.visible) return;
-    for (const sphere of spheres) {
+    for (const sphere of activeSpheres()) {
       if (sphere.userData.collected) continue;
       const phaseT = timeSeconds * 2.1 + sphere.userData.phase;
       sphere.position.y = sphere.userData.baseY + Math.sin(phaseT) * FLOAT_AMPLITUDE;
@@ -84,10 +107,13 @@ export function createCollectibleSpheres({ scene, tiles }) {
     }
   }
 
+  setActiveTiles(tiles);
+
   return {
     group,
     spheres,
-    total: spheres.length,
+    get total() { return activeSphereSet.size; },
+    setActiveTiles,
     setActive,
     reset,
     collectNear,

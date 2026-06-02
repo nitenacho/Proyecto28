@@ -1,14 +1,14 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-06-02 (Etapa 22 floor ascension - `v0.26.0`)
-> **Tag activo esperado tras cierre:** `v0.26.0`
+> **Ultima actualizacion:** 2026-06-02 (Etapa 23 edge stair floor loop - `v0.27.0`)
+> **Tag activo esperado tras cierre:** `v0.27.0`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
 > **Google Doc revision cierre:** `AFwiY1-q2sRKejy3mEhBEeT0VwKev2mnHNxxfoOYJok9C6rE_ijXs9Xl3GpSuqPdXMTl1lPnilJqLTrh-9XZ3gfnJW4KQwtLHCzDlMnI0uE`
 
-Etapas 1-22 cerradas y `v0.26.0` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
+Etapas 1-23 cerradas y `v0.27.0` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
 sync Claude Design, hardening performance/a11y, mini-juego Pacman de luz y una
 capa de audio interactivo configurable desde Strapi. La luz ahora se puede
@@ -28,6 +28,10 @@ El mini-juego de luz ahora asciende por pisos: al comer suficientes esferas
 aparece una escalera, la camara/mundo simulan subir y el piso anterior queda
 visible como InstancedMesh/Grid Ventana optimizado. La meta de esferas, altura
 entre pisos y cantidad de pisos visibles son publicables desde Strapi.
+Desde `v0.27.0`, la escalera aparece junto a un cubo aleatorio de borde, el
+ascenso ocurre al llegar a la escalera y el loop alterna pisos completos con
+pisos sparse temporales que siempre tienen al menos un cubo brillante y uno
+normal con esfera.
 
 ---
 
@@ -35,6 +39,10 @@ entre pisos y cantidad de pisos visibles son publicables desde Strapi.
 
 Estado vigente esperado tras cierre:
 
+- `v0.27.0`: la escalera aparece en un cubo de borde, se muestra preview del
+  siguiente piso y el ascenso solo ocurre al llegar a la escalera. Los pisos
+  sparse tienen menos cubos, al menos un brillante y un normal con esfera; el
+  siguiente ascenso vuelve a layout full.
 - `v0.26.0`: la luz/personaje come `gameAscendSphereGoal` esferas, genera una
   escalera y asciende de piso; el piso anterior queda visible en fondo como
   InstancedMesh/Grid Ventana con `gameFloorHeight` y `gameGhostFloors`.
@@ -95,7 +103,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- ultimo tag `v0.26.0`
+- ultimo tag `v0.27.0`
 - build Vite OK
 - build Strapi OK
 
@@ -105,14 +113,36 @@ Lectura obligatoria:
 2. `ADMIN-URLS.md` - URLs para administrar todos los servicios.
 3. `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
 4. `DEPLOY.md` - GitHub Pages, Strapi, OAuth, Pixel Streaming, releases.
-5. `CHANGELOG.md` - `[0.26.0]`.
-6. `PLAN-PROYECTO28-V2.md` - Etapa 22 + patches `v0.25.1`/`v0.25.4`/`v0.25.5`/`v0.25.6` cerrados.
+5. `CHANGELOG.md` - `[0.27.0]`.
+6. `PLAN-PROYECTO28-V2.md` - Etapa 23 + patches `v0.25.1`/`v0.25.4`/`v0.25.5`/`v0.25.6` cerrados.
 7. `cms/README.md` - SiteSetting incluye `brandLogoImage`, `gameLightColor`
    y `audio*`.
 
 ---
 
-## 2. Cambios v0.26.0
+## 2. Cambios v0.27.0
+
+### Edge stair + active floor loop
+
+- Al completar la meta de esferas se revela una escalera junto a un cubo
+  aleatorio de la orilla de la grilla.
+- El ascenso solo empieza cuando la luz llega a la escalera.
+- Mientras la escalera esta activa, aparece un preview temporal del siguiente
+  piso; al completar la transicion se elimina el preview y se aplica el layout
+  real del nuevo piso.
+- Los pisos impares usan un numero menor y aleatorio de cubos, siempre con al
+  menos un brillante y un normal con esfera; los pisos pares vuelven al layout
+  completo.
+- La luz, respawn, colision, sombra, esferas, hover/click y teclado usan solo
+  cubos activos del piso actual.
+- QA con `?floor-test=...`:
+  `window.p28FloorDebug.revealStaircase()`,
+  `window.p28FloorDebug.stepOnStair()` y
+  `window.p28FloorDebug.state()`.
+- Build id y Service Worker:
+  `v0.27.0-20260602-edge-stair-floor-loop`.
+
+## 3. Cambios v0.26.0
 
 ### Floor ascension game loop
 

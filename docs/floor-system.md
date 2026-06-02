@@ -9,10 +9,16 @@ subir a un nivel superior mientras el piso anterior queda visible como fondo.
 1. El usuario toma control de la luz desde el HUD.
 2. `createCollectibleSpheres` activa esferas pequenas sobre cubos vacios.
 3. Al recolectar `gameAscendSphereGoal` esferas, se ocultan las esferas y
-   `createFloorSystem.startAscension()` muestra una escalera luminosa.
-4. La camara levanta su objetivo durante una transicion vertical breve.
-5. El piso anterior se conserva como una version simplificada en el fondo.
-6. El HUD sube `Piso` y reinicia el contador de esferas para el nuevo nivel.
+   `createFloorSystem.prepareStaircase()` muestra una escalera luminosa junto
+   a un cubo aleatorio de la orilla de la grilla.
+4. Mientras la escalera espera, se muestra un preview temporal del siguiente
+   piso para que parezca que el mundo sigue conectado.
+5. El ascenso se gatilla cuando la luz llega a la escalera.
+6. La camara levanta su objetivo durante una transicion vertical breve.
+7. El piso anterior se conserva como una version simplificada en el fondo.
+8. El layout real del nuevo piso reemplaza al anterior y se destruye el
+   preview temporal para ahorrar recursos.
+9. El HUD sube `Piso` y reinicia el contador de esferas para el nuevo nivel.
 
 ## InstancedMesh / Grid Ventana
 
@@ -27,6 +33,25 @@ representan con `THREE.InstancedMesh` de cajas bajas en wireframe:
 Este enfoque deja visible la memoria del piso anterior sin multiplicar draw
 calls ni mantener texturas/iframes/popups por nivel. Por defecto se conservan
 3 pisos anteriores y Strapi limita el valor a `1..4`.
+
+## Escalera en borde y layout activo
+
+Desde v0.27.0 la escalera no aparece en el centro ni dispara el ascenso sola.
+Al completar la meta de esferas, el sistema elige un cubo activo de borde
+(`row=0`, `col=0`, ultima fila o ultima columna), posiciona la escalera hacia
+afuera de la grilla y agrega la escalera a los objetos de colision de la luz.
+
+El piso activo es la unica grilla interactiva. Los cubos ocultos quedan fuera
+de colision, sombra, hover, click/tap, accesibilidad por teclado y esferas.
+Esto permite alternar entre:
+
+- pisos full: todos los cubos activos;
+- pisos sparse: menos cubos aleatorios, siempre con al menos un cubo brillante
+  y un cubo normal con esfera.
+
+Los pisos sparse venden la idea de subir a un lugar nuevo sin tener que crear
+un mundo completo. El siguiente ascenso vuelve a un piso full, generando un
+loop simple: full -> sparse -> full -> sparse.
 
 ## Matematica visual
 
@@ -63,10 +88,12 @@ window.p28FloorDebug.triggerAscension()
 Senales esperadas:
 
 - antes: `ascensionState="idle"`, `floorLevel=0`, `ghostCount=0`;
-- al disparar: `ascensionState="stair"`, `stairVisible=true`,
-  `ghostCount=1`;
-- durante: `ascensionState="ascend"`, `cameraLift>0`;
-- final: `ascensionState="idle"`, `floorLevel=1`, `stairVisible=false`.
+- `revealStaircase()`: `ascensionState="stair-ready"`,
+  `stairVisible=true`, `stairAnchor` en borde y `nextFloorTileCount>0`;
+- `stepOnStair()` o subir manualmente: `ascensionState="ascend"`,
+  `cameraLift>0`;
+- final: `ascensionState="idle"`, `floorLevel=1`, `stairVisible=false`,
+  `layoutMode="sparse"` y `activeProjectCount>=1`, `activeNormalCount>=1`.
 
 Tambien quedan datasets en `document.documentElement.dataset`:
 

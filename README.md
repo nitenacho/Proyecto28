@@ -143,6 +143,19 @@ Etapa 22 convierte el mini-juego en sistema de pisos:
 - QA local/produccion: abrir con `?floor-test=...` y usar
   `window.p28FloorDebug.triggerAscension()`.
 
+Etapa 23 hace fisico el loop de escalera/pisos:
+
+- al completar esferas aparece una escalera junto a un cubo aleatorio de la
+  orilla de la grilla;
+- el ascenso se gatilla cuando la luz llega a la escalera, no al completar la
+  meta;
+- mientras la escalera esta visible se muestra un preview temporal del proximo
+  piso con cubos nuevos, y se elimina al terminar la transicion;
+- los pisos impares usan menos cubos aleatorios, siempre con al menos un cubo
+  brillante y un cubo normal con esfera; los pares vuelven al layout completo;
+- la luz, el respawn, las esferas, hover/click y teclado trabajan solo con el
+  piso activo.
+
 ### Performance y accesibilidad
 
 Etapa 15 endurece el boot final antes de v1:

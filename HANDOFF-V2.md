@@ -1,8 +1,8 @@
 # HANDOFF V2 - Proyecto 28
 
-> Ultima actualizacion: 2026-06-02 (Etapa 22 floor ascension - `v0.26.0`)
+> Ultima actualizacion: 2026-06-02 (Etapa 23 edge stair floor loop - `v0.27.0`)
 > Branch esperado: `main`
-> Tag activo esperado tras cierre: `v0.26.0`
+> Tag activo esperado tras cierre: `v0.27.0`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
 > Google Doc revision cierre: `AFwiY1-q2sRKejy3mEhBEeT0VwKev2mnHNxxfoOYJok9C6rE_ijXs9Xl3GpSuqPdXMTl1lPnilJqLTrh-9XZ3gfnJW4KQwtLHCzDlMnI0uE`
@@ -14,7 +14,7 @@ operacion detallada, leer `RUNBOOK.md`.
 
 ## 1. Estado ejecutivo
 
-Etapas 1-22 cerradas y `v0.26.0` aplicado. Proyecto28 queda como web 3D interactiva con:
+Etapas 1-23 cerradas y `v0.27.0` aplicado. Proyecto28 queda como web 3D interactiva con:
 
 - Vite + Three.js + GSAP.
 - Strapi Cloud como CMS.
@@ -58,15 +58,20 @@ Etapas 1-22 cerradas y `v0.26.0` aplicado. Proyecto28 queda como web 3D interact
   genera una escalera, la camara/mundo simulan subir y el piso anterior queda
   visible en fondo como InstancedMesh/Grid Ventana con `gameFloorHeight` y
   `gameGhostFloors`.
+- Escalera fisica en borde: al completar esferas aparece junto a un cubo de
+  orilla, el ascenso se gatilla al llegar a ella, y los pisos alternan entre
+  layout completo y layout sparse con al menos un cubo brillante y uno normal
+  con esfera.
 - Logo del header configurable desde Strapi `SiteSetting.brandLogoImage`;
   `Project.popupImage` es la imagen prioritaria del popup.
 
 Ultimo codigo funcional esperado:
 
-- `v0.26.0` - Floor ascension game loop.
+- `v0.27.0` - Edge stair + active floor loop.
 
 Tags/commits recientes:
 
+- `v0.27.0` - Escalera en borde, preview de siguiente piso y loop full/sparse.
 - `v0.26.0` - Esferas suficientes generan escalera, ascenso y piso anterior visible.
 - `v0.25.6` - Click/tap cercano captura cubo y fija popup + luz.
 - `v0.25.5` - Click/tap fija popup y luz hasta cerrar con X.
@@ -104,7 +109,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- tag `v0.26.0`
+- tag `v0.27.0`
 - build Vite OK
 - build Strapi OK
 

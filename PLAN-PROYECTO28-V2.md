@@ -1,10 +1,10 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-06-02 — `v0.26.0` Etapa 22 ascenso por pisos
+> **Última actualización operativa:** 2026-06-02 — `v0.27.0` Etapa 23 escalera en borde y loop de pisos
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-22 cerradas. `v0.26.0` convierte el mini-juego de luz en experiencia por pisos: esferas suficientes generan escalera, camara/mundo ascienden y el piso anterior queda visible como InstancedMesh/Grid Ventana optimizado.
+> **Status:** En ejecución — etapas 1-23 cerradas. `v0.27.0` hace que la escalera aparezca en un cubo de borde, que el ascenso dependa de llegar a ella, y que el loop alterne pisos full/sparse con preview temporal del siguiente piso.
 
 ## Estado del plan al 2026-05-31 America/Santiago
 
@@ -44,6 +44,7 @@
 | 21 hotfix 3 — Pinned popup + light anchor | ✅ Cerrada | `v0.25.5` | `deaceb7` |
 | 21 hotfix 4 — Magnetic popup capture radius | ✅ Cerrada | `v0.25.6` | `abd6d93` |
 | 22 — Floor ascension game loop | ✅ Cerrada | `v0.26.0` | `5752efe` |
+| 23 — Edge stair + active floor loop | ✅ Cerrada | `v0.27.0` | pendiente cierre |
 
 ## Decisiones tomadas durante la ejecución (resoluciones al §1)
 
@@ -81,7 +82,10 @@
   agrega el sistema de pisos: la luz come `gameAscendSphereGoal` esferas,
   genera escalera, asciende con camara vertical y deja pisos anteriores como
   `InstancedMesh/Grid Ventana`; `gameFloorHeight` y `gameGhostFloors` quedan
-  publicables desde Strapi.
+  publicables desde Strapi. Etapa 23 mueve la escalera a un cubo aleatorio de
+  borde, hace que el ascenso dependa de llegar a esa escalera y alterna pisos
+  full/sparse con preview temporal del siguiente piso para vender continuidad
+  sin mantener mundos completos en memoria.
 - **§1.6 Admin Strapi:** ✅ Admin operativo. Fix aplicado: `Project` no usa
   Draft & Publish para evitar el choque entre el campo editable `status` y el
   `status` interno de Strapi v5.

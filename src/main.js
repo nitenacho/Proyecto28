@@ -95,18 +95,42 @@ async function boot() {
     scene: sceneCtx.scene,
     tiles: sceneCtx.tiles,
   });
+  let sphereRun = null;
+  let controlLight = null;
+  let activeFloorTiles = [...sceneCtx.tiles];
+  let activeCollisionObjects = [...sceneCtx.tiles];
+  function chooseRespawnTile(tiles) {
+    if (!tiles.length) return sceneCtx.tiles[0] || null;
+    return [...tiles].sort((a, b) => {
+      const da = a.position.x * a.position.x + a.position.z * a.position.z;
+      const db = b.position.x * b.position.x + b.position.z * b.position.z;
+      return da - db;
+    })[0];
+  }
+  function syncActiveFloor(activeTiles = activeFloorTiles, collisionObjects = activeCollisionObjects) {
+    activeFloorTiles = activeTiles;
+    activeCollisionObjects = collisionObjects;
+    collectibles.setActiveTiles(activeFloorTiles);
+    if (controlLight) {
+      controlLight.setCollisionObjects(activeCollisionObjects);
+      controlLight.setRespawnTile(chooseRespawnTile(activeFloorTiles));
+    }
+    if (sphereRun) refreshSphereGoal();
+  }
   const floorSystem = createFloorSystem({
     scene: sceneCtx.scene,
     tiles: sceneCtx.tiles,
     config: site.game,
+    onActiveTilesChange(activeTiles, collisionObjects) {
+      syncActiveFloor(activeTiles, collisionObjects);
+    },
   });
   const streamOverlay = createLazyStreamOverlay({ site, camera: sceneCtx.camera });
   let activeTile = null;
   let lightControlled = false;
-  let controlLight = null;
   let touchControls = null;
   let touchControlsRequested = false;
-  const sphereRun = {
+  sphereRun = {
     active: false,
     complete: false,
     startAt: 0,
@@ -115,6 +139,7 @@ async function boot() {
     goal: floorSystem.getSphereGoal(collectibles.total),
     floorLevel: 0,
     ascending: false,
+    awaitingStair: false,
     bestMs: readBestSphereTime(),
   };
 
@@ -143,6 +168,7 @@ async function boot() {
     sphereRun.active = true;
     sphereRun.complete = false;
     sphereRun.ascending = false;
+    sphereRun.awaitingStair = false;
     sphereRun.startAt = nowMs;
     sphereRun.elapsedMs = 0;
     sphereRun.collected = 0;
@@ -157,14 +183,26 @@ async function boot() {
     sphereRun.active = false;
     sphereRun.complete = false;
     sphereRun.ascending = false;
+    sphereRun.awaitingStair = false;
     sphereRun.startAt = 0;
     sphereRun.elapsedMs = 0;
     sphereRun.collected = 0;
     refreshSphereGoal();
+    floorSystem.cancelStaircase();
     collectibles.setActive(false);
     collectibles.reset();
     hud.setCollectibles(0, sphereRun.goal);
     hud.setTimer(0, false);
+  }
+
+  function revealStaircase() {
+    if (sphereRun.awaitingStair || sphereRun.ascending) return;
+    sphereRun.active = false;
+    sphereRun.awaitingStair = true;
+    collectibles.setActive(false);
+    floorSystem.prepareStaircase(sphereRun.floorLevel + 1);
+    syncActiveFloor(floorSystem.activeTiles, floorSystem.collisionObjects);
+    document.documentElement.dataset.p28FloorAwaitingStair = 'true';
   }
 
   function beginFloorAscension(nowMs) {
@@ -172,6 +210,7 @@ async function boot() {
     sphereRun.active = false;
     sphereRun.complete = true;
     sphereRun.ascending = true;
+    sphereRun.awaitingStair = false;
     sphereRun.elapsedMs = Math.max(0, nowMs - sphereRun.startAt);
     collectibles.setActive(false);
     hud.setCollectibles(sphereRun.goal, sphereRun.goal);
@@ -183,6 +222,7 @@ async function boot() {
     }
     interactionAudio.playInteraction('victory');
     controlLight.flashVictory();
+    delete document.documentElement.dataset.p28FloorAwaitingStair;
     floorSystem.startAscension(sphereRun.floorLevel + 1);
   }
 
@@ -190,6 +230,7 @@ async function boot() {
     sphereRun.floorLevel = level;
     sphereRun.complete = false;
     sphereRun.ascending = false;
+    sphereRun.awaitingStair = false;
     hud.setFloorLevel(level);
     document.documentElement.dataset.p28FloorLevel = String(level);
     if (lightControlled) startSphereRun(nowMs);
@@ -198,6 +239,14 @@ async function boot() {
 
   function updateSphereRun(nowMs, timeSeconds) {
     collectibles.update(timeSeconds);
+    if (sphereRun.awaitingStair) {
+      sphereRun.elapsedMs = Math.max(0, nowMs - sphereRun.startAt);
+      hud.setTimer(sphereRun.elapsedMs, true);
+      if (floorSystem.hasReachedStair(controlLight.mesh)) {
+        beginFloorAscension(nowMs);
+      }
+      return;
+    }
     if (!sphereRun.active) return;
     const picked = collectibles.collectNear(controlLight.mesh);
     if (picked > 0) {
@@ -206,7 +255,7 @@ async function boot() {
       interactionAudio.playInteraction('collect');
     }
     if (sphereRun.collected >= sphereRun.goal) {
-      beginFloorAscension(nowMs);
+      revealStaircase();
       return;
     }
     sphereRun.elapsedMs = Math.max(0, nowMs - sphereRun.startAt);
@@ -216,7 +265,7 @@ async function boot() {
   controlLight = createControllableLight({
     scene: sceneCtx.scene,
     config: site.game,
-    tiles: sceneCtx.tiles,
+    tiles: activeCollisionObjects,
     gravityEnabled: defaults.gravityEnabled,
     onActiveTileChange(tile) {
       activeTile = tile;
@@ -244,6 +293,7 @@ async function boot() {
       }
     },
   });
+  syncActiveFloor(floorSystem.activeTiles, floorSystem.collisionObjects);
   touchControls = mountTouchControls({
     onMove(x, z, active) {
       if (!controlLight || !lightControlled || !touchControlsRequested) return;
@@ -540,7 +590,17 @@ async function boot() {
   const floorQaParams = new URLSearchParams(window.location.search);
   if (import.meta.env.DEV || floorQaParams.has('floor-test')) {
     window.p28FloorDebug = {
+      revealStaircase() {
+        revealStaircase();
+        return this.state();
+      },
+      stepOnStair() {
+        if (!floorSystem.isStairReady) revealStaircase();
+        beginFloorAscension(performance.now());
+        return this.state();
+      },
       triggerAscension() {
+        if (!floorSystem.isStairReady) revealStaircase();
         beginFloorAscension(performance.now());
         return this.state();
       },
@@ -548,12 +608,23 @@ async function boot() {
         return {
           active: sphereRun.active,
           ascending: sphereRun.ascending,
+          awaitingStair: sphereRun.awaitingStair,
           collected: sphereRun.collected,
           goal: sphereRun.goal,
           floorLevel: sphereRun.floorLevel,
           systemLevel: floorSystem.level,
           ghostCount: floorSystem.ghostCount,
+          activeTileCount: floorSystem.activeTileCount,
+          activeProjectCount: activeFloorTiles.filter((tile) => tile.userData?.isProject).length,
+          activeNormalCount: activeFloorTiles.filter((tile) => !tile.userData?.isProject).length,
+          layoutMode: floorSystem.layoutMode,
+          nextFloorTileCount: floorSystem.nextFloorTileCount,
           stairVisible: floorSystem.staircase.visible,
+          stairReady: floorSystem.isStairReady,
+          stairAnchor: floorSystem.stairAnchor ? {
+            row: floorSystem.stairAnchor.userData.row,
+            col: floorSystem.stairAnchor.userData.col,
+          } : null,
           cameraLift: Number(floorSystem.cameraLift.toFixed(4)),
           ascensionState: document.documentElement.dataset.p28AscensionState || null,
           contentSource: document.documentElement.dataset.p28ContentSource || null,
@@ -730,7 +801,7 @@ async function boot() {
     const radiusSq = radius * radius;
     let bestTile = null;
     let bestDistSq = Infinity;
-    for (const tile of sceneCtx.tiles) {
+    for (const tile of activeFloorTiles) {
       if (!tile.userData?.isProject) continue;
       const dx = capturePoint.x - tile.position.x;
       const dz = capturePoint.z - tile.position.z;
@@ -744,7 +815,7 @@ async function boot() {
   }
 
   function resolveProjectTileFromPointer() {
-    const hits = raycaster.intersectObjects(sceneCtx.tiles, false);
+    const hits = raycaster.intersectObjects(activeFloorTiles, false);
     const exactProject = hits.find((hit) => hit.object?.userData?.isProject)?.object || null;
     if (exactProject) return { tile: exactProject, mode: 'exact' };
     const captured = findNearestProjectTileInCapture(raycaster.ray);
@@ -860,7 +931,7 @@ async function boot() {
   }
 
   function focusTileForKeyboard(tile, focusPopup = false) {
-    if (!tile?.userData?.isProject) return;
+    if (!tile?.userData?.isProject || !tile.visible) return;
     if (focusPopup) {
       pinPopupToTile(tile);
       popup.focus();
@@ -946,6 +1017,10 @@ async function boot() {
     applyHoverTarget(hit);
 
     for (const tile of sceneCtx.tiles) {
+      if (!tile.visible) {
+        tile.userData.isLit = false;
+        continue;
+      }
       const ud = tile.userData;
       const isLit = (tile === hovered || tile === activeTile) && ud.isProject;
       if (ud.isProject && ud.isLit !== isLit) {

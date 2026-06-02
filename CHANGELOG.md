@@ -10,6 +10,45 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.27.0] — 2026-06-02 — Etapa 23: escalera fisica en borde y loop de pisos
+
+### Added
+- La escalera ahora aparece junto a un cubo aleatorio de la orilla de la
+  grilla cuando se completa la meta de esferas; el ascenso ya no ocurre de
+  forma automatica al recolectar.
+- Preview barato del siguiente piso mientras la escalera esta visible: se
+  agregan cubos temporales para vender el truco de mundo conectado y se
+  eliminan al completar la transicion.
+- Layouts activos por piso: los pisos impares usan un numero menor y aleatorio
+  de cubos; siempre incluyen al menos un cubo brillante y un cubo normal con
+  esfera. Los pisos pares vuelven al layout completo para mantener el loop.
+- La luz usa solo cubos activos + escalera para colision/sombra/respawn; las
+  esferas solo aparecen en cubos normales activos.
+- QA ampliado en `window.p28FloorDebug`: `revealStaircase()`, `stepOnStair()`,
+  `activeTileCount`, `activeProjectCount`, `activeNormalCount`,
+  `nextFloorTileCount`, `stairAnchor` y `layoutMode`.
+
+### Changed
+- El flujo queda: recolectar esferas -> revelar escalera en borde -> subir o
+  tocar la escalera -> transicion vertical -> aplicar layout nuevo -> reiniciar
+  recoleccion.
+- Hover, click/tap, popup magnetico y accesibilidad por teclado ignoran cubos
+  ocultos del piso no activo.
+- Build id y Service Worker suben a
+  `v0.27.0-20260602-edge-stair-floor-loop`.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- Build local servido con `vite preview`, mobile `390x844` por CDP:
+  - piso 0 full: `activeTileCount=24`, `activeProjectCount=6`,
+    `activeNormalCount=18`;
+  - `revealStaircase()` crea escalera en borde, por ejemplo `row=3,col=0`,
+    `ascensionState="stair-ready"`, `nextFloorTileCount` menor que 24;
+  - `stepOnStair()` sube a piso 1 sparse con `ghostCount=1`,
+    `activeProjectCount>=1`, `activeNormalCount>=1`;
+  - siguiente escalera prepara `nextFloorTileCount=24` y el ascenso vuelve a
+    piso full.
+
 ## [0.26.0] — 2026-06-02 — Etapa 22: ascenso por pisos del mini-juego
 
 ### Added

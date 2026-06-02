@@ -125,6 +125,7 @@ export function createControllableLight({
   if (tiles && tiles.length > 0) {
     RESPAWN_XZ.set(tiles[0].position.x, 0, tiles[0].position.z);
   }
+  let collisionObjects = Array.isArray(tiles) ? [...tiles] : [];
   const SPAWN_POSITION = new THREE.Vector3(RESPAWN_XZ.x, LIGHT_Y, RESPAWN_XZ.z);
   mesh.position.copy(SPAWN_POSITION);
   light.position.copy(mesh.position);
@@ -482,7 +483,7 @@ export function createControllableLight({
       downRay.set(downOrigin, downDir);
       const drop = Math.max(0, prevY - newY);
       downRay.far = drop + SPHERE_RADIUS + GROUND_EPSILON;
-      const hits = downRay.intersectObjects(tiles, false);
+      const hits = downRay.intersectObjects(collisionObjects, false);
       if (hits.length > 0) {
         const tile = hits[0].object;
         const tileTopY = tile.position.y + TILE_TOP_Y;
@@ -554,7 +555,7 @@ export function createControllableLight({
     shadowOrigin.set(mesh.position.x, mesh.position.y, mesh.position.z);
     shadowRay.set(shadowOrigin, downDir);
     shadowRay.far = 50;
-    const hits = shadowRay.intersectObjects(tiles, false);
+    const hits = shadowRay.intersectObjects(collisionObjects, false);
     let surfaceY = FLOOR_Y;
     if (hits.length > 0) {
       surfaceY = hits[0].point.y;
@@ -608,6 +609,15 @@ export function createControllableLight({
     target.set(mesh.position.x, LIGHT_Y, mesh.position.z);
   }
 
+  function setCollisionObjects(objects = tiles) {
+    collisionObjects = Array.isArray(objects) ? objects.filter(Boolean) : [];
+  }
+
+  function setRespawnTile(tile) {
+    if (!tile) return;
+    RESPAWN_XZ.set(tile.position.x, 0, tile.position.z);
+  }
+
   return {
     mesh,
     light,
@@ -623,6 +633,8 @@ export function createControllableLight({
     toggleControl,
     isControlActive,
     setExternalMoveVector,
+    setCollisionObjects,
+    setRespawnTile,
     pinToTile,
     releasePin,
     jump,

@@ -153,6 +153,26 @@ El helper solo aparece en dev o al abrir con `?floor-test=...`. Senal sana:
 `stairVisible=true` durante la transicion, `ghostCount>=1`, y al cierre
 `floorLevel` sube en 1 con `ascensionState="idle"`.
 
+Desde `v0.27.0`, el ascenso requiere llegar a la escalera. QA recomendado:
+
+```js
+window.p28FloorDebug.revealStaircase()
+window.p28FloorDebug.state().stairAnchor // debe estar en borde
+window.p28FloorDebug.stepOnStair()
+window.p28FloorDebug.state()
+```
+
+Senal sana:
+
+- piso 0 full: `activeTileCount=24`, `activeProjectCount=6`,
+  `activeNormalCount=18`;
+- al revelar escalera: `ascensionState="stair-ready"`, `stairVisible=true`,
+  `nextFloorTileCount` menor que 24;
+- despues de subir: `layoutMode="sparse"`, `activeProjectCount>=1`,
+  `activeNormalCount>=1`;
+- la siguiente escalera debe preparar `nextFloorTileCount=24` para volver al
+  layout full.
+
 ---
 
 ## 3. Agregar un proyecto nuevo
