@@ -211,6 +211,12 @@ tocar fuera o presionar Escape no cambia el detalle; la X del popup libera la
 selección y devuelve la luz a flotar. Para QA se puede leer
 `document.documentElement.dataset.p28PinnedProject`.
 
+Desde `v0.25.6`, click/tap cerca de un cubo brillante tambien puede capturarlo
+por radio magnetico antes de fijar el popup. El ajuste vive en
+`Admin -> Tweaks -> Juego -> Radio captura popup` y se publica a Strapi como
+`gameTileCaptureRadius` (`1.15` recomendado, `0.8..1.8`). Para QA:
+`p28TileCaptureMode` queda como `exact` o `magnet`.
+
 Recomendaciones de media visibles en Strapi:
 
 - Logo de marca: PNG o WebP transparente, `512 x 512 px`, zona segura central
@@ -309,3 +315,4 @@ El plan completo de evolución vive en `PLAN-PROYECTO28-V2.md`.
 | 21 hotfix — Loader 1/28 + CMS mobile hardening | ✅ Cerrado — mensaje `Cargando proyecto N/28`, runtime CMS fallback y QA `Random: Museo MAC` | `v0.25.1` |
 | 21 hotfix 2 — Fresh navigation + popup images mobile | ✅ Cerrado — Service Worker network-first, Strapi fuera del worker e imagenes popup estables | `v0.25.4` |
 | 21 hotfix 3 — Pinned popup + light anchor | ✅ Cerrado — click/tap fija popup y luz hasta cerrar con X | `v0.25.5` |
+| 21 hotfix 4 — Magnetic popup capture radius | ✅ Cerrado — tap/click cercano captura cubo y fija popup + luz | `v0.25.6` |

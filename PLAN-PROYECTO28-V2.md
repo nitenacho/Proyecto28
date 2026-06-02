@@ -1,10 +1,10 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-06-01 — `v0.25.5` Patch popup fijo y luz anclada
+> **Última actualización operativa:** 2026-06-02 — `v0.25.6` Patch captura magnetica popup + luz
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-21 cerradas. `v0.25.5` fija el popup al seleccionar un cubo, ancla la luz al centro superior del cubo y libera el estado solo desde la X del popup.
+> **Status:** En ejecución — etapas 1-21 cerradas. `v0.25.6` agrega radio magnetico configurable para que click/tap cerca de un cubo de proyecto fije el popup y atraiga la luz al centro del cubo, liberando el estado solo desde la X del popup.
 
 ## Estado del plan al 2026-05-31 America/Santiago
 
@@ -42,6 +42,7 @@
 | 21 hotfix — Loader 1/28 + CMS mobile hardening | ✅ Cerrada | `v0.25.1` | `0d0bbac` |
 | 21 hotfix 2 — Fresh navigation + popup images mobile | ✅ Cerrada | `v0.25.4` | `05b0d31` |
 | 21 hotfix 3 — Pinned popup + light anchor | ✅ Cerrada | `v0.25.5` | `deaceb7` |
+| 21 hotfix 4 — Magnetic popup capture radius | ✅ Cerrada | `v0.25.6` | `abd6d93` |
 
 ## Decisiones tomadas durante la ejecución (resoluciones al §1)
 
@@ -73,7 +74,9 @@
   y desaparecian en navegadores mobile. `v0.25.5` convierte click/tap/Enter
   sobre un cubo de proyecto en una seleccion fija: el popup no cambia ni se
   cierra por hover/mouse/taps fuera, la luz se asienta en el centro del cubo y
-  solo la X libera la seleccion para volver a flotar.
+  solo la X libera la seleccion para volver a flotar. `v0.25.6` agrega
+  `gameTileCaptureRadius` para que un toque/click cercano capture el cubo mas
+  cercano antes de fijar popup + luz; se edita desde Tweaks -> Juego.
 - **§1.6 Admin Strapi:** ✅ Admin operativo. Fix aplicado: `Project` no usa
   Draft & Publish para evitar el choque entre el campo editable `status` y el
   `status` interno de Strapi v5.

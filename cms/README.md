@@ -26,6 +26,9 @@ Headless CMS that owns the content shown in the frontend:
     - `gameLightSpeed`, `gameLightJumpHeight`, `gameLightJumpCount`,
       `gameLightGravity`, `gameLightVelocityCurve`, `gameMouseFollowDelay`,
       `gameFallDuration` — tweaks del juego de plataformas (Etapas 4–6)
+    - `gameTileCaptureRadius` — radio magnetico X/Z para que click/tap cercano
+      capture el cubo de proyecto mas cercano y fije popup + luz. Default
+      recomendado `1.15`; limites `0.8..1.8`
     - `gameLightColor` — color publicable de la luz controlable (`cyan`,
       `red`, `green`) usado por el mini-juego de recoleccion (Etapa 17)
     - `brandLogoImage` — logo/icono del header desde Strapi. Recomendado:

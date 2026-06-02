@@ -10,6 +10,56 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.25.6] — 2026-06-02 — Patch: captura magnetica para popup + luz
+
+### Added
+- Nuevo radio magnetico de seleccion `gameTileCaptureRadius` para que
+  click/tap cerca de un cubo de proyecto capture el cubo mas cercano, fije el
+  popup y lleve la luz al centro del cubo aunque el toque no haya caido
+  exactamente sobre la geometria.
+- Slider publicable en `Admin -> Tweaks -> Juego -> Radio captura popup`.
+  Default recomendado: `1.15`; limites Strapi/frontend: `0.8..1.8`.
+- QA invisible: `document.documentElement.dataset.p28TileCaptureMode` indica
+  `exact` o `magnet`, y `p28TileCaptureRadius` refleja el radio activo.
+
+### Changed
+- El hover/click usa el mismo resolver de cubo: primero respeta impactos
+  exactos del raycaster y luego busca el cubo de proyecto mas cercano en el
+  plano X/Z dentro del radio configurado.
+- Build id y Service Worker suben a
+  `v0.25.6-20260601-magnetic-popup-capture`.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- `cd cms; npm run build` OK. Warning heredado de Strapi/Node:
+  `DEP0187 fs.existsSync`.
+- Build local servido con `vite preview`, viewport mobile `390x844`:
+  - tap sintetico cerca del cubo, no exacto, fija `028.B` con
+    `p28TileCaptureMode="magnet"`;
+  - `p28TileCaptureRadius="1.15"`;
+  - pointer move + Escape mantienen popup `.pinned.visible`;
+  - X libera `p28PinnedProject` y oculta el pin.
+- GitHub Actions:
+  - Pages run `26794558779` OK;
+  - Auto tag run `26794558812` OK;
+  - tag `v0.25.6` creado para `abd6d93`.
+- Produccion `https://proyecto28.com/?verify-magnet=...`:
+  - HTML contiene `v0.25.6-20260601-magnetic-popup-capture`;
+  - `/p28-sw.js` contiene `v0.25.6-20260601-magnetic-popup-capture`.
+- Smoke mobile vivo `390x844`:
+  - `source="cms"`;
+  - Service Worker activo `p28-sw.js?build=v0.25.6...`;
+  - tap cercano fija `028.B · Invasión` con `mode="magnet"`;
+  - `Random: Museo MAC` sigue visible desde Strapi;
+  - mouse move + Escape mantienen popup visible;
+  - X libera el pin.
+- Strapi Cloud:
+  - `/admin` => `200`;
+  - `/api/projects?populate=*` => `200`;
+  - `/api/site-setting?populate=*` => `200`;
+  - `/api/site-setting` expone `gameTileCaptureRadius=1.15`;
+  - `/api/admin-whitelists` => `403`.
+
 ## [0.25.5] — 2026-06-01 — Patch: popup fijo y luz anclada al seleccionar cubo
 
 ### Added
@@ -1606,7 +1656,8 @@ Feedback del owner sobre `v0.14.0` en iOS Safari real:
 - Admin de Strapi no creado todavía (signup pendiente del owner).
 - `.cl` esperando propagación NIC al momento del handoff.
 
-[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.25.5...HEAD
+[Unreleased]: https://github.com/nitenacho/Proyecto28/compare/v0.25.6...HEAD
+[0.25.6]: https://github.com/nitenacho/Proyecto28/compare/v0.25.5...v0.25.6
 [0.25.5]: https://github.com/nitenacho/Proyecto28/compare/v0.25.4...v0.25.5
 [0.25.4]: https://github.com/nitenacho/Proyecto28/compare/v0.25.1...v0.25.4
 [0.25.1]: https://github.com/nitenacho/Proyecto28/compare/v0.25.0...v0.25.1

@@ -1,13 +1,13 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-06-01 (Patch pinned popup + light anchor - `v0.25.5`)
-> **Tag activo esperado tras cierre:** `v0.25.5`
+> **Ultima actualizacion:** 2026-06-02 (Patch magnetic popup capture radius - `v0.25.6`)
+> **Tag activo esperado tras cierre:** `v0.25.6`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
 
-Etapas 1-21 cerradas y patch `v0.25.5` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
+Etapas 1-21 cerradas y patch `v0.25.6` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
 sync Claude Design, hardening performance/a11y, mini-juego Pacman de luz y una
 capa de audio interactivo configurable desde Strapi. La luz ahora se puede
@@ -20,7 +20,9 @@ header puede venir desde una imagen `brandLogoImage` en Strapi. La URL limpia
 imagenes de popup mobile ya no desaparecen al reutilizar un asset cargado.
 Seleccionar un cubo de proyecto con click/tap/Enter ahora fija el popup y
 asienta la luz en el centro superior del cubo hasta que el usuario cierre con
-la X del popup.
+la X del popup. Si el click/tap cae cerca pero no exactamente sobre el cubo,
+el radio magnetico `gameTileCaptureRadius` atrae la seleccion al cubo de
+proyecto mas cercano para fijar popup + luz.
 
 ---
 
@@ -28,6 +30,10 @@ la X del popup.
 
 Estado vigente esperado tras cierre:
 
+- `v0.25.6`: click/tap cercano a un cubo de proyecto usa captura magnetica
+  configurable (`gameTileCaptureRadius`) para fijar popup + luz sin exigir
+  precision perfecta. QA: `p28TileCaptureMode="magnet"` y
+  `p28TileCaptureRadius`.
 - `v0.25.5`: click/tap/Enter sobre un cubo de proyecto fija el popup, ancla la
   luz al centro del cubo y solo la X libera la seleccion para volver a flotar.
 - `v0.25.4`: `public/p28-sw.js` fuerza navegaciones frescas para la URL limpia,
@@ -78,7 +84,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- ultimo tag `v0.25.5`
+- ultimo tag `v0.25.6`
 - build Vite OK
 - build Strapi OK
 
@@ -88,14 +94,43 @@ Lectura obligatoria:
 2. `ADMIN-URLS.md` - URLs para administrar todos los servicios.
 3. `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
 4. `DEPLOY.md` - GitHub Pages, Strapi, OAuth, Pixel Streaming, releases.
-5. `CHANGELOG.md` - `[0.25.5]`.
-6. `PLAN-PROYECTO28-V2.md` - Etapa 21 + patches `v0.25.1`/`v0.25.4`/`v0.25.5` cerrados.
+5. `CHANGELOG.md` - `[0.25.6]`.
+6. `PLAN-PROYECTO28-V2.md` - Etapa 21 + patches `v0.25.1`/`v0.25.4`/`v0.25.5`/`v0.25.6` cerrados.
 7. `cms/README.md` - SiteSetting incluye `brandLogoImage`, `gameLightColor`
    y `audio*`.
 
 ---
 
-## 2. Cambios v0.25.5
+## 2. Cambios v0.25.6
+
+### Captura magnetica de cubos
+
+- `gameTileCaptureRadius` vive en Strapi `SiteSetting` y en fallback local.
+  Default recomendado `1.15`, limites `0.8..1.8`.
+- `Admin -> Tweaks -> Juego -> Radio captura popup` permite ajustar y publicar
+  el radio.
+- Click/tap primero intenta impacto exacto del raycaster; si no hay proyecto,
+  proyecta el puntero al plano X/Z y captura el cubo de proyecto mas cercano
+  dentro del radio.
+- Al capturar, se reutiliza el flujo `v0.25.5`: popup fijado, luz asentada en
+  el centro superior del cubo y X como unica accion para liberar.
+- QA invisible:
+  - `document.documentElement.dataset.p28TileCaptureMode` => `exact`/`magnet`;
+  - `document.documentElement.dataset.p28TileCaptureRadius` => radio activo.
+
+### Archivos tocados
+
+- `index.html`
+- `public/p28-sw.js`
+- `src/main.js`
+- `src/data/cms.js`
+- `src/data/fallback.js`
+- `src/admin/publish.js`
+- `cms/src/index.js`
+- `cms/src/api/site-setting/controllers/site-setting.js`
+- `cms/src/api/site-setting/content-types/site-setting/schema.json`
+
+## 3. Cambios v0.25.5
 
 ### Popup fijo + luz anclada
 
@@ -118,7 +153,7 @@ Lectura obligatoria:
 - `src/main.js`
 - `src/ui/popup.js`
 
-## 3. Cambios v0.25.4
+## 4. Cambios v0.25.4
 
 ### Fresh navigation para proyecto28.com
 
@@ -148,7 +183,7 @@ Lectura obligatoria:
 - `src/data/cms.js`
 - `src/ui/popup.js`
 
-## 4. Cambios v0.25.1
+## 5. Cambios v0.25.1
 
 ### Loader proyecto 1/28
 
@@ -174,7 +209,7 @@ Lectura obligatoria:
 - `src/data/cms.js`
 - `src/styles/three-host.css`
 
-## 5. Cambios v0.25.0
+## 6. Cambios v0.25.0
 
 ### Loader + feedback de carga
 
@@ -370,7 +405,7 @@ Archivos tocados:
 
 ## 9. Validacion realizada antes del cierre
 
-### Local v0.25.5
+### Local v0.25.6
 
 ```powershell
 npm run build
@@ -382,12 +417,12 @@ Resultado:
 
 - Frontend OK. Warning existente: chunk `three` >500 kB.
 - Strapi admin build OK. Warning heredado: `DEP0187 fs.existsSync`.
-- Build local `v0.25.5` genera `assets/index-DyLe-wD1.js` y copia
+- Build local `v0.25.6` genera `assets/index-B9LWKLuG.js` y copia
   `public/p28-sw.js` a `dist/p28-sw.js`.
 
 Servidor local:
 
-- `http://127.0.0.1:5174/` responde `HTTP 200` sirviendo build preview.
+- `http://127.0.0.1:5176/` responde `HTTP 200` sirviendo build preview.
 - QA usa la URL CMS runtime `window.__P28_CMS_URL__` desde:
   `C:/Users/incon/Downloads/EscritorioNobita/Proyectos_Claude/Claude_P28/Proyecto28`.
 
@@ -423,6 +458,13 @@ Chrome CDP smoke:
   - popup `.pinned.visible`;
   - mouse move + Escape no cierran el popup;
   - click en X limpia `p28PinnedProject` y deja `aria-hidden="true"`.
+- Magnetic capture local:
+  - viewport mobile `390x844`;
+  - tap sintetico cercano en `x=284, y=326` fija `028.B`;
+  - `p28TileCaptureMode="magnet"`;
+  - `p28TileCaptureRadius="1.15"`;
+  - mouse move + Escape mantienen popup `.pinned.visible`;
+  - X libera el pin.
 
 ### Produccion/Strapi predeploy
 
@@ -436,6 +478,32 @@ Chrome CDP smoke:
   `{ allowed:true, role:"owner" }`
 - `/api/auth/check?email=yk8arts@gmail.com` =>
   `{ allowed:true, role:"editor" }`
+
+### Produccion postdeploy v0.25.6
+
+- Commit funcional: `abd6d93 fix: add magnetic popup capture radius`.
+- Tag activo: `v0.25.6`.
+- GitHub Actions:
+  - Pages run `26794558779` OK;
+  - Auto tag run `26794558812` OK.
+- Produccion:
+  - `https://proyecto28.com` => `200`
+  - HTML vivo contiene `v0.25.6-20260601-magnetic-popup-capture`
+  - `/p28-sw.js` contiene `v0.25.6-20260601-magnetic-popup-capture`
+- Smoke mobile vivo `390x844`:
+  - carga desde `cms`;
+  - Service Worker activo: `/p28-sw.js?build=v0.25.6...`;
+  - tap cercano fija `028.B · Invasión` con `p28TileCaptureMode="magnet"`;
+  - `p28TileCaptureRadius="1.15"`;
+  - `Random: Museo MAC` sigue visible desde Strapi;
+  - mouse move + Escape no cierran el popup;
+  - X libera el pin.
+- Strapi Cloud postdeploy:
+  - `/admin` => `200`
+  - `/api/projects?populate=*` => `200`
+  - `/api/site-setting?populate=*` => `200`
+  - `SiteSetting.gameTileCaptureRadius=1.15`
+  - `/api/admin-whitelists` => `403`
 
 ### Produccion postdeploy v0.25.5
 
@@ -583,6 +651,13 @@ Flujo correcto para una etapa nueva:
 8. Actualizar handoff local + Google Doc.
 9. Confirmar tag semver.
 
+Para `v0.25.6`:
+
+- Rama usada: `main`.
+- Commit funcional: `abd6d93 fix: add magnetic popup capture radius`.
+- Tag automatico final: `v0.25.6`.
+- Build id: `v0.25.6-20260601-magnetic-popup-capture`.
+
 Para `v0.25.5`:
 
 - Rama usada: `main`.
@@ -633,13 +708,13 @@ Regla:
 - No usar el Handoff:Kaiyi para esta etapa.
 - Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 - Revision Google Doc post-insercion:
-`AFwiY1-wGfVWveJDvjXkU7TrEO53X0fySx1-bgYLKkoG4gyE1YNagjWknRgxvpgd35ycpdft0FWRp3P5fNgM29veTK-eLk8WJtYqU_v7aeQ`.
+`AFwiY182Hz9zXVz3y_kZY-brLpbEUuhBz4puvRhy6WSrJOBtXt5750E-VQ93vKeeJ1Pm4Y8fDnrXSAiC9l0Ygo7HsArSdnBldhSzQ1f41P0`.
 - Titulo/anchor:
 
 ```text
-2026-06-02 00:45 UTC - v0.25.5 pinned-popup-light
+2026-06-02 02:30 UTC - v0.25.6 magnetic-popup-capture
 ```
 
 ---
 
-Fin del handoff `v0.25.5`.
+Fin del handoff `v0.25.6`.

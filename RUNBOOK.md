@@ -121,6 +121,16 @@ document.documentElement.dataset.p28PinnedProject
 document.querySelector('#popup')?.classList.contains('pinned')
 ```
 
+Desde `v0.25.6`, la seleccion de cubos de proyecto tiene radio magnetico
+configurable desde `Admin -> Tweaks -> Juego -> Radio captura popup`. El valor
+publicado vive en Strapi como `SiteSetting.gameTileCaptureRadius`; default
+recomendado `1.15`, limites `0.8..1.8`. Para QA de un tap/click cercano:
+
+```js
+document.documentElement.dataset.p28TileCaptureMode // "exact" o "magnet"
+document.documentElement.dataset.p28TileCaptureRadius
+```
+
 ---
 
 ## 3. Agregar un proyecto nuevo
