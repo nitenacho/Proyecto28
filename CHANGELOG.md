@@ -39,6 +39,8 @@ o a un fix puntual entre etapas.
 
 ### Verified
 - `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- `cd cms; npm run build` OK. Warning heredado de Strapi/Node:
+  `DEP0187 fs.existsSync`.
 - Build local servido con `vite preview`, mobile `390x844` por CDP:
   - piso 0 full: `activeTileCount=24`, `activeProjectCount=6`,
     `activeNormalCount=18`;
@@ -48,6 +50,26 @@ o a un fix puntual entre etapas.
     `activeProjectCount>=1`, `activeNormalCount>=1`;
   - siguiente escalera prepara `nextFloorTileCount=24` y el ascenso vuelve a
     piso full.
+- GitHub Actions:
+  - Pages run `26827419187` OK;
+  - Auto tag run `26827419119` OK;
+  - tag `v0.27.0` creado para `349d728`.
+- Produccion `https://proyecto28.com/?floor-test=...`, mobile `390x844`:
+  - HTML y `/p28-sw.js` contienen
+    `v0.27.0-20260602-edge-stair-floor-loop`;
+  - `source="cms"`, build `v0.27.0`, control activo;
+  - `revealStaircase()` crea escalera en borde y preview sparse;
+  - `stepOnStair()` finaliza en `floorLevel=1`, `systemLevel=1`,
+    `layoutMode="sparse"`, con al menos un proyecto y un normal con esfera;
+  - sin errores de consola.
+- Strapi Cloud:
+  - `/api/projects?populate=*` => `200`, 6 proyectos;
+  - `/api/site-setting?populate=*` => `200`;
+  - `SiteSetting.gameAscendSphereGoal=6`, `gameFloorHeight=4.2`,
+    `gameGhostFloors=3`.
+- Google Doc `NOTAS_Proyecto28`, tab `t.7lpfc5ado1h`, actualizado con bloque
+  24 y revision
+  `AFwiY19BboSpgMqnFJhu9FFaZNtdXZAOSA0NvjaVo2hEKD44ZDT2Q8sZN6ZayGQz-IsPgtx4eC2yL8xPLscjVJH1N06bSdIs_TRe5_EJ_Mo`.
 
 ## [0.26.0] — 2026-06-02 — Etapa 22: ascenso por pisos del mini-juego
 

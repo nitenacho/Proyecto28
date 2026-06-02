@@ -6,7 +6,7 @@
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
-> **Google Doc revision cierre:** `AFwiY1-q2sRKejy3mEhBEeT0VwKev2mnHNxxfoOYJok9C6rE_ijXs9Xl3GpSuqPdXMTl1lPnilJqLTrh-9XZ3gfnJW4KQwtLHCzDlMnI0uE`
+> **Google Doc revision cierre:** `AFwiY19BboSpgMqnFJhu9FFaZNtdXZAOSA0NvjaVo2hEKD44ZDT2Q8sZN6ZayGQz-IsPgtx4eC2yL8xPLscjVJH1N06bSdIs_TRe5_EJ_Mo`
 
 Etapas 1-23 cerradas y `v0.27.0` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
@@ -42,7 +42,10 @@ Estado vigente esperado tras cierre:
 - `v0.27.0`: la escalera aparece en un cubo de borde, se muestra preview del
   siguiente piso y el ascenso solo ocurre al llegar a la escalera. Los pisos
   sparse tienen menos cubos, al menos un brillante y un normal con esfera; el
-  siguiente ascenso vuelve a layout full.
+  siguiente ascenso vuelve a layout full. Produccion verificada: Pages run
+  `26827419187`, Auto-tag run `26827419119`, commit `349d728`, tag
+  `v0.27.0`, Strapi expone `6/4.2/3` y Google Doc actualizado en tab
+  `t.7lpfc5ado1h`.
 - `v0.26.0`: la luz/personaje come `gameAscendSphereGoal` esferas, genera una
   escalera y asciende de piso; el piso anterior queda visible en fondo como
   InstancedMesh/Grid Ventana con `gameFloorHeight` y `gameGhostFloors`.
@@ -141,6 +144,15 @@ Lectura obligatoria:
   `window.p28FloorDebug.state()`.
 - Build id y Service Worker:
   `v0.27.0-20260602-edge-stair-floor-loop`.
+- Produccion `https://proyecto28.com/?floor-test=...` verificada en mobile
+  `390x844`: `source="cms"`, build `v0.27.0`, escalera en borde, preview
+  sparse, ascenso a `floorLevel=1/systemLevel=1/layoutMode=sparse` y cero
+  errores de consola.
+- GitHub Actions: Pages run `26827419187` OK, Auto-tag run `26827419119` OK,
+  tag `v0.27.0` en commit `349d728`.
+- Strapi Cloud sano: `/api/projects?populate=*` 200 con 6 proyectos y
+  `/api/site-setting?populate=*` 200 con `gameAscendSphereGoal=6`,
+  `gameFloorHeight=4.2`, `gameGhostFloors=3`.
 
 ## 3. Cambios v0.26.0
 
@@ -784,13 +796,27 @@ Regla:
 - No usar el Handoff:Kaiyi para esta etapa.
 - Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 - Revision Google Doc post-insercion:
-`AFwiY182Hz9zXVz3y_kZY-brLpbEUuhBz4puvRhy6WSrJOBtXt5750E-VQ93vKeeJ1Pm4Y8fDnrXSAiC9l0Ygo7HsArSdnBldhSzQ1f41P0`.
+`AFwiY19BboSpgMqnFJhu9FFaZNtdXZAOSA0NvjaVo2hEKD44ZDT2Q8sZN6ZayGQz-IsPgtx4eC2yL8xPLscjVJH1N06bSdIs_TRe5_EJ_Mo`.
 - Titulo/anchor:
 
 ```text
-2026-06-02 02:30 UTC - v0.25.6 magnetic-popup-capture
+2026-06-02 06:10 UTC - v0.27.0 edge-stair-floor-loop
 ```
+
+- Commit funcional `349d728 feat: add edge stair floor loop`.
+- GitHub Pages run `26827419187` OK.
+- Auto-tag run `26827419119` OK; tag `v0.27.0`.
+- Produccion `https://proyecto28.com/?floor-test=...`, mobile `390x844`:
+  `source="cms"`, build `v0.27.0`, control activo, escalera en borde,
+  preview sparse, ascenso a `floorLevel=1/systemLevel=1/layoutMode=sparse`
+  y cero errores de consola.
+- Strapi Cloud: `/api/projects?populate=*` `200` con 6 proyectos,
+  `/api/site-setting?populate=*` `200`, `gameAscendSphereGoal=6`,
+  `gameFloorHeight=4.2`, `gameGhostFloors=3`.
+- Google Doc `NOTAS_Proyecto28`, tab `t.7lpfc5ado1h`, actualizado con bloque
+  24 y revision
+  `AFwiY19BboSpgMqnFJhu9FFaZNtdXZAOSA0NvjaVo2hEKD44ZDT2Q8sZN6ZayGQz-IsPgtx4eC2yL8xPLscjVJH1N06bSdIs_TRe5_EJ_Mo`.
 
 ---
 
-Fin del handoff `v0.25.6`.
+Fin del handoff `v0.27.0`.

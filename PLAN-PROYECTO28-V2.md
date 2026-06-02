@@ -44,7 +44,7 @@
 | 21 hotfix 3 — Pinned popup + light anchor | ✅ Cerrada | `v0.25.5` | `deaceb7` |
 | 21 hotfix 4 — Magnetic popup capture radius | ✅ Cerrada | `v0.25.6` | `abd6d93` |
 | 22 — Floor ascension game loop | ✅ Cerrada | `v0.26.0` | `5752efe` |
-| 23 — Edge stair + active floor loop | ✅ Cerrada | `v0.27.0` | pendiente cierre |
+| 23 — Edge stair + active floor loop | ✅ Cerrada | `v0.27.0` | `349d728` |
 
 ## Decisiones tomadas durante la ejecución (resoluciones al §1)
 

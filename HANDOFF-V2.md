@@ -5,7 +5,7 @@
 > Tag activo esperado tras cierre: `v0.27.0`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
-> Google Doc revision cierre: `AFwiY1-q2sRKejy3mEhBEeT0VwKev2mnHNxxfoOYJok9C6rE_ijXs9Xl3GpSuqPdXMTl1lPnilJqLTrh-9XZ3gfnJW4KQwtLHCzDlMnI0uE`
+> Google Doc revision cierre: `AFwiY19BboSpgMqnFJhu9FFaZNtdXZAOSA0NvjaVo2hEKD44ZDT2Q8sZN6ZayGQz-IsPgtx4eC2yL8xPLscjVJH1N06bSdIs_TRe5_EJ_Mo`
 
 Este handoff es el punto de entrada compacto para un nuevo agente. Para
 operacion detallada, leer `RUNBOOK.md`.
@@ -72,6 +72,9 @@ Ultimo codigo funcional esperado:
 Tags/commits recientes:
 
 - `v0.27.0` - Escalera en borde, preview de siguiente piso y loop full/sparse.
+- Produccion verificada para `v0.27.0`: Pages run `26827419187`, Auto-tag
+  run `26827419119`, commit `349d728`, tag `v0.27.0`, mobile
+  `390x844` con `source="cms"`, escalera en borde y ascenso a piso sparse.
 - `v0.26.0` - Esferas suficientes generan escalera, ascenso y piso anterior visible.
 - `v0.25.6` - Click/tap cercano captura cubo y fija popup + luz.
 - `v0.25.5` - Click/tap fija popup y luz hasta cerrar con X.
@@ -202,7 +205,7 @@ Validado postdeploy `v0.26.0`:
   `/api/admin-whitelists` `403`.
 - Google Doc `NOTAS_Proyecto28`, tab `t.7lpfc5ado1h`, actualizado con bloque
   23 y revision
-  `AFwiY1-q2sRKejy3mEhBEeT0VwKev2mnHNxxfoOYJok9C6rE_ijXs9Xl3GpSuqPdXMTl1lPnilJqLTrh-9XZ3gfnJW4KQwtLHCzDlMnI0uE`.
+  `AFwiY19BboSpgMqnFJhu9FFaZNtdXZAOSA0NvjaVo2hEKD44ZDT2Q8sZN6ZayGQz-IsPgtx4eC2yL8xPLscjVJH1N06bSdIs_TRe5_EJ_Mo`.
 
 Validado postdeploy `v0.25.4`:
 
@@ -512,13 +515,23 @@ https://docs.google.com/document/d/1Px4W6UA2tdE2WflTb-PpLhyRYpx0tG4Q1X2eWOq3vT0/
 
 Respaldo insertado al final del tab Proyecto28/Handoff `t.7lpfc5ado1h`.
 Revision Google Doc post-insercion:
-`AFwiY182Hz9zXVz3y_kZY-brLpbEUuhBz4puvRhy6WSrJOBtXt5750E-VQ93vKeeJ1Pm4Y8fDnrXSAiC9l0Ygo7HsArSdnBldhSzQ1f41P0`.
+`AFwiY19BboSpgMqnFJhu9FFaZNtdXZAOSA0NvjaVo2hEKD44ZDT2Q8sZN6ZayGQz-IsPgtx4eC2yL8xPLscjVJH1N06bSdIs_TRe5_EJ_Mo`.
 
 Titulo/anchor para este cierre:
 
 ```text
-2026-06-02 02:30 UTC - v0.25.6 magnetic-popup-capture
+2026-06-02 06:10 UTC - v0.27.0 edge-stair-floor-loop
 ```
+
+- Commit funcional `349d728 feat: add edge stair floor loop`.
+- GitHub Pages run `26827419187` OK.
+- Auto-tag run `26827419119` OK; tag `v0.27.0`.
+- Produccion mobile `390x844` con `?floor-test=...`: `source="cms"`,
+  build `v0.27.0`, escalera en borde, preview sparse y ascenso a
+  `floorLevel=1/systemLevel=1/layoutMode=sparse`.
+- Strapi Cloud: `/api/projects?populate=*` `200` con 6 proyectos,
+  `/api/site-setting?populate=*` `200`, `gameAscendSphereGoal=6`,
+  `gameFloorHeight=4.2`, `gameGhostFloors=3`.
 
 ---
 
