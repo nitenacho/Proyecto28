@@ -85,6 +85,7 @@ export function createControllableLight({
   let victoryFlashing = false;
   let manualControlActive = false;
   let controlLocked = false;
+  let pinnedTile = null;
 
   const mesh = new THREE.Mesh(
     new THREE.SphereGeometry(SPHERE_RADIUS, 24, 16),
@@ -194,6 +195,14 @@ export function createControllableLight({
     if (onActiveTileChange) onActiveTileChange(activeTile);
   }
 
+  function tileRestPosition(tile) {
+    return {
+      x: tile.position.x,
+      y: tile.position.y + TILE_TOP_Y + SPHERE_RADIUS,
+      z: tile.position.z,
+    };
+  }
+
   function setOpacity(o) {
     mesh.material.opacity = o;
     light.intensity = BASE_LIGHT_INTENSITY * o;
@@ -227,6 +236,7 @@ export function createControllableLight({
   }
 
   function notifyMouseMoved() {
+    if (pinnedTile) return;
     if (mode === 'physics' && respawnPhase === 'none' && !controlLocked) exitPhysics();
   }
 
@@ -250,6 +260,7 @@ export function createControllableLight({
   }
 
   function setControlActive(active) {
+    if (pinnedTile && active) return isControlActive();
     controlLocked = !!active;
     if (active) {
       target.set(mesh.position.x, LIGHT_Y, mesh.position.z);
@@ -275,6 +286,7 @@ export function createControllableLight({
   }
 
   function handleMoveKey(k) {
+    if (pinnedTile) return;
     keysActive.add(k);
     lastMoveInput = performance.now();
     if (gravityFlag && mode === 'floating') {
@@ -398,6 +410,19 @@ export function createControllableLight({
   }
 
   function updateFloating(dt, nowMs, raycaster, padInput) {
+    if (pinnedTile) {
+      const rest = tileRestPosition(pinnedTile);
+      target.set(rest.x, rest.y, rest.z);
+      const k = 1 - Math.exp(-dt * FOLLOW_SMOOTHING * 1.25);
+      mesh.position.x += (target.x - mesh.position.x) * k;
+      mesh.position.y += (target.y - mesh.position.y) * k;
+      mesh.position.z += (target.z - mesh.position.z) * k;
+      velocity.set(0, 0, 0);
+      setManualControlActive(false);
+      setActiveTile(pinnedTile);
+      return;
+    }
+
     const move = getMoveVector(padInput);
     const anyMove = (move.x !== 0 || move.z !== 0);
     if (anyMove) lastMoveInput = nowMs;
@@ -560,6 +585,29 @@ export function createControllableLight({
     updateShadow();
   }
 
+  function pinToTile(tile) {
+    if (!tile?.userData?.isProject) return false;
+    pinnedTile = tile;
+    controlLocked = false;
+    keysActive.clear();
+    lastMoveInput = -Infinity;
+    setExternalMoveVector(0, 0, false);
+    if (mode === 'physics') exitPhysics();
+    mode = 'floating';
+    const rest = tileRestPosition(tile);
+    target.set(rest.x, rest.y, rest.z);
+    setManualControlActive(false);
+    setActiveTile(tile);
+    return true;
+  }
+
+  function releasePin() {
+    if (!pinnedTile) return;
+    pinnedTile = null;
+    setActiveTile(null);
+    target.set(mesh.position.x, LIGHT_Y, mesh.position.z);
+  }
+
   return {
     mesh,
     light,
@@ -575,6 +623,8 @@ export function createControllableLight({
     toggleControl,
     isControlActive,
     setExternalMoveVector,
+    pinToTile,
+    releasePin,
     jump,
   };
 }

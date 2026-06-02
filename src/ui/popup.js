@@ -5,7 +5,7 @@
 
 import { popupEnterTimeline, popupExitTimeline } from '../animations/timelines.js';
 
-export function createPopup() {
+export function createPopup({ onClose = null } = {}) {
   const root        = document.getElementById('popup');
   const titleEl     = document.getElementById('popup-title');
   const descEl      = document.getElementById('popup-desc');
@@ -23,6 +23,7 @@ export function createPopup() {
   let closeTimer    = null;
   let placement     = 'side';
   let currentImageURL = null;
+  let pinned        = false;
 
   function show(project) {
     if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
@@ -94,6 +95,7 @@ export function createPopup() {
   }
 
   function scheduleHide() {
+    if (pinned) return;
     if (closeTimer) clearTimeout(closeTimer);
     closeTimer = setTimeout(() => {
       popupExitTimeline(root);
@@ -111,6 +113,15 @@ export function createPopup() {
     root.setAttribute('aria-hidden', 'true');
     activeProject = null;
     if (coordModule) coordModule.textContent = '—';
+  }
+
+  function setPinned(value) {
+    pinned = !!value;
+    root.classList.toggle('pinned', pinned);
+    if (pinned && closeTimer) {
+      clearTimeout(closeTimer);
+      closeTimer = null;
+    }
   }
 
   function setPlacement(p) {
@@ -140,10 +151,14 @@ export function createPopup() {
 
   root.addEventListener('pointerenter', () => { if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; } });
   root.addEventListener('pointerleave', scheduleHide);
-  closeEl.addEventListener('click', hideNow);
+  closeEl.addEventListener('click', () => {
+    hideNow();
+    onClose?.();
+  });
 
-  return { show, scheduleHide, hideNow, setPlacement, positionAtCursor,
+  return { show, scheduleHide, hideNow, setPinned, setPlacement, positionAtCursor,
     focus() { root.focus({ preventScroll: true }); },
     get placement() { return placement; },
+    get pinned() { return pinned; },
     get active() { return activeProject; } };
 }

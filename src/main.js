@@ -232,7 +232,7 @@ async function boot() {
     if (!active) touchControlsRequested = false;
     if (touchControls) touchControls.setActive(active && touchControlsRequested);
   });
-  const popup = createPopup();
+  const popup = createPopup({ onClose: releasePinnedPopup });
 
   // Botón admin (Etapa 8) — declarado antes de mountTweaks para que el
   // onChange del panel pueda llamarlo. Se monta más abajo con tweaks.show
@@ -562,6 +562,7 @@ async function boot() {
   const pointerPx = { x: 0, y: 0 };
   let hovered = null;
   let keyboardHovered = null;
+  let pinnedTile = null;
   let pointerInsideViewport = false;
   let lastPointerHitAt = -Infinity;
   let hoverCandidate = null;
@@ -584,6 +585,7 @@ async function boot() {
   }
 
   function applyHoverTarget(nextHover, { force = false, immediateHide = false } = {}) {
+    if (pinnedTile && nextHover !== pinnedTile) return;
     if (!force && nextHover === hovered) return;
     hovered = nextHover;
     if (hovered && hovered.userData.isProject) {
@@ -599,6 +601,11 @@ async function boot() {
   }
 
   function resolveHoverTarget(pointerHit, nowMs) {
+    if (pinnedTile) {
+      clearHoverCandidate();
+      return pinnedTile;
+    }
+
     if (keyboardHovered) {
       clearHoverCandidate();
       return keyboardHovered;
@@ -638,21 +645,56 @@ async function boot() {
     return null;
   }
 
+  function setVisualTileTarget(tile) {
+    hovered = tile;
+    if (tile?.userData?.isProject) {
+      popup.show(tile.userData.project);
+      sceneCtx.hoverModel.setHovered(tile, tile.userData.project);
+      canvas.style.cursor = 'pointer';
+    } else {
+      canvas.style.cursor = 'default';
+      sceneCtx.hoverModel.setHovered(null, null);
+    }
+  }
+
+  function pinPopupToTile(tile) {
+    if (!tile?.userData?.isProject) return;
+    pinnedTile = tile;
+    keyboardHovered = null;
+    lastPointerHitAt = performance.now();
+    clearHoverCandidate();
+    popup.setPinned(true);
+    document.documentElement.dataset.p28PinnedProject = tile.userData.project.id || '';
+    controlLight.pinToTile(tile);
+    setVisualTileTarget(tile);
+  }
+
+  function releasePinnedPopup() {
+    if (!pinnedTile) return;
+    pinnedTile = null;
+    popup.setPinned(false);
+    delete document.documentElement.dataset.p28PinnedProject;
+    controlLight.releasePin();
+    keyboardHovered = null;
+    lastPointerHitAt = -Infinity;
+    clearHoverCandidate();
+    hovered = null;
+    canvas.style.cursor = 'default';
+    sceneCtx.hoverModel.setHovered(null, null);
+  }
+
   window.addEventListener('pointermove', (e) => {
     keyboardHovered = null;
     setPointerFromEvent(e);
-    controlLight.notifyMouseMoved();
-    if (popup.placement === 'cursor') popup.positionAtCursor(e.clientX, e.clientY);
+    if (!pinnedTile) controlLight.notifyMouseMoved();
+    if (!pinnedTile && popup.placement === 'cursor') popup.positionAtCursor(e.clientX, e.clientY);
   });
 
-  // Etapa 10: tap vs drag + double-tap-to-navigate en mobile.
-  // Desktop (mouse/pen): click navega directo como antes.
-  // Mobile (touch): primer tap muestra popup, segundo tap dentro de 500ms
-  //   sobre el mismo cubo navega.
+  // Click/tap sobre un cubo fija el popup y ancla la luz en su centro.
+  // La navegacion queda en el CTA del popup para que el detalle no parpadee
+  // por hover, mouse-follow o taps fuera.
   const TAP_THRESHOLD_PX = 8;
-  const DOUBLE_TAP_MS = 500;
   let downXY = { x: 0, y: 0, type: 'mouse' };
-  let lastTap = { tileId: null, t: 0 };
 
   window.addEventListener('pointerdown', (e) => {
     downXY = { x: e.clientX, y: e.clientY, type: e.pointerType || 'mouse' };
@@ -668,8 +710,8 @@ async function boot() {
     const hits = raycaster.intersectObjects(sceneCtx.tiles, false);
     const tile = hits.length ? hits[0].object : null;
     if (!tile || !tile.userData.isProject) {
-      // Tap fuera de un cubo en mobile cierra el popup.
-      if (downXY.type === 'touch') {
+      // Tap fuera de un cubo en mobile cierra solo popups no fijados.
+      if (downXY.type === 'touch' && !pinnedTile) {
         keyboardHovered = null;
         lastPointerHitAt = -Infinity;
         clearHoverCandidate();
@@ -678,26 +720,11 @@ async function boot() {
       return;
     }
     interactionAudio.playInteraction('tap');
-    if (downXY.type === 'touch') {
-      const now = performance.now();
-      const same = lastTap.tileId === tile.id && (now - lastTap.t) < DOUBLE_TAP_MS;
-      if (same) {
-        navigateTo(tile.userData.project);
-        lastTap = { tileId: null, t: 0 };
-      } else {
-        // Primer tap: muestra popup como hover.
-        lastPointerHitAt = now;
-        clearHoverCandidate();
-        applyHoverTarget(tile, { force: true });
-        lastTap = { tileId: tile.id, t: now };
-      }
-    } else {
-      // Mouse/pen: navegación inmediata (comportamiento desktop original).
-      navigateTo(tile.userData.project);
-    }
+    pinPopupToTile(tile);
   });
 
   window.addEventListener('pointerleave', () => {
+    if (pinnedTile) return;
     pointerInsideViewport = false;
     lastPointerHitAt = -Infinity;
     clearHoverCandidate();
@@ -727,10 +754,14 @@ async function boot() {
 
   function focusTileForKeyboard(tile, focusPopup = false) {
     if (!tile?.userData?.isProject) return;
+    if (focusPopup) {
+      pinPopupToTile(tile);
+      popup.focus();
+      return;
+    }
     keyboardHovered = tile;
     clearHoverCandidate();
     applyHoverTarget(tile, { force: true });
-    if (focusPopup) popup.focus();
   }
 
   routeBackEl.addEventListener('click', () => {
@@ -749,6 +780,7 @@ async function boot() {
       focusTileForKeyboard(tile, true);
     },
     onClear() {
+      if (pinnedTile) return;
       keyboardHovered = null;
       clearHoverCandidate();
       applyHoverTarget(null, { immediateHide: true });
@@ -761,6 +793,7 @@ async function boot() {
       closeRouteOverlay();
       return;
     }
+    if (pinnedTile) return;
     keyboardHovered = null;
     clearHoverCandidate();
     applyHoverTarget(null, { immediateHide: true });
