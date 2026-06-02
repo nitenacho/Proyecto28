@@ -1,0 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "kaiyi_registration_sessions",
+  "info": {
+    "singularName": "kaiyi-registration-session",
+    "pluralName": "kaiyi-registration-sessions",
+    "displayName": "Kaiyi — Sesión de Registro QR",
+    "description": "Sesión iniciada por el juego al mostrar el QR. Marcada como claimed cuando el jugador escanea y acepta. Email pendiente (D6: asesoría legal Ley 19.628 Chile)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "sessionToken": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "description": "Token UUID único generado por el servidor al crear la sesión."
+    },
+    "claimed": {
+      "type": "boolean",
+      "default": false,
+      "description": "true cuando el jugador escaneó el QR y completó el formulario web."
+    },
+    "claimedAt": {
+      "type": "datetime",
+      "required": false,
+      "description": "Fecha/hora en que se reclamó la sesión."
+    },
+    "expiresAt": {
+      "type": "datetime",
+      "required": false,
+      "description": "Expiración de la sesión (10 minutos desde creación). El juego deja de hacer polling si ya pasó."
+    }
+  }
+}

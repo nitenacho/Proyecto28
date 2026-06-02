@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "kaiyi_ranking_records",
+  "info": {
+    "singularName": "kaiyi-ranking-record",
+    "pluralName": "kaiyi-ranking-records",
+    "displayName": "Kaiyi — Récord de Carrera",
+    "description": "Registro de tiempo completado en Kaiyi. Cada entrada es una carrera terminada."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "vehicleId": {
+      "type": "enumeration",
+      "required": true,
+      "enum": ["Vehicle_01", "Vehicle_02", "Vehicle_03", "Vehicle_04"],
+      "description": "Vehículo usado en la carrera (enum de EKaiyiVehicleID del juego)."
+    },
+    "completionTimeSeconds": {
+      "type": "float",
+      "required": true,
+      "description": "Tiempo de completación en segundos (con decimales, ej. 83.47)."
+    },
+    "completionDate": {
+      "type": "string",
+      "required": true,
+      "description": "Fecha y hora ISO 8601 del fin de carrera, enviada por el juego (ej. 2026-06-02T14:30:00.000Z)."
+    },
+    "collectedLettersCount": {
+      "type": "integer",
+      "required": true,
+      "description": "Letras K-A-I-Y-I recolectadas en esa carrera (0–5)."
+    },
+    "bCollectedAllLetters": {
+      "type": "boolean",
+      "required": true,
+      "default": false,
+      "description": "true si el jugador recogió las 5 letras en esta carrera."
+    }
+  }
+}

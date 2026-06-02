@@ -1,0 +1,75 @@
+{
+  "kind": "singleType",
+  "collectionName": "kaiyi_web_content",
+  "info": {
+    "singularName": "kaiyi-web-content",
+    "pluralName": "kaiyi-web-contents",
+    "displayName": "Kaiyi — Contenido Web",
+    "description": "Textos editables para la web de Kaiyi (proyecto28.com/kaiyi) y el popup post-carrera del juego. Editar desde el admin de Strapi."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "rankingTitle": {
+      "type": "string",
+      "default": "Ranking Kaiyi",
+      "description": "Título de la página de ranking en la web."
+    },
+    "rankingSubtitle": {
+      "type": "string",
+      "default": "Los mejores tiempos de Chile",
+      "description": "Subtítulo bajo el título del ranking."
+    },
+    "thankYouMessage": {
+      "type": "text",
+      "description": "Mensaje de agradecimiento al pie del ranking (al pie de la página web)."
+    },
+    "legalTermsText": {
+      "type": "richtext",
+      "description": "Texto de términos legales mostrado en el formulario de registro QR. Editar con Strapi Rich Text editor."
+    },
+    "popupMessage": {
+      "type": "string",
+      "default": "¡Revisa tu ranking en proyecto28.com/kaiyi!",
+      "description": "Mensaje mostrado en el popup post-carrera del juego (después de cruzar la meta).",
+      "maxLength": 200
+    },
+    "registrationTitle": {
+      "type": "string",
+      "default": "Kaiyi The Game",
+      "description": "Título de la página de registro QR (estilo Disney+)."
+    },
+    "registrationSubtitle": {
+      "type": "string",
+      "default": "Ingresa tu correo para guardar tu tiempo en el ranking",
+      "description": "Texto bajo el título de la página de registro."
+    },
+    "registrationSuccessMessage": {
+      "type": "string",
+      "default": "¡Listo! Vuelve al juego, ya está desbloqueado.",
+      "description": "Mensaje mostrado en la web después de completar el registro."
+    },
+    "vehicle01Requirement": {
+      "type": "string",
+      "default": "Vehículo inicial — disponible desde el comienzo",
+      "description": "Texto de requisito de desbloqueo para Vehicle_01 (mostrado en el pódium del lobby)."
+    },
+    "vehicle02Requirement": {
+      "type": "string",
+      "default": "Completa una carrera con el Vehículo 1",
+      "description": "Texto de requisito de desbloqueo para Vehicle_02."
+    },
+    "vehicle03Requirement": {
+      "type": "string",
+      "default": "Completa una carrera con el Vehículo 2",
+      "description": "Texto de requisito de desbloqueo para Vehicle_03."
+    },
+    "vehicle04Requirement": {
+      "type": "string",
+      "default": "Completa una carrera con el Vehículo 3",
+      "description": "Texto de requisito de desbloqueo para Vehicle_04."
+    }
+  }
+}

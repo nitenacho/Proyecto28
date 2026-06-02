@@ -1,0 +1,119 @@
+'use strict';
+
+const { createCoreController } = require('@strapi/strapi').factories;
+
+const VALID_VEHICLE_IDS = ['Vehicle_01', 'Vehicle_02', 'Vehicle_03', 'Vehicle_04'];
+
+function formatTime(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60);
+  const s = Math.floor(totalSeconds % 60);
+  const cs = Math.round((totalSeconds - Math.floor(totalSeconds)) * 100);
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(cs).padStart(2, '0')}`;
+}
+
+module.exports = createCoreController(
+  'api::kaiyi-ranking-record.kaiyi-ranking-record',
+  ({ strapi }) => ({
+
+    /**
+     * POST /api/kaiyi/records
+     * Recibe un récord desde el juego. Requiere header X-Kaiyi-Token.
+     */
+    async submitRecord(ctx) {
+      const token = ctx.request.headers['x-kaiyi-token'];
+      const expectedToken = process.env.KAIYI_GAME_TOKEN;
+
+      if (!expectedToken || token !== expectedToken) {
+        return ctx.unauthorized('Token inválido.');
+      }
+
+      const {
+        vehicleId,
+        completionTimeSeconds,
+        completionDate,
+        collectedLettersCount,
+        bCollectedAllLetters,
+      } = ctx.request.body;
+
+      if (!VALID_VEHICLE_IDS.includes(vehicleId)) {
+        return ctx.badRequest(`vehicleId inválido. Valores permitidos: ${VALID_VEHICLE_IDS.join(', ')}`);
+      }
+      if (typeof completionTimeSeconds !== 'number' || completionTimeSeconds <= 0 || completionTimeSeconds > 7200) {
+        return ctx.badRequest('completionTimeSeconds inválido (debe ser número > 0 y < 7200).');
+      }
+      if (!completionDate || typeof completionDate !== 'string') {
+        return ctx.badRequest('completionDate requerida (string ISO 8601).');
+      }
+      if (typeof collectedLettersCount !== 'number' || collectedLettersCount < 0 || collectedLettersCount > 5) {
+        return ctx.badRequest('collectedLettersCount inválido (0–5).');
+      }
+      if (typeof bCollectedAllLetters !== 'boolean') {
+        return ctx.badRequest('bCollectedAllLetters debe ser boolean.');
+      }
+
+      const record = await strapi.entityService.create(
+        'api::kaiyi-ranking-record.kaiyi-ranking-record',
+        {
+          data: {
+            vehicleId,
+            completionTimeSeconds,
+            completionDate,
+            collectedLettersCount,
+            bCollectedAllLetters,
+          },
+        }
+      );
+
+      strapi.log.info(
+        `[kaiyi] record creado: ${vehicleId} — ${formatTime(completionTimeSeconds)}`
+      );
+
+      ctx.body = {
+        data: {
+          id: record.id,
+          vehicleId: record.vehicleId,
+          completionTimeSeconds: record.completionTimeSeconds,
+          formattedTime: formatTime(record.completionTimeSeconds),
+          completionDate: record.completionDate,
+          collectedLettersCount: record.collectedLettersCount,
+          bCollectedAllLetters: record.bCollectedAllLetters,
+        },
+      };
+    },
+
+    /**
+     * GET /api/kaiyi/records/export
+     * Descarga CSV de todos los récords ordenados por tiempo. Requiere X-Kaiyi-Token.
+     */
+    async exportCsv(ctx) {
+      const token = ctx.request.headers['x-kaiyi-token'];
+      const expectedToken = process.env.KAIYI_GAME_TOKEN;
+
+      if (!expectedToken || token !== expectedToken) {
+        return ctx.unauthorized('Token inválido.');
+      }
+
+      const records = await strapi.entityService.findMany(
+        'api::kaiyi-ranking-record.kaiyi-ranking-record',
+        {
+          sort: { completionTimeSeconds: 'asc' },
+          limit: -1,
+        }
+      );
+
+      const lines = [
+        'Puesto,Vehículo,Tiempo,Tiempo (seg),Letras,Todas las Letras,Fecha',
+      ];
+      records.forEach((r, i) => {
+        const allLetters = r.bCollectedAllLetters ? 'Sí' : 'No';
+        lines.push(
+          `${i + 1},${r.vehicleId},${formatTime(r.completionTimeSeconds)},${r.completionTimeSeconds},${r.collectedLettersCount}/5,${allLetters},${r.completionDate}`
+        );
+      });
+
+      ctx.set('Content-Type', 'text/csv; charset=utf-8');
+      ctx.set('Content-Disposition', `attachment; filename="kaiyi-ranking-${new Date().toISOString().slice(0, 10)}.csv"`);
+      ctx.body = '﻿' + lines.join('\r\n'); // BOM UTF-8 para Excel
+    },
+  })
+);

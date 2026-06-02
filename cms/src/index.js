@@ -89,6 +89,21 @@ const PROJECT_STATUS_ALIASES = new Map([
   ['PAUSED', 'EN PAUSA'],
 ]);
 
+const KAIYI_WEB_CONTENT_DEFAULTS = {
+  rankingTitle: 'Ranking Kaiyi',
+  rankingSubtitle: 'Los mejores tiempos de Chile',
+  thankYouMessage:
+    'Gracias por disfrutar la experiencia. Hecha con mucho cariño para que conocieras una parte de Chile junto con Kaiyi.',
+  popupMessage: '¡Revisa tu ranking en proyecto28.com/kaiyi!',
+  registrationTitle: 'Kaiyi The Game',
+  registrationSubtitle: 'Ingresa tu correo para guardar tu tiempo en el ranking',
+  registrationSuccessMessage: '¡Listo! Vuelve al juego, ya está desbloqueado.',
+  vehicle01Requirement: 'Vehículo inicial — disponible desde el comienzo',
+  vehicle02Requirement: 'Completa una carrera con el Vehículo 1',
+  vehicle03Requirement: 'Completa una carrera con el Vehículo 2',
+  vehicle04Requirement: 'Completa una carrera con el Vehículo 3',
+};
+
 const ADMIN_WHITELIST_SEED = [
   { email: 'inconcha@gmail.com', role: 'owner', note: 'Dueño del proyecto.' },
   { email: 'cnignacioa@gmail.com', role: 'owner', note: 'Dueño del proyecto (cuenta alterna).' },
@@ -162,6 +177,11 @@ async function grantPublicReadAccess(strapi) {
     'api::site-setting.site-setting.find',
     'plugin::upload.content-api.find',
     'plugin::upload.content-api.findOne',
+    // Kaiyi: ranking público (GET /api/kaiyi-ranking-records)
+    'api::kaiyi-ranking-record.kaiyi-ranking-record.find',
+    'api::kaiyi-ranking-record.kaiyi-ranking-record.findOne',
+    // Kaiyi: textos web públicos (GET /api/kaiyi-web-content)
+    'api::kaiyi-web-content.kaiyi-web-content.find',
   ];
 
   for (const action of allow) {
@@ -241,6 +261,22 @@ async function seedIfEmpty(strapi) {
         data: patch,
       });
     }
+  }
+
+  // 4. KaiyiWebContent (singleType): seed con defaults si no existe.
+  try {
+    const kaiyiContent = await strapi.db
+      .query('api::kaiyi-web-content.kaiyi-web-content')
+      .findOne({});
+    if (!kaiyiContent) {
+      strapi.log.info('[bootstrap] seeding kaiyi-web-content defaults...');
+      await strapi.entityService.create('api::kaiyi-web-content.kaiyi-web-content', {
+        data: KAIYI_WEB_CONTENT_DEFAULTS,
+      });
+    }
+  } catch (err) {
+    // El content type puede no existir en deploys anteriores; no es bloqueante.
+    strapi.log.warn('[bootstrap] kaiyi-web-content seed skipped:', err.message);
   }
 
   // 3. AdminWhitelist (collection): upsert por email para que el seed se
