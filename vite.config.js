@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import { resolve } from 'path'
 
 export default defineConfig({
   base: '/',
@@ -14,6 +15,12 @@ export default defineConfig({
       },
     },
     rollupOptions: {
+      input: {
+        // Sitio principal (Three.js / WebGL)
+        main: resolve(__dirname, 'index.html'),
+        // Sub-app Kaiyi (ranking + registro QR) — proyecto28.com/kaiyi/
+        kaiyi: resolve(__dirname, 'kaiyi/index.html'),
+      },
       output: {
         manualChunks(id) {
           const normalized = id.replace(/\\/g, '/');

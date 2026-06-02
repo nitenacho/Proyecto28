@@ -1,0 +1,515 @@
+/* =========================================================
+   KAIYI — Estilos de la sub-app (proyecto28.com/kaiyi).
+   Hereda los design tokens de tokens.css (dark sci-fi).
+   Dos vistas: ranking (tabla) y register (card Disney+).
+   ========================================================= */
+
+/* --------------------------------------------------------
+   RESET / BASE
+   -------------------------------------------------------- */
+
+.kaiyi-root {
+  min-height: 100dvh;
+  background: var(--bg-1);
+  color: var(--ink-1);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --------------------------------------------------------
+   LOADING SPINNER
+   -------------------------------------------------------- */
+
+.kaiyi-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.875rem;
+  min-height: 30vh;
+  color: var(--ink-3);
+  font-size: var(--fs-14);
+}
+
+.kaiyi-ring {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 2px solid var(--cyan-a18);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: kaiyi-spin 0.85s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes kaiyi-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --------------------------------------------------------
+   RANKING PAGE — LAYOUT
+   -------------------------------------------------------- */
+
+.kaiyi-page {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100dvh;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* Header */
+
+.kaiyi-header {
+  padding: 1.5rem 0 2rem;
+  border-bottom: 1px solid var(--cyan-a12);
+}
+
+.kaiyi-back {
+  display: inline-block;
+  color: var(--cyan-dim);
+  text-decoration: none;
+  font-size: var(--fs-13);
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  margin-bottom: 1.125rem;
+  transition: color 0.15s;
+}
+.kaiyi-back:hover { color: var(--cyan); }
+
+.kaiyi-brand-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  letter-spacing: var(--tr-xwide);
+  color: var(--copper);
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+}
+
+.kaiyi-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 5vw, 3rem);
+  font-weight: 700;
+  color: var(--ink-1);
+  line-height: var(--lh-tight);
+}
+
+.kaiyi-subtitle {
+  color: var(--ink-2);
+  font-size: 1rem;
+  margin-top: 0.375rem;
+  line-height: var(--lh-norm);
+}
+
+/* Main area */
+
+.kaiyi-main {
+  padding: 2rem 0 1rem;
+}
+
+/* Controls */
+
+.kaiyi-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 1.25rem;
+}
+
+.kaiyi-input,
+.kaiyi-select {
+  background: var(--bg-2);
+  border: 1px solid var(--cyan-a28);
+  color: var(--ink-1);
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--r-md);
+  font-size: var(--fs-14);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  min-width: 0;
+}
+
+.kaiyi-input { flex: 1; min-width: 160px; }
+.kaiyi-select { cursor: pointer; appearance: none; padding-right: 2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A7290' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+}
+
+.kaiyi-input:focus,
+.kaiyi-select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px var(--cyan-a12);
+}
+
+.kaiyi-letters-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.kaiyi-letters-filter input[type="checkbox"] {
+  accent-color: var(--copper);
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+/* Table */
+
+.kaiyi-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--cyan-a12);
+  border-radius: var(--r-lg);
+  background: var(--bg-0);
+}
+
+.kaiyi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.kaiyi-table thead th {
+  background: var(--bg-2);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  letter-spacing: var(--tr-wide);
+  text-transform: uppercase;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--cyan-a18);
+  white-space: nowrap;
+}
+
+.kaiyi-table tbody tr {
+  border-bottom: 1px solid var(--cyan-a08);
+  transition: background 0.1s;
+}
+.kaiyi-table tbody tr:last-child { border-bottom: none; }
+.kaiyi-table tbody tr:hover { background: var(--bg-3); }
+
+.kaiyi-table td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+.kaiyi-pos {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  width: 2.5rem;
+  text-align: right;
+  padding-right: 1.25rem;
+}
+
+.kaiyi-time {
+  font-family: var(--font-mono);
+  color: var(--cyan);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.kaiyi-vehicle {
+  color: var(--ink-2);
+  font-size: var(--fs-14);
+}
+
+.kaiyi-letters {
+  color: var(--ink-3);
+  font-size: var(--fs-13);
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.kaiyi-letters--full {
+  color: var(--copper);
+}
+
+.kaiyi-date {
+  color: var(--ink-3);
+  font-size: var(--fs-13);
+  white-space: nowrap;
+}
+
+/* Record count */
+
+.kaiyi-count {
+  margin-top: 0.75rem;
+  text-align: right;
+  font-size: var(--fs-13);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+}
+
+/* Empty / Error states */
+
+.kaiyi-empty {
+  padding: 3.5rem 1rem;
+  text-align: center;
+  color: var(--ink-2);
+  line-height: var(--lh-norm);
+}
+.kaiyi-empty-sub {
+  margin-top: 0.5rem;
+  color: var(--ink-3);
+  font-size: var(--fs-14);
+}
+
+.kaiyi-error {
+  padding: 2rem;
+  text-align: center;
+  color: var(--ink-2);
+  border: 1px solid var(--copper-a18);
+  border-radius: var(--r-lg);
+  font-size: var(--fs-14);
+}
+
+/* Footer */
+
+.kaiyi-footer {
+  padding: 2rem 0 2.5rem;
+  border-top: 1px solid var(--cyan-a12);
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 0.9375rem;
+  line-height: var(--lh-loose);
+  font-style: italic;
+}
+
+/* --------------------------------------------------------
+   REGISTER PAGE (estilo Disney+ — card centrada)
+   -------------------------------------------------------- */
+
+.kaiyi-register-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -5%, var(--cyan-a08) 0%, transparent 65%),
+    var(--bg-0);
+}
+
+.kaiyi-register-card {
+  position: relative;
+  width: 100%;
+  max-width: 26rem;
+  padding: 2.5rem 2rem 2rem;
+  background: var(--bg-2);
+  border: 1px solid var(--cyan-a18);
+  border-radius: var(--r-xl);
+  text-align: center;
+  overflow: hidden;
+  box-shadow: var(--sh-floating);
+}
+
+.kaiyi-register-glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, var(--cyan-a08) 0%, transparent 55%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* All card children above the glow */
+.kaiyi-register-card > *:not(.kaiyi-register-glow) {
+  position: relative;
+  z-index: 1;
+}
+
+.kaiyi-register-brand {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  letter-spacing: var(--tr-xwide);
+  color: var(--copper);
+  text-transform: uppercase;
+  margin-bottom: 0.625rem;
+}
+
+.kaiyi-register-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 6vw, 2.25rem);
+  font-weight: 700;
+  color: var(--ink-1);
+  line-height: var(--lh-snug);
+  margin-bottom: 0.5rem;
+}
+
+.kaiyi-register-sub {
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+  line-height: var(--lh-norm);
+  margin-bottom: 1.75rem;
+  min-height: 1.25rem; /* reservar espacio mientras carga */
+}
+
+.kaiyi-register-link {
+  display: block;
+  margin-top: 1.5rem;
+  color: var(--cyan-dim);
+  text-decoration: none;
+  font-size: var(--fs-13);
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  transition: color 0.15s;
+}
+.kaiyi-register-link:hover { color: var(--cyan); }
+
+/* Register form */
+
+.kaiyi-reg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.kaiyi-reg-terms {
+  color: var(--ink-3);
+  font-size: var(--fs-13);
+  line-height: var(--lh-norm);
+  text-align: left;
+  background: var(--bg-1);
+  border: 1px solid var(--cyan-a12);
+  border-radius: var(--r-md);
+  padding: 0.75rem;
+  max-height: 7rem;
+  overflow-y: auto;
+}
+
+/* Primary button */
+
+.kaiyi-btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  background: var(--cyan);
+  color: var(--bg-0);
+  border: none;
+  border-radius: var(--r-md);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+.kaiyi-btn-primary:hover:not(:disabled) {
+  background: var(--cyan-bright);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--cyan-a40);
+}
+.kaiyi-btn-primary:active:not(:disabled) { transform: translateY(0); }
+.kaiyi-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.kaiyi-btn-arrow {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+/* Ghost button */
+
+.kaiyi-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.625rem 1.125rem;
+  background: transparent;
+  color: var(--cyan);
+  border: 1px solid var(--cyan-a28);
+  border-radius: var(--r-md);
+  font-size: var(--fs-14);
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.kaiyi-btn-ghost:hover {
+  border-color: var(--cyan);
+  background: var(--cyan-a08);
+}
+
+/* Hint */
+.kaiyi-reg-hint {
+  color: var(--ink-3);
+  font-size: var(--fs-12);
+  line-height: var(--lh-norm);
+  text-align: center;
+}
+
+/* Success */
+.kaiyi-reg-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  animation: kaiyi-fade-in 0.3s ease;
+}
+
+.kaiyi-success-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--success);
+  color: var(--bg-0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.375rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.kaiyi-success-msg {
+  color: var(--ink-1);
+  font-size: 1rem;
+  line-height: var(--lh-norm);
+}
+
+/* Error */
+.kaiyi-reg-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+  line-height: var(--lh-norm);
+  animation: kaiyi-fade-in 0.2s ease;
+}
+
+@keyframes kaiyi-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------
+   RESPONSIVE
+   -------------------------------------------------------- */
+
+@media (max-width: 480px) {
+  .kaiyi-controls { flex-direction: column; align-items: stretch; }
+  .kaiyi-input, .kaiyi-select { min-width: 0; width: 100%; }
+  .kaiyi-table th:nth-child(5),
+  .kaiyi-table td.kaiyi-date { display: none; }
+  .kaiyi-register-card { padding: 2rem 1.25rem 1.5rem; }
+}
