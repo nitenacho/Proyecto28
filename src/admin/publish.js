@@ -22,6 +22,7 @@ const PUBLISHABLE_KEYS = new Set([
   'gameMouseFollowDelay',
   'gameFallDuration',
   'gameShadowSize',
+  'gameTileCaptureRadius',
   'streamingEnabled',
   'streamingPreviewEnabled',
   'streamingMode',

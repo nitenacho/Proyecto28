@@ -36,6 +36,7 @@ export const FALLBACK_SITE = {
     mouseFollowDelay: 1.0,
     fallDuration: 1.0,
     shadowSize: 0.3,           // v0.9.2: ajuste fino del owner (antes 0.45)
+    tileCaptureRadius: 1.15,   // v0.25.6: radio magnetico para seleccionar cubos con popup
   },
   admin: {
     buttonVisible: true,        // v0.12.0: botón admin visible por default (Etapa 8)

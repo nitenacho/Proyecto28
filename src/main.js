@@ -253,6 +253,7 @@ async function boot() {
     gameMouseFollowDelay: site.game.mouseFollowDelay,
     gameFallDuration: site.game.fallDuration,
     gameShadowSize: site.game.shadowSize ?? 0.45,
+    gameTileCaptureRadius: site.game.tileCaptureRadius ?? 1.15,
     streamingEnabled: site.streaming.enabled,
     streamingPreviewEnabled: site.streaming.previewEnabled,
     streamingMode: normalizeStreamingMode(site.streaming.mode),
@@ -309,6 +310,7 @@ async function boot() {
       site.game.mouseFollowDelay = state.gameMouseFollowDelay;
       site.game.fallDuration     = state.gameFallDuration;
       site.game.shadowSize       = state.gameShadowSize;
+      site.game.tileCaptureRadius = state.gameTileCaptureRadius;
       controlLight.setLightColor(site.game.lightColor);
       // Streaming — Etapa 11: iframe sobre el cubo activo o fallback local.
       site.streaming.enabled     = !!state.streamingEnabled;
@@ -399,6 +401,7 @@ async function boot() {
           { type: 'slider', key: 'gameMouseFollowDelay', label: 'Delay mouse-follow', min: 0,   max: 3,   step: 0.1, unit: 's' },
           { type: 'slider', key: 'gameFallDuration',    label: 'Duración caída',     min: 0.2, max: 3,   step: 0.1, unit: 's' },
           { type: 'slider', key: 'gameShadowSize',       label: 'Tamaño sombra',     min: 0.15, max: 1.2, step: 0.05 },
+          { type: 'slider', key: 'gameTileCaptureRadius', label: 'Radio captura popup', min: 0.8, max: 1.8, step: 0.05 },
         ],
       },
       {
@@ -560,6 +563,8 @@ async function boot() {
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2(-10, -10);
   const pointerPx = { x: 0, y: 0 };
+  const capturePlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  const capturePoint = new THREE.Vector3();
   let hovered = null;
   let keyboardHovered = null;
   let pinnedTile = null;
@@ -570,6 +575,7 @@ async function boot() {
 
   const HOVER_EXIT_GRACE_MS = 180;
   const HOVER_SWITCH_GRACE_MS = 90;
+  const DEFAULT_TILE_CAPTURE_RADIUS = 1.15;
 
   function clearHoverCandidate() {
     hoverCandidate = null;
@@ -645,6 +651,39 @@ async function boot() {
     return null;
   }
 
+  function getTileCaptureRadius() {
+    const value = Number(site.game.tileCaptureRadius);
+    if (!Number.isFinite(value)) return DEFAULT_TILE_CAPTURE_RADIUS;
+    return Math.max(0.8, Math.min(1.8, value));
+  }
+
+  function findNearestProjectTileInCapture(ray) {
+    if (!ray.intersectPlane(capturePlane, capturePoint)) return null;
+    const radius = getTileCaptureRadius();
+    const radiusSq = radius * radius;
+    let bestTile = null;
+    let bestDistSq = Infinity;
+    for (const tile of sceneCtx.tiles) {
+      if (!tile.userData?.isProject) continue;
+      const dx = capturePoint.x - tile.position.x;
+      const dz = capturePoint.z - tile.position.z;
+      const distSq = dx * dx + dz * dz;
+      if (distSq <= radiusSq && distSq < bestDistSq) {
+        bestTile = tile;
+        bestDistSq = distSq;
+      }
+    }
+    return bestTile;
+  }
+
+  function resolveProjectTileFromPointer() {
+    const hits = raycaster.intersectObjects(sceneCtx.tiles, false);
+    const exactProject = hits.find((hit) => hit.object?.userData?.isProject)?.object || null;
+    if (exactProject) return { tile: exactProject, mode: 'exact' };
+    const captured = findNearestProjectTileInCapture(raycaster.ray);
+    return captured ? { tile: captured, mode: 'magnet' } : { tile: null, mode: 'none' };
+  }
+
   function setVisualTileTarget(tile) {
     hovered = tile;
     if (tile?.userData?.isProject) {
@@ -707,8 +746,7 @@ async function boot() {
     if (dx > TAP_THRESHOLD_PX || dy > TAP_THRESHOLD_PX) return;   // drag, no tap
     setPointerFromEvent(e);
     raycaster.setFromCamera(pointer, sceneCtx.camera);
-    const hits = raycaster.intersectObjects(sceneCtx.tiles, false);
-    const tile = hits.length ? hits[0].object : null;
+    const { tile, mode } = resolveProjectTileFromPointer();
     if (!tile || !tile.userData.isProject) {
       // Tap fuera de un cubo en mobile cierra solo popups no fijados.
       if (downXY.type === 'touch' && !pinnedTile) {
@@ -719,6 +757,8 @@ async function boot() {
       }
       return;
     }
+    document.documentElement.dataset.p28TileCaptureMode = mode;
+    document.documentElement.dataset.p28TileCaptureRadius = String(getTileCaptureRadius());
     interactionAudio.playInteraction('tap');
     pinPopupToTile(tile);
   });
@@ -828,8 +868,7 @@ async function boot() {
     raycaster.setFromCamera(pointer, sceneCtx.camera);
     controlLight.update(dt, now, raycaster);
     updateSphereRun(now, t);
-    const hits = raycaster.intersectObjects(sceneCtx.tiles, false);
-    const pointerHit = hits.length ? hits[0].object : null;
+    const { tile: pointerHit } = resolveProjectTileFromPointer();
     if (pointerInsideViewport && pointerHit) interactionAudio.playBlock(pointerHit);
     const hit = resolveHoverTarget(pointerHit, now);
     applyHoverTarget(hit);

@@ -128,6 +128,13 @@
       "max": 1.2,
       "description": "Tamaño base del anillo de sombra bajo la luz controlable."
     },
+    "gameTileCaptureRadius": {
+      "type": "decimal",
+      "default": 1.15,
+      "min": 0.8,
+      "max": 1.8,
+      "description": "Radio magnetico X/Z para atraer click/tap al cubo de proyecto mas cercano y fijar popup + luz. 0.8 exige precision; 1.15 es recomendado; 1.8 es muy permisivo."
+    },
     "audioEnabled": {
       "type": "boolean",
       "default": true,

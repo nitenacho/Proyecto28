@@ -117,6 +117,7 @@ const SITE_SETTING_DEFAULTS = {
   gameMouseFollowDelay: 1.0,
   gameFallDuration: 1.0,
   gameShadowSize: 0.3,
+  gameTileCaptureRadius: 1.15,
   audioEnabled: true,
   audioPreset: 'midi',
   audioMasterVolume: 0.24,

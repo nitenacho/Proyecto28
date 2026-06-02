@@ -60,6 +60,7 @@ const FETCH_TIMEOUT_MS = 8000;
  * @property {number} game.mouseFollowDelay      Segundos sin WASD antes de seguir mouse
  * @property {number} game.fallDuration          Segundos de caída antes del respawn
  * @property {number} game.shadowSize            Tamaño del anillo de sombra
+ * @property {number} game.tileCaptureRadius     Radio X/Z para atraer click/tap al cubo de proyecto
  *
  * @property {Object} admin                      Toggles admin (Etapas 7-9)
  * @property {boolean} admin.buttonVisible       Botón secreto bajo el logo
@@ -194,6 +195,7 @@ function normalizeSite(s) {
       mouseFollowDelay: num(parseFloat(a.gameMouseFollowDelay), fb.game.mouseFollowDelay),
       fallDuration: num(parseFloat(a.gameFallDuration), fb.game.fallDuration),
       shadowSize: num(parseFloat(a.gameShadowSize), fb.game.shadowSize),
+      tileCaptureRadius: num(parseFloat(a.gameTileCaptureRadius), fb.game.tileCaptureRadius),
     },
     admin: {
       buttonVisible: a.adminButtonVisible ?? fb.admin.buttonVisible,

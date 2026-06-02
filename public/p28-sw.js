@@ -2,7 +2,7 @@
    Keeps proyecto28.com navigations network-first even when the edge/browser
    applies the default GitHub Pages max-age header. */
 
-const P28_SW_VERSION = 'v0.25.5-20260601-pinned-popup-light';
+const P28_SW_VERSION = 'v0.25.6-20260601-magnetic-popup-capture';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
