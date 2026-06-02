@@ -102,6 +102,9 @@ const HUD_CSS = `
   letter-spacing: 0.06em;
   opacity: 0.78;
 }
+.p28-hud-floor .p28-hud-value {
+  color: var(--warning);
+}
 @media (max-width: 1024px), (pointer: coarse), (max-aspect-ratio: 1/1) {
   .p28-hud {
     top: auto;
@@ -165,6 +168,7 @@ function makeRow(labelText, valueText, extraClass = '') {
  * @returns {{
  *   setFallCount: (n:number)=>void,
  *   setCollectibles: (current:number,total:number)=>void,
+ *   setFloorLevel: (level:number)=>void,
  *   setTimer: (ms:number, active?:boolean, complete?:boolean)=>void,
  *   setBestTime: (ms:number|null)=>void,
  *   setControlActive: (active:boolean)=>void,
@@ -190,11 +194,13 @@ export function mountHud() {
   head.appendChild(controlButton);
 
   const falls = makeRow('Caidas', pad3(0));
+  const floor = makeRow('Piso', '00', 'p28-hud-floor');
   const spheres = makeRow('Esferas', '00/00');
   const timer = makeRow('Tiempo', formatTime(0));
   const best = makeRow('Mejor', formatTime(null), 'p28-hud-best');
   root.appendChild(head);
   root.appendChild(falls.row);
+  root.appendChild(floor.row);
   root.appendChild(spheres.row);
   root.appendChild(timer.row);
   root.appendChild(best.row);
@@ -215,6 +221,11 @@ export function mountHud() {
   function setCollectibles(current, total) {
     spheres.value.textContent = `${pad2(current)}/${pad2(total)}`;
     hudCounterTimeline(spheres.value);
+  }
+
+  function setFloorLevel(level) {
+    floor.value.textContent = pad2(level);
+    hudCounterTimeline(floor.value);
   }
 
   function setTimer(ms, active = false, complete = false) {
@@ -241,6 +252,7 @@ export function mountHud() {
   return {
     setFallCount,
     setCollectibles,
+    setFloorLevel,
     setTimer,
     setBestTime,
     setControlActive,

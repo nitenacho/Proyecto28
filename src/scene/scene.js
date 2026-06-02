@@ -123,14 +123,20 @@ export async function createScene({ canvas, grid, projects }) {
   const camera = new THREE.PerspectiveCamera(computeCamFov(), initialViewport.w / Math.max(initialViewport.h, 1), 0.1, 100);
   const CAM_TARGET = new THREE.Vector3(0, 0, 0);
   let camRadius = computeCamRadius();
+  let cameraAscentOffset = 0;
   const camState = { tilt: 58, yaw: 0, drift: true };
 
   function setCameraFromState(tiltDeg, yawDeg) {
     const t = THREE.MathUtils.degToRad(tiltDeg);
     const y = THREE.MathUtils.degToRad(yawDeg);
     const hr = camRadius * Math.cos(t);
-    camera.position.set(hr * Math.sin(y), camRadius * Math.sin(t), hr * Math.cos(y));
+    CAM_TARGET.set(0, cameraAscentOffset, 0);
+    camera.position.set(hr * Math.sin(y), camRadius * Math.sin(t) + cameraAscentOffset, hr * Math.cos(y));
     camera.lookAt(CAM_TARGET);
+  }
+
+  function setCameraAscentOffset(offset = 0) {
+    cameraAscentOffset = Number.isFinite(offset) ? offset : 0;
   }
   setCameraFromState(camState.tilt, camState.yaw);
 
@@ -277,6 +283,6 @@ export async function createScene({ canvas, grid, projects }) {
 
   return {
     renderer, scene, camera, composer, tiles, tilesGroup, hoverModel,
-    setCameraFromState, applyTileStyle, camState,
+    setCameraFromState, setCameraAscentOffset, applyTileStyle, camState,
   };
 }

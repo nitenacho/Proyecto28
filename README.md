@@ -130,6 +130,19 @@ Etapa 20 reemplaza el input mobile del juego por split-screen touch:
 - se implemento sin dependencia externa tipo Nipple.js para mantener bundle y
   comportamiento exactos.
 
+Etapa 22 convierte el mini-juego en sistema de pisos:
+
+- la luz/personaje come una meta configurable de esferas pequenas;
+- al completar la meta aparece una escalera luminosa y comienza una transicion
+  vertical de camara/mundo;
+- el HUD suma `Piso` y reinicia la meta de esferas despues de cada ascenso;
+- el piso anterior queda visible en el fondo como `InstancedMesh/Grid Ventana`
+  transparente, con escala/opacidad decreciente para profundidad;
+- `Admin -> Tweaks -> Juego` permite publicar en Strapi
+  `gameAscendSphereGoal`, `gameFloorHeight` y `gameGhostFloors`;
+- QA local/produccion: abrir con `?floor-test=...` y usar
+  `window.p28FloorDebug.triggerAscension()`.
+
 ### Performance y accesibilidad
 
 Etapa 15 endurece el boot final antes de v1:
@@ -173,6 +186,8 @@ Ver [`DEPLOY.md`](DEPLOY.md), [`RUNBOOK.md`](RUNBOOK.md) y
 - [`HANDOFF-LATEST.md`](HANDOFF-LATEST.md) — continuidad vigente.
 - [`HANDOFF-V2.md`](HANDOFF-V2.md) — handoff final compacto para nuevos agentes.
 - [`docs/architecture.png`](docs/architecture.png) — diagrama de arquitectura.
+- [`docs/floor-system.md`](docs/floor-system.md) — documento tecnico del
+  sistema de pisos, Grid Ventana, camara/profundidad y QA.
 - [`docs/demo-script.md`](docs/demo-script.md) — guion de video/release demo.
 - [`docs/proyecto28-demo.webm`](docs/proyecto28-demo.webm) — captura tecnica
   reproducible del canvas WebGL.

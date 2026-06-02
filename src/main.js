@@ -10,6 +10,7 @@ import { createInteractionAudio } from './audio/interactionAudio.js';
 import { createScene } from './scene/scene.js';
 import { createControllableLight } from './game/light.js';
 import { createCollectibleSpheres } from './game/collectibles.js';
+import { createFloorSystem } from './game/floors.js';
 import { createLazyStreamOverlay } from './streaming/lazyStreamOverlay.js';
 import { createPopup } from './ui/popup.js';
 import { mountCubeA11y } from './ui/cubeA11y.js';
@@ -94,6 +95,11 @@ async function boot() {
     scene: sceneCtx.scene,
     tiles: sceneCtx.tiles,
   });
+  const floorSystem = createFloorSystem({
+    scene: sceneCtx.scene,
+    tiles: sceneCtx.tiles,
+    config: site.game,
+  });
   const streamOverlay = createLazyStreamOverlay({ site, camera: sceneCtx.camera });
   let activeTile = null;
   let lightControlled = false;
@@ -106,13 +112,23 @@ async function boot() {
     startAt: 0,
     elapsedMs: 0,
     collected: 0,
+    goal: floorSystem.getSphereGoal(collectibles.total),
+    floorLevel: 0,
+    ascending: false,
     bestMs: readBestSphereTime(),
   };
 
-  hud.setCollectibles(0, collectibles.total);
+  hud.setFloorLevel(sphereRun.floorLevel);
+  hud.setCollectibles(0, sphereRun.goal);
   hud.setTimer(0, false);
   hud.setBestTime(sphereRun.bestMs);
   hud.setControlActive(false);
+
+  function refreshSphereGoal() {
+    sphereRun.goal = floorSystem.getSphereGoal(collectibles.total);
+    document.documentElement.dataset.p28FloorSphereGoal = String(sphereRun.goal);
+    hud.setCollectibles(Math.min(sphereRun.collected, sphereRun.goal), sphereRun.goal);
+  }
 
   function setTouchControlsActive(active) {
     touchControlsRequested = !!active;
@@ -126,34 +142,39 @@ async function boot() {
     if (!collectibles.total) return;
     sphereRun.active = true;
     sphereRun.complete = false;
+    sphereRun.ascending = false;
     sphereRun.startAt = nowMs;
     sphereRun.elapsedMs = 0;
     sphereRun.collected = 0;
+    refreshSphereGoal();
     collectibles.reset();
     collectibles.setActive(true);
-    hud.setCollectibles(0, collectibles.total);
+    hud.setCollectibles(0, sphereRun.goal);
     hud.setTimer(0, true);
   }
 
   function resetSphereRun() {
     sphereRun.active = false;
     sphereRun.complete = false;
+    sphereRun.ascending = false;
     sphereRun.startAt = 0;
     sphereRun.elapsedMs = 0;
     sphereRun.collected = 0;
+    refreshSphereGoal();
     collectibles.setActive(false);
     collectibles.reset();
-    hud.setCollectibles(0, collectibles.total);
+    hud.setCollectibles(0, sphereRun.goal);
     hud.setTimer(0, false);
   }
 
-  function finishSphereRun(nowMs) {
-    if (sphereRun.complete) return;
+  function beginFloorAscension(nowMs) {
+    if (sphereRun.complete || sphereRun.ascending) return;
     sphereRun.active = false;
     sphereRun.complete = true;
+    sphereRun.ascending = true;
     sphereRun.elapsedMs = Math.max(0, nowMs - sphereRun.startAt);
     collectibles.setActive(false);
-    hud.setCollectibles(collectibles.total, collectibles.total);
+    hud.setCollectibles(sphereRun.goal, sphereRun.goal);
     hud.setTimer(sphereRun.elapsedMs, false, true);
     if (!sphereRun.bestMs || sphereRun.elapsedMs < sphereRun.bestMs) {
       sphereRun.bestMs = sphereRun.elapsedMs;
@@ -162,6 +183,17 @@ async function boot() {
     }
     interactionAudio.playInteraction('victory');
     controlLight.flashVictory();
+    floorSystem.startAscension(sphereRun.floorLevel + 1);
+  }
+
+  function completeFloorAscension(level, nowMs = performance.now()) {
+    sphereRun.floorLevel = level;
+    sphereRun.complete = false;
+    sphereRun.ascending = false;
+    hud.setFloorLevel(level);
+    document.documentElement.dataset.p28FloorLevel = String(level);
+    if (lightControlled) startSphereRun(nowMs);
+    else resetSphereRun();
   }
 
   function updateSphereRun(nowMs, timeSeconds) {
@@ -169,12 +201,12 @@ async function boot() {
     if (!sphereRun.active) return;
     const picked = collectibles.collectNear(controlLight.mesh);
     if (picked > 0) {
-      sphereRun.collected = Math.min(collectibles.total, sphereRun.collected + picked);
-      hud.setCollectibles(sphereRun.collected, collectibles.total);
+      sphereRun.collected = Math.min(sphereRun.goal, sphereRun.collected + picked);
+      hud.setCollectibles(sphereRun.collected, sphereRun.goal);
       interactionAudio.playInteraction('collect');
     }
-    if (sphereRun.collected >= collectibles.total) {
-      finishSphereRun(nowMs);
+    if (sphereRun.collected >= sphereRun.goal) {
+      beginFloorAscension(nowMs);
       return;
     }
     sphereRun.elapsedMs = Math.max(0, nowMs - sphereRun.startAt);
@@ -254,6 +286,9 @@ async function boot() {
     gameFallDuration: site.game.fallDuration,
     gameShadowSize: site.game.shadowSize ?? 0.45,
     gameTileCaptureRadius: site.game.tileCaptureRadius ?? 1.15,
+    gameAscendSphereGoal: site.game.ascendSphereGoal ?? 6,
+    gameFloorHeight: site.game.floorHeight ?? 4.2,
+    gameGhostFloors: site.game.ghostFloors ?? 3,
     streamingEnabled: site.streaming.enabled,
     streamingPreviewEnabled: site.streaming.previewEnabled,
     streamingMode: normalizeStreamingMode(site.streaming.mode),
@@ -311,6 +346,10 @@ async function boot() {
       site.game.fallDuration     = state.gameFallDuration;
       site.game.shadowSize       = state.gameShadowSize;
       site.game.tileCaptureRadius = state.gameTileCaptureRadius;
+      site.game.ascendSphereGoal = state.gameAscendSphereGoal;
+      site.game.floorHeight = state.gameFloorHeight;
+      site.game.ghostFloors = state.gameGhostFloors;
+      refreshSphereGoal();
       controlLight.setLightColor(site.game.lightColor);
       // Streaming — Etapa 11: iframe sobre el cubo activo o fallback local.
       site.streaming.enabled     = !!state.streamingEnabled;
@@ -402,6 +441,9 @@ async function boot() {
           { type: 'slider', key: 'gameFallDuration',    label: 'Duración caída',     min: 0.2, max: 3,   step: 0.1, unit: 's' },
           { type: 'slider', key: 'gameShadowSize',       label: 'Tamaño sombra',     min: 0.15, max: 1.2, step: 0.05 },
           { type: 'slider', key: 'gameTileCaptureRadius', label: 'Radio captura popup', min: 0.8, max: 1.8, step: 0.05 },
+          { type: 'slider', key: 'gameAscendSphereGoal', label: 'Esferas para subir', min: 1, max: 18, step: 1 },
+          { type: 'slider', key: 'gameFloorHeight', label: 'Altura entre pisos', min: 2.8, max: 7.5, step: 0.1 },
+          { type: 'slider', key: 'gameGhostFloors', label: 'Pisos visibles', min: 1, max: 4, step: 1 },
         ],
       },
       {
@@ -494,6 +536,31 @@ async function boot() {
 
   // QA helper: forzar sign-out manual via DevTools.
   window.p28SignOut = () => { signOut(); console.log('[p28 auth] signed out'); };
+
+  const floorQaParams = new URLSearchParams(window.location.search);
+  if (import.meta.env.DEV || floorQaParams.has('floor-test')) {
+    window.p28FloorDebug = {
+      triggerAscension() {
+        beginFloorAscension(performance.now());
+        return this.state();
+      },
+      state() {
+        return {
+          active: sphereRun.active,
+          ascending: sphereRun.ascending,
+          collected: sphereRun.collected,
+          goal: sphereRun.goal,
+          floorLevel: sphereRun.floorLevel,
+          systemLevel: floorSystem.level,
+          ghostCount: floorSystem.ghostCount,
+          stairVisible: floorSystem.staircase.visible,
+          cameraLift: Number(floorSystem.cameraLift.toFixed(4)),
+          ascensionState: document.documentElement.dataset.p28AscensionState || null,
+          contentSource: document.documentElement.dataset.p28ContentSource || null,
+        };
+      },
+    };
+  }
 
   if (import.meta.env.DEV) {
     window.p28StreamDebug = {
@@ -857,6 +924,8 @@ async function boot() {
     lastT = now;
     const t = now / 1000;
 
+    const floorEvent = floorSystem.update(dt, t);
+    sceneCtx.setCameraAscentOffset(floorSystem.cameraLift);
     if (sceneCtx.camState.drift) {
       const tiltOff = Math.sin(t * 0.18) * 1.2;
       const yawOff  = Math.sin(t * 0.13) * 2.0;
@@ -868,6 +937,9 @@ async function boot() {
     raycaster.setFromCamera(pointer, sceneCtx.camera);
     controlLight.update(dt, now, raycaster);
     updateSphereRun(now, t);
+    if (floorEvent?.type === 'ascended') {
+      completeFloorAscension(floorEvent.level, now);
+    }
     const { tile: pointerHit } = resolveProjectTileFromPointer();
     if (pointerInsideViewport && pointerHit) interactionAudio.playBlock(pointerHit);
     const hit = resolveHoverTarget(pointerHit, now);

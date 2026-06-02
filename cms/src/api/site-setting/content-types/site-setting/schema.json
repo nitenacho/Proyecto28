@@ -135,6 +135,27 @@
       "max": 1.8,
       "description": "Radio magnetico X/Z para atraer click/tap al cubo de proyecto mas cercano y fijar popup + luz. 0.8 exige precision; 1.15 es recomendado; 1.8 es muy permisivo."
     },
+    "gameAscendSphereGoal": {
+      "type": "integer",
+      "default": 6,
+      "min": 1,
+      "max": 18,
+      "description": "Esferas pequenas que la luz/personaje debe comer para generar la escalera y subir al siguiente piso. Recomendado: 6."
+    },
+    "gameFloorHeight": {
+      "type": "decimal",
+      "default": 4.2,
+      "min": 2.8,
+      "max": 7.5,
+      "description": "Separacion visual vertical entre el piso activo y los pisos anteriores. Recomendado: 4.2 para mantener profundidad sin perder lectura."
+    },
+    "gameGhostFloors": {
+      "type": "integer",
+      "default": 3,
+      "min": 1,
+      "max": 4,
+      "description": "Cantidad de pisos anteriores visibles como InstancedMesh/Grid Ventana simple, con niebla visual por opacidad y escala. Recomendado: 3."
+    },
     "audioEnabled": {
       "type": "boolean",
       "default": true,

@@ -37,6 +37,9 @@ export const FALLBACK_SITE = {
     fallDuration: 1.0,
     shadowSize: 0.3,           // v0.9.2: ajuste fino del owner (antes 0.45)
     tileCaptureRadius: 1.15,   // v0.25.6: radio magnetico para seleccionar cubos con popup
+    ascendSphereGoal: 6,       // v0.26.0: esferas necesarias para generar escalera/subir piso
+    floorHeight: 4.2,          // v0.26.0: separacion visual entre piso actual y fondos
+    ghostFloors: 3,            // v0.26.0: pisos anteriores visibles como grid instanciado
   },
   admin: {
     buttonVisible: true,        // v0.12.0: botón admin visible por default (Etapa 8)

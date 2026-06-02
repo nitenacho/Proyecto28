@@ -10,6 +10,39 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.26.0] — 2026-06-02 — Etapa 22: ascenso por pisos del mini-juego
+
+### Added
+- Nuevo `src/game/floors.js` con sistema de pisos: escalera luminosa,
+  transicion vertical de camara y pisos anteriores simplificados como
+  `InstancedMesh/Grid Ventana`.
+- El HUD del mini-juego suma `Piso` y la experiencia pasa de completar todas
+  las esferas a reunir una meta configurable para subir de nivel.
+- Nuevo documento tecnico `docs/floor-system.md` con flujo, matematica visual,
+  performance, QA y recomendaciones de camara/profundidad.
+- QA invisible con `?floor-test=...`: `window.p28FloorDebug.state()` y
+  `window.p28FloorDebug.triggerAscension()`.
+- Nuevos campos Strapi/SiteSetting publicables desde Tweaks:
+  `gameAscendSphereGoal`, `gameFloorHeight` y `gameGhostFloors`.
+
+### Changed
+- Al reunir suficientes esferas se genera una escalera, se inicia ascenso y el
+  piso anterior queda visible en el fondo con opacidad/escala decreciente.
+- `index.html` y `public/p28-sw.js` suben build id a
+  `v0.26.0-20260602-floor-ascension`.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- `cd cms; npm run build` OK. Warning heredado de Strapi/Node:
+  `DEP0187 fs.existsSync`.
+- Build local servido con `vite preview`, viewport mobile `390x844` por CDP:
+  - `source="cms"` y contenido vivo incluye `Random: Museo MAC`;
+  - `window.p28FloorDebug.triggerAscension()` crea `ghostCount=1`;
+  - durante transicion: `stairVisible=true`, `ascensionState="ascend"`,
+    `cameraLift>0`;
+  - final: `floorLevel=1`, `systemLevel=1`, `stairVisible=false`,
+    HUD `Piso01` y `Esferas00/06`.
+
 ## [0.25.6] — 2026-06-02 — Patch: captura magnetica para popup + luz
 
 ### Added

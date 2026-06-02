@@ -29,6 +29,13 @@ Headless CMS that owns the content shown in the frontend:
     - `gameTileCaptureRadius` — radio magnetico X/Z para que click/tap cercano
       capture el cubo de proyecto mas cercano y fije popup + luz. Default
       recomendado `1.15`; limites `0.8..1.8`
+    - `gameAscendSphereGoal` — esferas necesarias para generar la escalera y
+      subir de piso. Default recomendado `6`; limites `1..18`
+    - `gameFloorHeight` — separacion vertical visual entre piso activo y pisos
+      anteriores. Default recomendado `4.2`; limites `2.8..7.5`
+    - `gameGhostFloors` — cantidad de pisos anteriores visibles como
+      InstancedMesh/Grid Ventana simplificado. Default recomendado `3`;
+      limites `1..4`
     - `gameLightColor` — color publicable de la luz controlable (`cyan`,
       `red`, `green`) usado por el mini-juego de recoleccion (Etapa 17)
     - `brandLogoImage` — logo/icono del header desde Strapi. Recomendado:

@@ -1,13 +1,13 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-06-02 (Patch magnetic popup capture radius - `v0.25.6`)
-> **Tag activo esperado tras cierre:** `v0.25.6`
+> **Ultima actualizacion:** 2026-06-02 (Etapa 22 floor ascension - `v0.26.0`)
+> **Tag activo esperado tras cierre:** `v0.26.0`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
 
-Etapas 1-21 cerradas y patch `v0.25.6` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
+Etapas 1-22 cerradas y `v0.26.0` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
 sync Claude Design, hardening performance/a11y, mini-juego Pacman de luz y una
 capa de audio interactivo configurable desde Strapi. La luz ahora se puede
@@ -23,6 +23,10 @@ asienta la luz en el centro superior del cubo hasta que el usuario cierre con
 la X del popup. Si el click/tap cae cerca pero no exactamente sobre el cubo,
 el radio magnetico `gameTileCaptureRadius` atrae la seleccion al cubo de
 proyecto mas cercano para fijar popup + luz.
+El mini-juego de luz ahora asciende por pisos: al comer suficientes esferas
+aparece una escalera, la camara/mundo simulan subir y el piso anterior queda
+visible como InstancedMesh/Grid Ventana optimizado. La meta de esferas, altura
+entre pisos y cantidad de pisos visibles son publicables desde Strapi.
 
 ---
 
@@ -30,6 +34,9 @@ proyecto mas cercano para fijar popup + luz.
 
 Estado vigente esperado tras cierre:
 
+- `v0.26.0`: la luz/personaje come `gameAscendSphereGoal` esferas, genera una
+  escalera y asciende de piso; el piso anterior queda visible en fondo como
+  InstancedMesh/Grid Ventana con `gameFloorHeight` y `gameGhostFloors`.
 - `v0.25.6`: click/tap cercano a un cubo de proyecto usa captura magnetica
   configurable (`gameTileCaptureRadius`) para fijar popup + luz sin exigir
   precision perfecta. QA: `p28TileCaptureMode="magnet"` y
@@ -84,7 +91,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- ultimo tag `v0.25.6`
+- ultimo tag `v0.26.0`
 - build Vite OK
 - build Strapi OK
 
@@ -94,14 +101,49 @@ Lectura obligatoria:
 2. `ADMIN-URLS.md` - URLs para administrar todos los servicios.
 3. `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
 4. `DEPLOY.md` - GitHub Pages, Strapi, OAuth, Pixel Streaming, releases.
-5. `CHANGELOG.md` - `[0.25.6]`.
-6. `PLAN-PROYECTO28-V2.md` - Etapa 21 + patches `v0.25.1`/`v0.25.4`/`v0.25.5`/`v0.25.6` cerrados.
+5. `CHANGELOG.md` - `[0.26.0]`.
+6. `PLAN-PROYECTO28-V2.md` - Etapa 22 + patches `v0.25.1`/`v0.25.4`/`v0.25.5`/`v0.25.6` cerrados.
 7. `cms/README.md` - SiteSetting incluye `brandLogoImage`, `gameLightColor`
    y `audio*`.
 
 ---
 
-## 2. Cambios v0.25.6
+## 2. Cambios v0.26.0
+
+### Floor ascension game loop
+
+- Nuevo `src/game/floors.js` crea escalera luminosa, transicion vertical y
+  pisos anteriores visibles como `InstancedMesh/Grid Ventana`.
+- El HUD suma `Piso`; al reunir suficientes esferas se sube de nivel y se
+  reinicia la meta.
+- Nuevos SiteSetting publicables desde `Admin -> Tweaks -> Juego`:
+  `gameAscendSphereGoal` (`1..18`, recomendado `6`), `gameFloorHeight`
+  (`2.8..7.5`, recomendado `4.2`) y `gameGhostFloors` (`1..4`, recomendado
+  `3`).
+- Documento tecnico: `docs/floor-system.md`.
+- QA con `?floor-test=...`:
+  `window.p28FloorDebug.state()` y
+  `window.p28FloorDebug.triggerAscension()`.
+- Build id y Service Worker:
+  `v0.26.0-20260602-floor-ascension`.
+
+### Archivos tocados
+
+- `index.html`
+- `public/p28-sw.js`
+- `src/main.js`
+- `src/game/floors.js`
+- `src/scene/scene.js`
+- `src/ui/hud.js`
+- `src/data/cms.js`
+- `src/data/fallback.js`
+- `src/admin/publish.js`
+- `cms/src/index.js`
+- `cms/src/api/site-setting/controllers/site-setting.js`
+- `cms/src/api/site-setting/content-types/site-setting/schema.json`
+- `docs/floor-system.md`
+
+## 3. Cambios v0.25.6
 
 ### Captura magnetica de cubos
 

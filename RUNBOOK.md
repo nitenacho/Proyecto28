@@ -131,6 +131,28 @@ document.documentElement.dataset.p28TileCaptureMode // "exact" o "magnet"
 document.documentElement.dataset.p28TileCaptureRadius
 ```
 
+Desde `v0.26.0`, el mini-juego asciende por pisos. En
+`Admin -> Tweaks -> Juego` se publican:
+
+- `gameAscendSphereGoal`: esferas necesarias para generar escalera y subir.
+- `gameFloorHeight`: separacion vertical visual entre pisos.
+- `gameGhostFloors`: cantidad de pisos anteriores visibles como
+  InstancedMesh/Grid Ventana.
+
+QA local o produccion:
+
+```js
+window.p28FloorDebug.state()
+window.p28FloorDebug.triggerAscension()
+document.documentElement.dataset.p28AscensionState
+document.documentElement.dataset.p28FloorLevel
+document.documentElement.dataset.p28FloorSphereGoal
+```
+
+El helper solo aparece en dev o al abrir con `?floor-test=...`. Senal sana:
+`stairVisible=true` durante la transicion, `ghostCount>=1`, y al cierre
+`floorLevel` sube en 1 con `ascensionState="idle"`.
+
 ---
 
 ## 3. Agregar un proyecto nuevo

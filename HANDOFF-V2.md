@@ -1,8 +1,8 @@
 # HANDOFF V2 - Proyecto 28
 
-> Ultima actualizacion: 2026-06-02 (Patch magnetic popup capture radius - `v0.25.6`)
+> Ultima actualizacion: 2026-06-02 (Etapa 22 floor ascension - `v0.26.0`)
 > Branch esperado: `main`
-> Tag activo esperado tras cierre: `v0.25.6`
+> Tag activo esperado tras cierre: `v0.26.0`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
 
@@ -13,7 +13,7 @@ operacion detallada, leer `RUNBOOK.md`.
 
 ## 1. Estado ejecutivo
 
-Etapas 1-21 cerradas y patch `v0.25.6` aplicado. Proyecto28 queda como web 3D interactiva con:
+Etapas 1-22 cerradas y `v0.26.0` aplicado. Proyecto28 queda como web 3D interactiva con:
 
 - Vite + Three.js + GSAP.
 - Strapi Cloud como CMS.
@@ -53,15 +53,20 @@ Etapas 1-21 cerradas y patch `v0.25.6` aplicado. Proyecto28 queda como web 3D in
 - Captura magnetica de popup: click/tap cercano a un cubo de proyecto usa
   `gameTileCaptureRadius` para atraer la seleccion al cubo mas cercano y fijar
   popup + luz sin exigir precision perfecta.
+- Ascenso por pisos: la luz/personaje come `gameAscendSphereGoal` esferas,
+  genera una escalera, la camara/mundo simulan subir y el piso anterior queda
+  visible en fondo como InstancedMesh/Grid Ventana con `gameFloorHeight` y
+  `gameGhostFloors`.
 - Logo del header configurable desde Strapi `SiteSetting.brandLogoImage`;
   `Project.popupImage` es la imagen prioritaria del popup.
 
 Ultimo codigo funcional esperado:
 
-- `v0.25.6` - Magnetic popup capture radius.
+- `v0.26.0` - Floor ascension game loop.
 
 Tags/commits recientes:
 
+- `v0.26.0` - Esferas suficientes generan escalera, ascenso y piso anterior visible.
 - `v0.25.6` - Click/tap cercano captura cubo y fija popup + luz.
 - `v0.25.5` - Click/tap fija popup y luz hasta cerrar con X.
 - `v0.25.4` - Service Worker network-first + popup image persistence.
@@ -98,7 +103,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- tag `v0.25.6`
+- tag `v0.26.0`
 - build Vite OK
 - build Strapi OK
 
@@ -161,6 +166,19 @@ Validado postdeploy `v0.25.1`:
   - `/api/admin-whitelists` => `403`
   - `/api/auth/check?email=inconcha@gmail.com` => owner permitido
   - `/api/auth/check?email=yk8arts@gmail.com` => editor permitido
+
+Validado local `v0.26.0`:
+
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- `cd cms; npm run build` OK. Warning heredado de Strapi/Node:
+  `DEP0187 fs.existsSync`.
+- Build local servido con `vite preview`, mobile `390x844` por CDP:
+  - `source="cms"` y contenido vivo incluye `Random: Museo MAC`;
+  - `window.p28FloorDebug.triggerAscension()` crea `ghostCount=1`;
+  - durante transicion: `stairVisible=true`, `ascensionState="ascend"`,
+    `cameraLift>0`;
+  - final: `floorLevel=1`, `systemLevel=1`, `stairVisible=false`, HUD
+    `Piso01` y `Esferas00/06`.
 
 Validado postdeploy `v0.25.4`:
 

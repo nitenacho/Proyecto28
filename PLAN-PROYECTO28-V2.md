@@ -1,10 +1,10 @@
 # PLAN DE EVOLUCIÓN — Proyecto 28 v2
 
 > **Fecha del plan:** 2026-05-21
-> **Última actualización operativa:** 2026-06-02 — `v0.25.6` Patch captura magnetica popup + luz
+> **Última actualización operativa:** 2026-06-02 — `v0.26.0` Etapa 22 ascenso por pisos
 > **Owner:** @nitenacho (cnignacioa@gmail.com / Inconcha@gmail.com)
 > **Alcance:** Convertir Proyecto28 en una experiencia 3D inmersiva con juego de plataformas + Pixel Streaming de Unreal Engine + pipeline de publicación admin-only.
-> **Status:** En ejecución — etapas 1-21 cerradas. `v0.25.6` agrega radio magnetico configurable para que click/tap cerca de un cubo de proyecto fije el popup y atraiga la luz al centro del cubo, liberando el estado solo desde la X del popup.
+> **Status:** En ejecución — etapas 1-22 cerradas. `v0.26.0` convierte el mini-juego de luz en experiencia por pisos: esferas suficientes generan escalera, camara/mundo ascienden y el piso anterior queda visible como InstancedMesh/Grid Ventana optimizado.
 
 ## Estado del plan al 2026-05-31 America/Santiago
 
@@ -43,6 +43,7 @@
 | 21 hotfix 2 — Fresh navigation + popup images mobile | ✅ Cerrada | `v0.25.4` | `05b0d31` |
 | 21 hotfix 3 — Pinned popup + light anchor | ✅ Cerrada | `v0.25.5` | `deaceb7` |
 | 21 hotfix 4 — Magnetic popup capture radius | ✅ Cerrada | `v0.25.6` | `abd6d93` |
+| 22 — Floor ascension game loop | ✅ Cerrada | `v0.26.0` | pendiente cierre |
 
 ## Decisiones tomadas durante la ejecución (resoluciones al §1)
 
@@ -76,7 +77,11 @@
   cierra por hover/mouse/taps fuera, la luz se asienta en el centro del cubo y
   solo la X libera la seleccion para volver a flotar. `v0.25.6` agrega
   `gameTileCaptureRadius` para que un toque/click cercano capture el cubo mas
-  cercano antes de fijar popup + luz; se edita desde Tweaks -> Juego.
+  cercano antes de fijar popup + luz; se edita desde Tweaks -> Juego. Etapa 22
+  agrega el sistema de pisos: la luz come `gameAscendSphereGoal` esferas,
+  genera escalera, asciende con camara vertical y deja pisos anteriores como
+  `InstancedMesh/Grid Ventana`; `gameFloorHeight` y `gameGhostFloors` quedan
+  publicables desde Strapi.
 - **§1.6 Admin Strapi:** ✅ Admin operativo. Fix aplicado: `Project` no usa
   Draft & Publish para evitar el choque entre el campo editable `status` y el
   `status` interno de Strapi v5.
