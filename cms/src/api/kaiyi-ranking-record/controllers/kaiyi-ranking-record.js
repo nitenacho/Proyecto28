@@ -4,6 +4,15 @@ const { createCoreController } = require('@strapi/strapi').factories;
 
 const VALID_VEHICLE_IDS = ['Vehicle_01', 'Vehicle_02', 'Vehicle_03', 'Vehicle_04'];
 
+// Puntaje: factor1*(tiempo - letras*factor2). MENOR es mejor (rápido + más letras).
+// Configurable por env vars en Strapi Cloud.
+const SCORE_FACTOR1 = Number(process.env.KAIYI_SCORE_FACTOR1) || 1;
+const SCORE_FACTOR2 = Number(process.env.KAIYI_SCORE_FACTOR2) || 10;
+
+function computeScore(completionTimeSeconds, collectedLettersCount) {
+  return SCORE_FACTOR1 * (completionTimeSeconds - collectedLettersCount * SCORE_FACTOR2);
+}
+
 function formatTime(totalSeconds) {
   const m = Math.floor(totalSeconds / 60);
   const s = Math.floor(totalSeconds % 60);
@@ -74,6 +83,8 @@ module.exports = createCoreController(
         }
       }
 
+      const score = computeScore(completionTimeSeconds, collectedLettersCount);
+
       const record = await strapi.entityService.create(
         'api::kaiyi-ranking-record.kaiyi-ranking-record',
         {
@@ -85,6 +96,7 @@ module.exports = createCoreController(
             bCollectedAllLetters,
             playerAlias,
             playerEmail,
+            score,
           },
         }
       );
@@ -103,6 +115,7 @@ module.exports = createCoreController(
           collectedLettersCount: record.collectedLettersCount,
           bCollectedAllLetters: record.bCollectedAllLetters,
           playerAlias: record.playerAlias, // alias público (el email NO se devuelve)
+          score: record.score,
         },
       };
     },
@@ -122,18 +135,19 @@ module.exports = createCoreController(
       const records = await strapi.entityService.findMany(
         'api::kaiyi-ranking-record.kaiyi-ranking-record',
         {
-          sort: { completionTimeSeconds: 'asc' },
+          sort: { score: 'asc' },
           limit: -1,
         }
       );
 
       const lines = [
-        'Puesto,Alias,Email,Vehículo,Tiempo,Tiempo (seg),Letras,Todas las Letras,Fecha',
+        'Puesto,Puntaje,Alias,Email,Vehículo,Tiempo,Tiempo (seg),Letras,Todas las Letras,Fecha',
       ];
       records.forEach((r, i) => {
         const allLetters = r.bCollectedAllLetters ? 'Sí' : 'No';
+        const score = (r.score === null || r.score === undefined) ? '' : r.score;
         lines.push(
-          `${i + 1},${csvCell(r.playerAlias)},${csvCell(r.playerEmail)},${r.vehicleId},${formatTime(r.completionTimeSeconds)},${r.completionTimeSeconds},${r.collectedLettersCount}/5,${allLetters},${r.completionDate}`
+          `${i + 1},${score},${csvCell(r.playerAlias)},${csvCell(r.playerEmail)},${r.vehicleId},${formatTime(r.completionTimeSeconds)},${r.completionTimeSeconds},${r.collectedLettersCount}/5,${allLetters},${r.completionDate}`
         );
       });
 

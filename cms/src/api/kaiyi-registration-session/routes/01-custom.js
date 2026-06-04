@@ -41,5 +41,15 @@ module.exports = {
         middlewares: [],
       },
     },
+    {
+      method: 'GET',
+      path: '/kaiyi/registrations/export',
+      handler: 'api::kaiyi-registration-session.kaiyi-registration-session.exportRegistrations',
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
   ],
 };

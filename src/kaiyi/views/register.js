@@ -159,14 +159,18 @@ export async function renderRegister(root, token) {
     });
 
     try {
-      await claimSession(token, {
+      const res = await claimSession(token, {
         alias: aliasEl.value.trim(),
         email: emailEl.value.trim(),
         consentPrivacy: privacy.checked,
         consentMarketing: marketing.checked,
         marketingConsents,
       });
-      showSuccess(body, content?.registrationSuccessMessage);
+      if (res && res.alreadyClaimed) {
+        showAlreadyClaimed(body);
+      } else {
+        showSuccess(body, content?.registrationSuccessMessage);
+      }
     } catch (err) {
       errEl.textContent = err?.message || 'No se pudo completar el registro. Inténtalo de nuevo.';
       errEl.hidden = false;
@@ -183,6 +187,13 @@ function showSuccess(body, customMsg) {
     <div class="kaiyi-reg-success">
       <div class="kaiyi-success-icon" aria-hidden="true">✓</div>
       <p class="kaiyi-success-msg">${escapeHtml(msg)}</p>
+    </div>`;
+}
+
+function showAlreadyClaimed(body) {
+  body.innerHTML = `
+    <div class="kaiyi-reg-error">
+      <p>Este código QR ya fue usado por otro jugador. Pide al operador un código nuevo para registrarte.</p>
     </div>`;
 }
 

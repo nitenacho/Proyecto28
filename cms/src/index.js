@@ -357,6 +357,31 @@ async function backfillProjectStatuses(strapi) {
   strapi.log.info(`[bootstrap] normalized invalid project status values: ${labels}`);
 }
 
+async function backfillKaiyiRecordScores(strapi) {
+  // Calcula score para records que aún no lo tienen (mismo cálculo del controller),
+  // para que el orden por puntaje no deje nulos arriba.
+  const F1 = Number(process.env.KAIYI_SCORE_FACTOR1) || 1;
+  const F2 = Number(process.env.KAIYI_SCORE_FACTOR2) || 10;
+  try {
+    const recs = await strapi.entityService.findMany(
+      'api::kaiyi-ranking-record.kaiyi-ranking-record',
+      { filters: { score: { $null: true } }, limit: -1 }
+    );
+    for (const r of recs) {
+      const score = F1 * (r.completionTimeSeconds - (r.collectedLettersCount || 0) * F2);
+      // eslint-disable-next-line no-await-in-loop
+      await strapi.entityService.update('api::kaiyi-ranking-record.kaiyi-ranking-record', r.id, {
+        data: { score },
+      });
+    }
+    if (recs.length) {
+      strapi.log.info(`[bootstrap] backfilled score en ${recs.length} record(s)`);
+    }
+  } catch (err) {
+    strapi.log.warn('[bootstrap] backfill score skipped:', err.message);
+  }
+}
+
 module.exports = {
   register() {},
   async bootstrap({ strapi }) {
@@ -364,6 +389,7 @@ module.exports = {
       await grantPublicReadAccess(strapi);
       await seedIfEmpty(strapi);
       await backfillProjectStatuses(strapi);
+      await backfillKaiyiRecordScores(strapi);
     } catch (err) {
       strapi.log.error('[bootstrap] failed', err);
     }

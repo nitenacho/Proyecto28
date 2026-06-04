@@ -155,26 +155,89 @@ module.exports = createCoreController(
         productosKaufmann: asBool(mc.productosKaufmann),
       };
 
-      await strapi.entityService.update(
-        'api::kaiyi-registration-session.kaiyi-registration-session',
-        session.id,
-        {
+      // Alias ÚNICO: si ya existe en una sesión reclamada, añadir sufijo " 2", " 3"...
+      let finalAlias = alias;
+      let suffix = 1;
+      // eslint-disable-next-line no-await-in-loop
+      while (true) {
+        const dup = await strapi.db
+          .query('api::kaiyi-registration-session.kaiyi-registration-session')
+          .findOne({ where: { claimed: true, playerAlias: finalAlias } });
+        if (!dup) break;
+        suffix += 1;
+        finalAlias = `${alias} ${suffix}`;
+        if (suffix > 9999) break; // guarda de seguridad
+      }
+
+      // Claim ATÓMICO: solo actualiza si la sesión sigue sin reclamar. Evita el
+      // borde de dos personas escaneando el MISMO QR a la vez (feria).
+      const updated = await strapi.db
+        .query('api::kaiyi-registration-session.kaiyi-registration-session')
+        .updateMany({
+          where: { id: session.id, claimed: false },
           data: {
             claimed: true,
             claimedAt: now,
-            playerAlias: alias,
+            playerAlias: finalAlias,
             playerEmail: email,
             consentAccepted: true,
             consentPrivacy: true,
             consentMarketing,
             marketingConsents,
           },
-        }
+        });
+
+      if (!updated || updated.count === 0) {
+        // Otra persona reclamó esta sesión primero.
+        ctx.body = { ok: true, alreadyClaimed: true };
+        return;
+      }
+
+      strapi.log.info(`[kaiyi] sesión reclamada: ${token} (alias=${finalAlias}, marketing=${consentMarketing})`);
+
+      ctx.body = { ok: true, alreadyClaimed: false, playerAlias: finalAlias };
+    },
+
+    /**
+     * GET /api/kaiyi/registrations/export
+     * CSV de TODAS las sesiones reclamadas: alias + email + consentimientos. Incluye
+     * a quien se registró aunque no haya completado carreras. Requiere X-Kaiyi-Token.
+     */
+    async exportRegistrations(ctx) {
+      const token = ctx.request.headers['x-kaiyi-token'];
+      const expectedToken = process.env.KAIYI_GAME_TOKEN;
+      if (!expectedToken || token !== expectedToken) {
+        return ctx.unauthorized('Token inválido.');
+      }
+
+      const sessions = await strapi.entityService.findMany(
+        'api::kaiyi-registration-session.kaiyi-registration-session',
+        { filters: { claimed: true }, sort: { claimedAt: 'asc' }, limit: -1 }
       );
 
-      strapi.log.info(`[kaiyi] sesión reclamada: ${token} (alias=${alias}, marketing=${consentMarketing})`);
+      const cell = (v) => {
+        const s = String(v == null ? '' : v);
+        return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const yn = (b) => (b ? 'Sí' : 'No');
 
-      ctx.body = { ok: true, alreadyClaimed: false };
+      const lines = [
+        'Alias,Email,Privacidad,Marketing,MC_Personalizadas,MC_Localizacion,MC_Terceros,MC_CesionTerceros,MC_ProductosKaufmann,Fecha',
+      ];
+      sessions.forEach((s) => {
+        const mc = s.marketingConsents || {};
+        lines.push([
+          cell(s.playerAlias), cell(s.playerEmail),
+          yn(s.consentPrivacy), yn(s.consentMarketing),
+          yn(mc.personalizadas), yn(mc.localizacion), yn(mc.terceros),
+          yn(mc.cesionTerceros), yn(mc.productosKaufmann),
+          cell(s.claimedAt),
+        ].join(','));
+      });
+
+      ctx.set('Content-Type', 'text/csv; charset=utf-8');
+      ctx.set('Content-Disposition', `attachment; filename="kaiyi-registros-${new Date().toISOString().slice(0, 10)}.csv"`);
+      ctx.body = '﻿' + lines.join('\r\n'); // BOM UTF-8 para Excel
     },
   })
 );

@@ -8,7 +8,17 @@
    RESET / BASE
    -------------------------------------------------------- */
 
+/* box-sizing border-box (scoped a la sub-app) — sin esto, width:100% + padding
+   se desborda y la página se ve corrida a la derecha en móvil. */
+.kaiyi-root,
+.kaiyi-root *,
+.kaiyi-root *::before,
+.kaiyi-root *::after { box-sizing: border-box; }
+
 .kaiyi-root {
+  margin: 0;
+  width: 100%;
+  overflow-x: hidden;          /* evita el scroll/desfase horizontal */
   min-height: 100dvh;
   background: var(--bg-1);
   color: var(--ink-1);
@@ -250,6 +260,36 @@
   color: var(--ink-3);
   font-size: var(--fs-13);
   white-space: nowrap;
+}
+
+.kaiyi-score {
+  font-family: var(--font-mono);
+  color: var(--copper);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  white-space: nowrap;
+}
+
+/* Paginación */
+
+.kaiyi-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+.kaiyi-pagination .kaiyi-btn-ghost:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.kaiyi-page-info {
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+  min-width: 9rem;
+  text-align: center;
 }
 
 /* Record count */
@@ -497,6 +537,8 @@
   border-top: 1px dashed var(--cyan-a18);
   animation: kaiyi-fade-in 0.2s ease;
 }
+/* El atributo [hidden] debe ganar a display:flex (si no, los 5 detalles se ven siempre). */
+.kaiyi-manage-panel[hidden] { display: none; }
 
 .kaiyi-manage-title {
   font-size: var(--fs-12);
@@ -626,8 +668,8 @@
 @media (max-width: 480px) {
   .kaiyi-controls { flex-direction: column; align-items: stretch; }
   .kaiyi-input, .kaiyi-select { min-width: 0; width: 100%; }
-  /* Ocultar la columna Fecha (6ª) en pantallas pequeñas para que entre la tabla. */
-  .kaiyi-table th:nth-child(6),
+  /* Ocultar la columna Fecha (7ª) en pantallas pequeñas para que entre la tabla. */
+  .kaiyi-table th:nth-child(7),
   .kaiyi-table td.kaiyi-date { display: none; }
   .kaiyi-player { max-width: 7rem; }
   .kaiyi-register-card { padding: 2rem 1.25rem 1.5rem; }

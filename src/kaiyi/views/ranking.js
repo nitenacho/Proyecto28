@@ -1,9 +1,12 @@
 /* =========================================================
    Kaiyi — Vista ranking público.
-   Lee kaiyi-ranking-records y kaiyi-web-content desde Strapi.
+   Lee kaiyi-ranking-records (ordenado por puntaje) y kaiyi-web-content.
+   Carga todo el set (hasta 9999), filtra y pagina en cliente.
    ========================================================= */
 
-import { getRanking, getWebContent } from '../api.js';
+import { getAllRanking, getWebContent } from '../api.js';
+
+const PAGE_SIZE = 25;
 
 /* ---------- helpers ---------- */
 
@@ -17,6 +20,11 @@ function formatTime(seconds) {
     String(s).padStart(2, '0') + '.' +
     String(cs).padStart(2, '0')
   );
+}
+
+function formatScore(score) {
+  if (score === null || score === undefined || Number.isNaN(score)) return '—';
+  return Number(score).toFixed(2);
 }
 
 function formatLetters(count) {
@@ -81,15 +89,13 @@ export async function renderRanking(root) {
   const footer     = root.querySelector('#kaiyi-footer');
 
   try {
-    const [contentRes, rankingRes] = await Promise.allSettled([
+    const [contentRes, recordsRes] = await Promise.allSettled([
       getWebContent(),
-      getRanking(),
+      getAllRanking(),
     ]);
 
     const c = contentRes.status === 'fulfilled' ? contentRes.value : null;
-    const records = rankingRes.status === 'fulfilled'
-      ? (rankingRes.value.data || [])
-      : [];
+    const records = recordsRes.status === 'fulfilled' ? (recordsRes.value || []) : [];
 
     if (c?.rankingTitle)    titleEl.textContent    = c.rankingTitle;
     if (c?.rankingSubtitle) subtitleEl.textContent = c.rankingSubtitle;
@@ -99,8 +105,8 @@ export async function renderRanking(root) {
       footer.removeAttribute('hidden');
     }
 
-    main.innerHTML = renderTable(records);
-    wireFilters(main);
+    main.innerHTML = renderShell(records.length);
+    setupTable(main, records);
 
   } catch (err) {
     console.error('[kaiyi:ranking]', err);
@@ -111,8 +117,8 @@ export async function renderRanking(root) {
   }
 }
 
-function renderTable(records) {
-  if (!records.length) {
+function renderShell(total) {
+  if (!total) {
     return `
       <div class="kaiyi-empty">
         <p>Aún no hay tiempos registrados.</p>
@@ -120,32 +126,10 @@ function renderTable(records) {
       </div>`;
   }
 
-  const rows = records.map((r, i) => {
-    const vid   = r.vehicleId || '';
-    const vName = VEHICLE_NAMES[vid] || vid || '—';
-    const count = r.collectedLettersCount;
-    const allLetters = (count ?? 0) >= 5;
-    const alias = (r.playerAlias && String(r.playerAlias).trim()) || 'Anónimo';
-    return `
-      <tr data-vehicle="${vid}" data-all-letters="${allLetters}">
-        <td class="kaiyi-pos">${i + 1}</td>
-        <td class="kaiyi-player">${escapeHtml(alias)}</td>
-        <td class="kaiyi-time">${formatTime(r.completionTimeSeconds)}</td>
-        <td class="kaiyi-vehicle">${vName}</td>
-        <td class="kaiyi-letters${allLetters ? ' kaiyi-letters--full' : ''}">${formatLetters(count)}</td>
-        <td class="kaiyi-date">${formatDate(r.completionDate)}</td>
-      </tr>`;
-  }).join('');
-
   return `
     <div class="kaiyi-controls">
-      <input
-        type="search"
-        id="kaiyi-search"
-        class="kaiyi-input"
-        placeholder="Buscar…"
-        aria-label="Buscar en el ranking"
-      />
+      <input type="search" id="kaiyi-search" class="kaiyi-input"
+        placeholder="Buscar jugador…" aria-label="Buscar en el ranking" />
       <select id="kaiyi-vehicle-filter" class="kaiyi-select" aria-label="Filtrar por vehículo">
         <option value="">Todos los vehículos</option>
         <option value="Vehicle_01">Vehículo 1</option>
@@ -165,58 +149,90 @@ function renderTable(records) {
           <tr>
             <th>#</th>
             <th>Jugador</th>
+            <th>Puntaje</th>
             <th>Tiempo</th>
             <th>Vehículo</th>
             <th>Letras</th>
             <th>Fecha</th>
           </tr>
         </thead>
-        <tbody id="kaiyi-tbody">${rows}</tbody>
+        <tbody id="kaiyi-tbody"></tbody>
       </table>
     </div>
 
-    <p class="kaiyi-count" id="kaiyi-count">${records.length} registros</p>`;
+    <div class="kaiyi-pagination" id="kaiyi-pagination">
+      <button class="kaiyi-btn-ghost" id="kaiyi-prev" type="button">← Anterior</button>
+      <span class="kaiyi-page-info" id="kaiyi-page-info"></span>
+      <button class="kaiyi-btn-ghost" id="kaiyi-next" type="button">Siguiente →</button>
+    </div>
+
+    <p class="kaiyi-count" id="kaiyi-count"></p>`;
 }
 
-function wireFilters(container) {
-  const search       = container.querySelector('#kaiyi-search');
-  const vehicleSel   = container.querySelector('#kaiyi-vehicle-filter');
-  const lettersCheck = container.querySelector('#kaiyi-letters-check');
-  const tbody        = container.querySelector('#kaiyi-tbody');
-  const countEl      = container.querySelector('#kaiyi-count');
+function setupTable(container, allRecords) {
+  const tbody    = container.querySelector('#kaiyi-tbody');
+  if (!tbody) return; // empty state
 
-  if (!tbody) return;
+  const search   = container.querySelector('#kaiyi-search');
+  const vehicle  = container.querySelector('#kaiyi-vehicle-filter');
+  const letters  = container.querySelector('#kaiyi-letters-check');
+  const prevBtn  = container.querySelector('#kaiyi-prev');
+  const nextBtn  = container.querySelector('#kaiyi-next');
+  const pageInfo = container.querySelector('#kaiyi-page-info');
+  const countEl  = container.querySelector('#kaiyi-count');
 
-  function applyFilters() {
-    const query   = search?.value.trim().toLowerCase() || '';
-    const vehicle = vehicleSel?.value || '';
-    const onlyAll = lettersCheck?.checked || false;
+  let page = 1;
 
-    let visible = 0;
-    let pos = 1;
-
-    tbody.querySelectorAll('tr[data-vehicle]').forEach((row) => {
-      const v  = row.dataset.vehicle || '';
-      const al = row.dataset.allLetters === 'true';
-      const matchVehicle = !vehicle  || v === vehicle;
-      const matchLetters = !onlyAll  || al;
-      const matchQuery   = !query    || row.textContent.toLowerCase().includes(query);
-
-      const show = matchVehicle && matchLetters && matchQuery;
-      row.style.display = show ? '' : 'none';
-
-      if (show) {
-        const posCell = row.querySelector('.kaiyi-pos');
-        if (posCell) posCell.textContent = pos;
-        pos++;
-        visible++;
-      }
+  function filtered() {
+    const q  = (search.value || '').trim().toLowerCase();
+    const v  = vehicle.value || '';
+    const oa = letters.checked;
+    return allRecords.filter((r) => {
+      const okV = !v || r.vehicleId === v;
+      const okL = !oa || (r.collectedLettersCount ?? 0) >= 5;
+      const okQ = !q || String(r.playerAlias || 'Anónimo').toLowerCase().includes(q);
+      return okV && okL && okQ;
     });
-
-    if (countEl) countEl.textContent = `${visible} registros`;
   }
 
-  search?.addEventListener('input', applyFilters);
-  vehicleSel?.addEventListener('change', applyFilters);
-  lettersCheck?.addEventListener('change', applyFilters);
+  function render() {
+    const list = filtered();
+    const pageCount = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+    if (page > pageCount) page = pageCount;
+    const start = (page - 1) * PAGE_SIZE;
+    const slice = list.slice(start, start + PAGE_SIZE);
+
+    tbody.innerHTML = slice.map((r, i) => {
+      const vid   = r.vehicleId || '';
+      const vName = VEHICLE_NAMES[vid] || vid || '—';
+      const count = r.collectedLettersCount;
+      const all   = (count ?? 0) >= 5;
+      const alias = (r.playerAlias && String(r.playerAlias).trim()) || 'Anónimo';
+      return `
+        <tr>
+          <td class="kaiyi-pos">${start + i + 1}</td>
+          <td class="kaiyi-player">${escapeHtml(alias)}</td>
+          <td class="kaiyi-score">${formatScore(r.score)}</td>
+          <td class="kaiyi-time">${formatTime(r.completionTimeSeconds)}</td>
+          <td class="kaiyi-vehicle">${vName}</td>
+          <td class="kaiyi-letters${all ? ' kaiyi-letters--full' : ''}">${formatLetters(count)}</td>
+          <td class="kaiyi-date">${formatDate(r.completionDate)}</td>
+        </tr>`;
+    }).join('');
+
+    pageInfo.textContent = `Página ${page} de ${pageCount}`;
+    prevBtn.disabled = page <= 1;
+    nextBtn.disabled = page >= pageCount;
+    countEl.textContent = `${list.length} registro${list.length === 1 ? '' : 's'}`;
+  }
+
+  function reset() { page = 1; render(); }
+
+  search.addEventListener('input', reset);
+  vehicle.addEventListener('change', reset);
+  letters.addEventListener('change', reset);
+  prevBtn.addEventListener('click', () => { if (page > 1) { page--; render(); } });
+  nextBtn.addEventListener('click', () => { page++; render(); });
+
+  render();
 }

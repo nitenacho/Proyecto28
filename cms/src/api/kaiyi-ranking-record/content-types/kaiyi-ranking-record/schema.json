@@ -50,6 +50,11 @@
       "required": false,
       "private": true,
       "description": "Email del jugador (PRIVADO, Ley 19.628). private:true => NUNCA aparece en GET /api/kaiyi-ranking-records. Visible solo en el admin de Strapi y en el export CSV."
+    },
+    "score": {
+      "type": "float",
+      "required": false,
+      "description": "Puntaje calculado = factor1*(completionTimeSeconds - collectedLettersCount*factor2). MENOR es mejor. El ranking se ordena por este campo (asc)."
     }
   }
 }
