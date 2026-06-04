@@ -38,6 +38,18 @@
       "required": true,
       "default": false,
       "description": "true si el jugador recogió las 5 letras en esta carrera."
+    },
+    "playerAlias": {
+      "type": "string",
+      "required": false,
+      "maxLength": 40,
+      "description": "Alias PÚBLICO del jugador (mostrado en el ranking). Copiado desde la sesión de registro al enviar el récord."
+    },
+    "playerEmail": {
+      "type": "email",
+      "required": false,
+      "private": true,
+      "description": "Email del jugador (PRIVADO, Ley 19.628). private:true => NUNCA aparece en GET /api/kaiyi-ranking-records. Visible solo en el admin de Strapi y en el export CSV."
     }
   }
 }

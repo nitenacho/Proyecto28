@@ -43,8 +43,23 @@
     },
     "registrationSubtitle": {
       "type": "string",
-      "default": "Ingresa tu correo para guardar tu tiempo en el ranking",
+      "default": "Ingresa tu nombre y correo para guardar tu tiempo en el ranking",
       "description": "Texto bajo el título de la página de registro."
+    },
+    "registrationAliasLabel": {
+      "type": "string",
+      "default": "Tu nombre o alias (visible en el ranking)",
+      "description": "Etiqueta del campo de alias PÚBLICO en el formulario de registro QR."
+    },
+    "registrationEmailLabel": {
+      "type": "string",
+      "default": "Tu correo electrónico (privado, no se muestra)",
+      "description": "Etiqueta del campo de email PRIVADO en el formulario de registro QR."
+    },
+    "registrationConsentLabel": {
+      "type": "string",
+      "default": "Acepto los términos y el tratamiento de mis datos personales según la Ley 19.628.",
+      "description": "Texto del checkbox de consentimiento informado (obligatorio, Ley 19.628)."
     },
     "registrationSuccessMessage": {
       "type": "string",

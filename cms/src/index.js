@@ -96,7 +96,10 @@ const KAIYI_WEB_CONTENT_DEFAULTS = {
     'Gracias por disfrutar la experiencia. Hecha con mucho cariño para que conocieras una parte de Chile junto con Kaiyi.',
   popupMessage: '¡Revisa tu ranking en proyecto28.com/kaiyi!',
   registrationTitle: 'Kaiyi The Game',
-  registrationSubtitle: 'Ingresa tu correo para guardar tu tiempo en el ranking',
+  registrationSubtitle: 'Ingresa tu nombre y correo para guardar tu tiempo en el ranking',
+  registrationAliasLabel: 'Tu nombre o alias (visible en el ranking)',
+  registrationEmailLabel: 'Tu correo electrónico (privado, no se muestra)',
+  registrationConsentLabel: 'Acepto los términos y el tratamiento de mis datos personales según la Ley 19.628.',
   registrationSuccessMessage: '¡Listo! Vuelve al juego, ya está desbloqueado.',
   vehicle01Requirement: 'Vehículo inicial — disponible desde el comienzo',
   vehicle02Requirement: 'Completa una carrera con el Vehículo 1',
@@ -263,7 +266,8 @@ async function seedIfEmpty(strapi) {
     }
   }
 
-  // 4. KaiyiWebContent (singleType): seed con defaults si no existe.
+  // 4. KaiyiWebContent (singleType): seed con defaults si no existe; si existe,
+  //    backfill solo los campos faltantes (null/undefined) sin pisar lo editado.
   try {
     const kaiyiContent = await strapi.db
       .query('api::kaiyi-web-content.kaiyi-web-content')
@@ -273,6 +277,21 @@ async function seedIfEmpty(strapi) {
       await strapi.entityService.create('api::kaiyi-web-content.kaiyi-web-content', {
         data: KAIYI_WEB_CONTENT_DEFAULTS,
       });
+    } else {
+      const patch = {};
+      for (const [key, value] of Object.entries(KAIYI_WEB_CONTENT_DEFAULTS)) {
+        if (kaiyiContent[key] === null || kaiyiContent[key] === undefined) {
+          patch[key] = value;
+        }
+      }
+      if (Object.keys(patch).length > 0) {
+        strapi.log.info(
+          `[bootstrap] backfilling kaiyi-web-content fields: ${Object.keys(patch).join(', ')}`
+        );
+        await strapi.entityService.update('api::kaiyi-web-content.kaiyi-web-content', kaiyiContent.id, {
+          data: patch,
+        });
+      }
     }
   } catch (err) {
     // El content type puede no existir en deploys anteriores; no es bloqueante.

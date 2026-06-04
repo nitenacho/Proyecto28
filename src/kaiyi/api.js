@@ -57,17 +57,22 @@ export async function getWebContent() {
 }
 
 /**
- * Claim de sesión desde la web del jugador.
- * D6: sin campo email por ahora (Ley 19.628, Chile — pendiente asesoría legal).
+ * Claim de sesión desde la web del jugador (D6 resuelto, Ley 19.628 Chile).
  * @param {string} token
+ * @param {object} data
+ *   alias: público (ranking) · email: privado (no se expone) ·
+ *   consentPrivacy: obligatorio · consentMarketing: opcional ·
+ *   marketingConsents: { personalizadas, localizacion, terceros, cesionTerceros, productosKaufmann }
  */
-export async function claimSession(token) {
+export async function claimSession(token, {
+  alias, email, consentPrivacy, consentMarketing, marketingConsents,
+} = {}) {
   return fetchJSON(
     `/api/kaiyi/sessions/${encodeURIComponent(token)}/claim`,
     {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({}),
+      body: JSON.stringify({ alias, email, consentPrivacy, consentMarketing, marketingConsents }),
     }
   );
 }

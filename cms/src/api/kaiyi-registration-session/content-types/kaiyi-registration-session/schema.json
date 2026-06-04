@@ -5,7 +5,7 @@
     "singularName": "kaiyi-registration-session",
     "pluralName": "kaiyi-registration-sessions",
     "displayName": "Kaiyi — Sesión de Registro QR",
-    "description": "Sesión iniciada por el juego al mostrar el QR. Marcada como claimed cuando el jugador escanea y acepta. Email pendiente (D6: asesoría legal Ley 19.628 Chile)."
+    "description": "Sesión iniciada por el juego al mostrar el QR. Marcada como claimed cuando el jugador escanea, ingresa alias + email y acepta los términos (D6 resuelto: email privado bajo Ley 19.628 Chile)."
   },
   "options": {
     "draftAndPublish": false
@@ -32,6 +32,37 @@
       "type": "datetime",
       "required": false,
       "description": "Expiración de la sesión (10 minutos desde creación). El juego deja de hacer polling si ya pasó."
+    },
+    "playerAlias": {
+      "type": "string",
+      "required": false,
+      "maxLength": 40,
+      "description": "Alias PÚBLICO elegido por el jugador en la web (se muestra en el ranking). Se copia al récord al enviarlo."
+    },
+    "playerEmail": {
+      "type": "email",
+      "required": false,
+      "private": true,
+      "description": "Email del jugador (PRIVADO, Ley 19.628). private:true => nunca se expone por la API pública. Se copia al récord (también privado)."
+    },
+    "consentAccepted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Compat: true si aceptó el consentimiento base. Espeja consentPrivacy. claimedAt = fecha/hora del consentimiento."
+    },
+    "consentPrivacy": {
+      "type": "boolean",
+      "default": false,
+      "description": "OBLIGATORIO: aceptación de las políticas de privacidad de datos (Ley 19.628)."
+    },
+    "consentMarketing": {
+      "type": "boolean",
+      "default": false,
+      "description": "Aceptación general de comunicaciones comerciales del grupo Kaufmann."
+    },
+    "marketingConsents": {
+      "type": "json",
+      "description": "Consentimientos comerciales granulares (los 5 'Gestiona aquí'): { personalizadas, localizacion, terceros, cesionTerceros, productosKaufmann } (booleans)."
     }
   }
 }

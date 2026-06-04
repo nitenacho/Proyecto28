@@ -37,11 +37,19 @@ function formatDate(dateStr) {
 }
 
 const VEHICLE_NAMES = {
-  V01: 'Vehículo 1',
-  V02: 'Vehículo 2',
-  V03: 'Vehículo 3',
-  V04: 'Vehículo 4',
+  Vehicle_01: 'Vehículo 1',
+  Vehicle_02: 'Vehículo 2',
+  Vehicle_03: 'Vehículo 3',
+  Vehicle_04: 'Vehículo 4',
 };
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
 /* ---------- render ---------- */
 
@@ -115,13 +123,16 @@ function renderTable(records) {
   const rows = records.map((r, i) => {
     const vid   = r.vehicleId || '';
     const vName = VEHICLE_NAMES[vid] || vid || '—';
-    const allLetters = (r.letras ?? 0) >= 5;
+    const count = r.collectedLettersCount;
+    const allLetters = (count ?? 0) >= 5;
+    const alias = (r.playerAlias && String(r.playerAlias).trim()) || 'Anónimo';
     return `
       <tr data-vehicle="${vid}" data-all-letters="${allLetters}">
         <td class="kaiyi-pos">${i + 1}</td>
+        <td class="kaiyi-player">${escapeHtml(alias)}</td>
         <td class="kaiyi-time">${formatTime(r.completionTimeSeconds)}</td>
         <td class="kaiyi-vehicle">${vName}</td>
-        <td class="kaiyi-letters${allLetters ? ' kaiyi-letters--full' : ''}">${formatLetters(r.letras)}</td>
+        <td class="kaiyi-letters${allLetters ? ' kaiyi-letters--full' : ''}">${formatLetters(count)}</td>
         <td class="kaiyi-date">${formatDate(r.completionDate)}</td>
       </tr>`;
   }).join('');
@@ -137,10 +148,10 @@ function renderTable(records) {
       />
       <select id="kaiyi-vehicle-filter" class="kaiyi-select" aria-label="Filtrar por vehículo">
         <option value="">Todos los vehículos</option>
-        <option value="V01">Vehículo 1</option>
-        <option value="V02">Vehículo 2</option>
-        <option value="V03">Vehículo 3</option>
-        <option value="V04">Vehículo 4</option>
+        <option value="Vehicle_01">Vehículo 1</option>
+        <option value="Vehicle_02">Vehículo 2</option>
+        <option value="Vehicle_03">Vehículo 3</option>
+        <option value="Vehicle_04">Vehículo 4</option>
       </select>
       <label class="kaiyi-letters-filter">
         <input type="checkbox" id="kaiyi-letters-check" />
@@ -153,6 +164,7 @@ function renderTable(records) {
         <thead>
           <tr>
             <th>#</th>
+            <th>Jugador</th>
             <th>Tiempo</th>
             <th>Vehículo</th>
             <th>Letras</th>

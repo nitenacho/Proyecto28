@@ -212,6 +212,16 @@
   padding-right: 1.25rem;
 }
 
+.kaiyi-player {
+  color: var(--ink-1);
+  font-size: var(--fs-14);
+  font-weight: 600;
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .kaiyi-time {
   font-family: var(--font-mono);
   color: var(--cyan);
@@ -386,6 +396,113 @@
   padding: 0.75rem;
   max-height: 7rem;
   overflow-y: auto;
+  white-space: pre-line;
+}
+
+/* Campos del formulario de registro (alias / email / consentimiento) */
+
+.kaiyi-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  text-align: left;
+}
+
+.kaiyi-field-label {
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+}
+
+.kaiyi-text-input {
+  width: 100%;
+  background: var(--bg-1);
+  border: 1px solid var(--cyan-a28);
+  color: var(--ink-1);
+  padding: 0.7rem 0.875rem;
+  border-radius: var(--r-md);
+  font-size: var(--fs-14);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.kaiyi-text-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px var(--cyan-a12);
+}
+
+.kaiyi-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  text-align: left;
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+  line-height: var(--lh-norm);
+  cursor: pointer;
+  user-select: none;
+}
+.kaiyi-consent input[type="checkbox"] {
+  accent-color: var(--cyan);
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.kaiyi-reg-error-inline {
+  color: var(--copper);
+  font-size: var(--fs-13);
+  line-height: var(--lh-norm);
+  text-align: left;
+}
+
+/* Grupo de consentimientos (privacidad + marketing + detalle desplegable) */
+
+.kaiyi-consent-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  text-align: left;
+  background: var(--bg-1);
+  border: 1px solid var(--cyan-a12);
+  border-radius: var(--r-md);
+  padding: 0.75rem;
+}
+
+.kaiyi-consent--sub {
+  font-size: var(--fs-12);
+  color: var(--ink-3);
+}
+
+.kaiyi-manage-link {
+  display: inline;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 0.25rem;
+  color: var(--cyan-dim);
+  font: inherit;
+  font-size: var(--fs-13);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.kaiyi-manage-link:hover { color: var(--cyan); }
+
+.kaiyi-manage-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.625rem 0.5rem 0.25rem;
+  border-top: 1px dashed var(--cyan-a18);
+  animation: kaiyi-fade-in 0.2s ease;
+}
+
+.kaiyi-manage-title {
+  font-size: var(--fs-12);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
 }
 
 /* Primary button */
@@ -509,7 +626,9 @@
 @media (max-width: 480px) {
   .kaiyi-controls { flex-direction: column; align-items: stretch; }
   .kaiyi-input, .kaiyi-select { min-width: 0; width: 100%; }
-  .kaiyi-table th:nth-child(5),
+  /* Ocultar la columna Fecha (6ª) en pantallas pequeñas para que entre la tabla. */
+  .kaiyi-table th:nth-child(6),
   .kaiyi-table td.kaiyi-date { display: none; }
+  .kaiyi-player { max-width: 7rem; }
   .kaiyi-register-card { padding: 2rem 1.25rem 1.5rem; }
 }

@@ -11,6 +11,12 @@ function formatTime(totalSeconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(cs).padStart(2, '0')}`;
 }
 
+// Escapa un valor para una celda CSV (alias/email pueden traer comas o comillas).
+function csvCell(value) {
+  const s = String(value == null ? '' : value);
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
 module.exports = createCoreController(
   'api::kaiyi-ranking-record.kaiyi-ranking-record',
   ({ strapi }) => ({
@@ -33,6 +39,7 @@ module.exports = createCoreController(
         completionDate,
         collectedLettersCount,
         bCollectedAllLetters,
+        sessionToken,
       } = ctx.request.body;
 
       if (!VALID_VEHICLE_IDS.includes(vehicleId)) {
@@ -51,6 +58,22 @@ module.exports = createCoreController(
         return ctx.badRequest('bCollectedAllLetters debe ser boolean.');
       }
 
+      // Adjuntar alias/email desde la sesión de registro SERVER-SIDE: el email
+      // nunca viaja de vuelta al juego (privacidad / minimización de datos, Ley
+      // 19.628). Tolerante a fallos: si no hay una sesión válida y reclamada, el
+      // récord se guarda igual (anónimo) para no perder el tiempo del jugador.
+      let playerAlias = null;
+      let playerEmail = null;
+      if (sessionToken && typeof sessionToken === 'string') {
+        const session = await strapi.db
+          .query('api::kaiyi-registration-session.kaiyi-registration-session')
+          .findOne({ where: { sessionToken } });
+        if (session && session.claimed) {
+          playerAlias = session.playerAlias || null;
+          playerEmail = session.playerEmail || null;
+        }
+      }
+
       const record = await strapi.entityService.create(
         'api::kaiyi-ranking-record.kaiyi-ranking-record',
         {
@@ -60,12 +83,14 @@ module.exports = createCoreController(
             completionDate,
             collectedLettersCount,
             bCollectedAllLetters,
+            playerAlias,
+            playerEmail,
           },
         }
       );
 
       strapi.log.info(
-        `[kaiyi] record creado: ${vehicleId} — ${formatTime(completionTimeSeconds)}`
+        `[kaiyi] record creado: ${vehicleId} — ${formatTime(completionTimeSeconds)}${playerAlias ? ` (alias=${playerAlias})` : ' (anónimo)'}`
       );
 
       ctx.body = {
@@ -77,6 +102,7 @@ module.exports = createCoreController(
           completionDate: record.completionDate,
           collectedLettersCount: record.collectedLettersCount,
           bCollectedAllLetters: record.bCollectedAllLetters,
+          playerAlias: record.playerAlias, // alias público (el email NO se devuelve)
         },
       };
     },
@@ -102,12 +128,12 @@ module.exports = createCoreController(
       );
 
       const lines = [
-        'Puesto,Vehículo,Tiempo,Tiempo (seg),Letras,Todas las Letras,Fecha',
+        'Puesto,Alias,Email,Vehículo,Tiempo,Tiempo (seg),Letras,Todas las Letras,Fecha',
       ];
       records.forEach((r, i) => {
         const allLetters = r.bCollectedAllLetters ? 'Sí' : 'No';
         lines.push(
-          `${i + 1},${r.vehicleId},${formatTime(r.completionTimeSeconds)},${r.completionTimeSeconds},${r.collectedLettersCount}/5,${allLetters},${r.completionDate}`
+          `${i + 1},${csvCell(r.playerAlias)},${csvCell(r.playerEmail)},${r.vehicleId},${formatTime(r.completionTimeSeconds)},${r.completionTimeSeconds},${r.collectedLettersCount}/5,${allLetters},${r.completionDate}`
         );
       });
 
