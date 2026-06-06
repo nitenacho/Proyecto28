@@ -687,23 +687,24 @@
   .kaiyi-table td.kaiyi-date { display: none; }
 
   /* Anchos por columna para las 6 visibles (suman 100%). */
-  .kaiyi-table th:nth-child(1), .kaiyi-table td:nth-child(1) { width: 8%; }   /* # */
-  .kaiyi-table th:nth-child(2), .kaiyi-table td:nth-child(2) { width: 25%; }  /* Jugador */
-  .kaiyi-table th:nth-child(3), .kaiyi-table td:nth-child(3) { width: 16%; }  /* Puntaje */
-  .kaiyi-table th:nth-child(4), .kaiyi-table td:nth-child(4) { width: 21%; }  /* Tiempo */
-  .kaiyi-table th:nth-child(5), .kaiyi-table td:nth-child(5) { width: 16%; }  /* Vehículo */
-  .kaiyi-table th:nth-child(6), .kaiyi-table td:nth-child(6) { width: 14%; }  /* Letras */
+  .kaiyi-table th:nth-child(1), .kaiyi-table td:nth-child(1) { width: 7%; }   /* # */
+  .kaiyi-table th:nth-child(2), .kaiyi-table td:nth-child(2) { width: 22%; }  /* Jugador */
+  .kaiyi-table th:nth-child(3), .kaiyi-table td:nth-child(3) { width: 15%; }  /* Puntaje */
+  .kaiyi-table th:nth-child(4), .kaiyi-table td:nth-child(4) { width: 20%; }  /* Tiempo */
+  .kaiyi-table th:nth-child(5), .kaiyi-table td:nth-child(5) { width: 19%; }  /* Vehículo */
+  .kaiyi-table th:nth-child(6), .kaiyi-table td:nth-child(6) { width: 17%; }  /* Letras */
 
-  /* Permitir envoltura del contenido (alias largo, "Vehículo 2", "K·A·I·Y·I ✓"). */
+  /* Envoltura: partir por espacios (palabras enteras), y solo cortar una palabra
+     si por sí sola no cabe (p.ej. alias largo sin espacios). */
   .kaiyi-player {
     max-width: none; white-space: normal; overflow: visible;
-    text-overflow: clip; word-break: break-word; font-size: 0.7rem;
+    text-overflow: clip; overflow-wrap: break-word; word-break: break-word; font-size: 0.7rem;
   }
   .kaiyi-time    { white-space: nowrap; font-size: 0.7rem; }
   .kaiyi-score   { white-space: nowrap; font-size: 0.7rem; }
-  .kaiyi-vehicle { white-space: normal; word-break: break-word; }
-  .kaiyi-letters { white-space: normal; word-break: break-word; }
-  .kaiyi-pos { width: 8%; padding-right: 0.3rem; }
+  .kaiyi-vehicle { white-space: normal; overflow-wrap: break-word; word-break: normal; font-size: 0.62rem; }
+  .kaiyi-letters { white-space: normal; overflow-wrap: break-word; word-break: normal; }
+  .kaiyi-pos { width: 7%; padding-right: 0.3rem; }
 
   .kaiyi-register-card { padding: 2rem 1.25rem 1.5rem; }
 }
