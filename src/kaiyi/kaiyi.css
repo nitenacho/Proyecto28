@@ -668,9 +668,42 @@
 @media (max-width: 480px) {
   .kaiyi-controls { flex-direction: column; align-items: stretch; }
   .kaiyi-input, .kaiyi-select { min-width: 0; width: 100%; }
-  /* Ocultar la columna Fecha (7ª) en pantallas pequeñas para que entre la tabla. */
+
+  /* Aprovechar el ancho del móvil. */
+  .kaiyi-page { padding: 0 0.5rem; }
+  .kaiyi-main { padding: 1.25rem 0 1rem; }
+
+  /* La tabla se ajusta SIEMPRE al ancho de la pantalla (table-layout: fixed +
+     width 100%): se ve completa sin tener que alejar con dos dedos. Fuentes y
+     padding compactos; el contenido envuelve en lugar de desbordar/recortarse. */
+  .kaiyi-table-wrap { overflow-x: hidden; }
+  .kaiyi-table { table-layout: fixed; width: 100%; font-size: 0.7rem; }
+
+  .kaiyi-table thead th { padding: 0.5rem 0.3rem; white-space: normal; font-size: 0.6rem; }
+  .kaiyi-table td { padding: 0.5rem 0.3rem; }
+
+  /* Ocultar la columna Fecha (7ª): es la menos relevante y no entra. */
   .kaiyi-table th:nth-child(7),
   .kaiyi-table td.kaiyi-date { display: none; }
-  .kaiyi-player { max-width: 7rem; }
+
+  /* Anchos por columna para las 6 visibles (suman 100%). */
+  .kaiyi-table th:nth-child(1), .kaiyi-table td:nth-child(1) { width: 8%; }   /* # */
+  .kaiyi-table th:nth-child(2), .kaiyi-table td:nth-child(2) { width: 25%; }  /* Jugador */
+  .kaiyi-table th:nth-child(3), .kaiyi-table td:nth-child(3) { width: 16%; }  /* Puntaje */
+  .kaiyi-table th:nth-child(4), .kaiyi-table td:nth-child(4) { width: 21%; }  /* Tiempo */
+  .kaiyi-table th:nth-child(5), .kaiyi-table td:nth-child(5) { width: 16%; }  /* Vehículo */
+  .kaiyi-table th:nth-child(6), .kaiyi-table td:nth-child(6) { width: 14%; }  /* Letras */
+
+  /* Permitir envoltura del contenido (alias largo, "Vehículo 2", "K·A·I·Y·I ✓"). */
+  .kaiyi-player {
+    max-width: none; white-space: normal; overflow: visible;
+    text-overflow: clip; word-break: break-word; font-size: 0.7rem;
+  }
+  .kaiyi-time    { white-space: nowrap; font-size: 0.7rem; }
+  .kaiyi-score   { white-space: nowrap; font-size: 0.7rem; }
+  .kaiyi-vehicle { white-space: normal; word-break: break-word; }
+  .kaiyi-letters { white-space: normal; word-break: break-word; }
+  .kaiyi-pos { width: 8%; padding-right: 0.3rem; }
+
   .kaiyi-register-card { padding: 2rem 1.25rem 1.5rem; }
 }
