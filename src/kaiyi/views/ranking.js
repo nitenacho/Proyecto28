@@ -23,8 +23,9 @@ function formatTime(seconds) {
 }
 
 function formatScore(score) {
-  if (score === null || score === undefined || Number.isNaN(score)) return '—';
-  return Number(score).toFixed(2);
+  if (score === null || score === undefined || Number.isNaN(Number(score))) return '—';
+  // Puntaje acotado [1000-9999], entero (mayor = mejor).
+  return String(Math.round(Number(score)));
 }
 
 function formatLetters(count) {

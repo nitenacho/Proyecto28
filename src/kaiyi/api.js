@@ -37,19 +37,19 @@ async function fetchJSON(path, init = {}) {
 }
 
 /**
- * Ranking público (una página) ordenado por PUNTAJE ascendente (menor = mejor).
+ * Ranking público (una página) ordenado por PUNTAJE descendente (mayor = mejor).
  * @returns {Promise<{data: Array, meta: {pagination: object}}>}
  */
 export async function getRanking({ page = 1, pageSize = 100 } = {}) {
   return fetchJSON(
-    `/api/kaiyi-ranking-records?sort=score:asc` +
+    `/api/kaiyi-ranking-records?sort=score:desc` +
     `&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
   );
 }
 
 /**
  * Trae TODOS los récords (hasta `max`, p. ej. 9999) paginando la API de Strapi
- * (máx 100 por página). Devuelve un array plano ya ordenado por puntaje.
+ * (máx 100 por página). Devuelve un array plano ya ordenado por puntaje (desc).
  */
 export async function getAllRanking({ max = 9999, pageSize = 100 } = {}) {
   let page = 1;

@@ -2,16 +2,11 @@
 
 const { createCoreController } = require('@strapi/strapi').factories;
 
+// Puntaje acotado [1000-9999], MAYOR es mejor. Única fuente de verdad compartida
+// con el backfill del bootstrap (cms/src/index.js) para que no diverjan.
+const { computeScore } = require('../score');
+
 const VALID_VEHICLE_IDS = ['Vehicle_01', 'Vehicle_02', 'Vehicle_03', 'Vehicle_04'];
-
-// Puntaje: factor1*(tiempo - letras*factor2). MENOR es mejor (rápido + más letras).
-// Configurable por env vars en Strapi Cloud.
-const SCORE_FACTOR1 = Number(process.env.KAIYI_SCORE_FACTOR1) || 1;
-const SCORE_FACTOR2 = Number(process.env.KAIYI_SCORE_FACTOR2) || 10;
-
-function computeScore(completionTimeSeconds, collectedLettersCount) {
-  return SCORE_FACTOR1 * (completionTimeSeconds - collectedLettersCount * SCORE_FACTOR2);
-}
 
 function formatTime(totalSeconds) {
   const m = Math.floor(totalSeconds / 60);
@@ -135,7 +130,7 @@ module.exports = createCoreController(
       const records = await strapi.entityService.findMany(
         'api::kaiyi-ranking-record.kaiyi-ranking-record',
         {
-          sort: { score: 'asc' },
+          sort: { score: 'desc' }, // mayor puntaje = mejor, va primero
           limit: -1,
         }
       );

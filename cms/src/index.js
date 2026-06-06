@@ -358,24 +358,27 @@ async function backfillProjectStatuses(strapi) {
 }
 
 async function backfillKaiyiRecordScores(strapi) {
-  // Calcula score para records que aún no lo tienen (mismo cálculo del controller),
-  // para que el orden por puntaje no deje nulos arriba.
-  const F1 = Number(process.env.KAIYI_SCORE_FACTOR1) || 1;
-  const F2 = Number(process.env.KAIYI_SCORE_FACTOR2) || 10;
+  // Recalcula el score de TODOS los records con la fórmula vigente (acotada
+  // [1000-9999], mayor=mejor). Usa la MISMA función que el controller para no
+  // divergir. Solo escribe los que cambian => idempotente y barato tras la 1ª vez.
+  const { computeScore } = require('./api/kaiyi-ranking-record/score');
   try {
     const recs = await strapi.entityService.findMany(
       'api::kaiyi-ranking-record.kaiyi-ranking-record',
-      { filters: { score: { $null: true } }, limit: -1 }
+      { fields: ['completionTimeSeconds', 'collectedLettersCount', 'score'], limit: -1 }
     );
+    let updated = 0;
     for (const r of recs) {
-      const score = F1 * (r.completionTimeSeconds - (r.collectedLettersCount || 0) * F2);
+      const score = computeScore(r.completionTimeSeconds, r.collectedLettersCount);
+      if (r.score === score) continue;
       // eslint-disable-next-line no-await-in-loop
       await strapi.entityService.update('api::kaiyi-ranking-record.kaiyi-ranking-record', r.id, {
         data: { score },
       });
+      updated += 1;
     }
-    if (recs.length) {
-      strapi.log.info(`[bootstrap] backfilled score en ${recs.length} record(s)`);
+    if (updated) {
+      strapi.log.info(`[bootstrap] recomputed score en ${updated} record(s)`);
     }
   } catch (err) {
     strapi.log.warn('[bootstrap] backfill score skipped:', err.message);

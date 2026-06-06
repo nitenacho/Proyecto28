@@ -54,7 +54,7 @@
     "score": {
       "type": "float",
       "required": false,
-      "description": "Puntaje calculado = factor1*(completionTimeSeconds - collectedLettersCount*factor2). MENOR es mejor. El ranking se ordena por este campo (asc)."
+      "description": "Puntaje acotado [1000-9999], MAYOR es mejor (9999=tiempo 0, 1000=tiempo>=base). Cada letra descuenta segundos efectivos. Factores administrables por env (KAIYI_SCORE_BASE_TIME, KAIYI_SCORE_LETTER_BONUS). El ranking se ordena por este campo (desc). Cálculo: cms/src/api/kaiyi-ranking-record/score.js"
     }
   }
 }
