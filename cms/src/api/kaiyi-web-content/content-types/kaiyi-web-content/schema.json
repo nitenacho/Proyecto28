@@ -66,6 +66,26 @@
       "default": "¡Listo! Vuelve al juego, ya está desbloqueado.",
       "description": "Mensaje mostrado en la web después de completar el registro."
     },
+    "vehicle01Name": {
+      "type": "string",
+      "default": "KYX3",
+      "description": "Nombre público/admin de Vehicle_01."
+    },
+    "vehicle02Name": {
+      "type": "string",
+      "default": "KYE 5",
+      "description": "Nombre público/admin de Vehicle_02."
+    },
+    "vehicle03Name": {
+      "type": "string",
+      "default": "KYX3 PRO",
+      "description": "Nombre público/admin de Vehicle_03."
+    },
+    "vehicle04Name": {
+      "type": "string",
+      "default": "KYX7",
+      "description": "Nombre público/admin de Vehicle_04."
+    },
     "vehicle01Requirement": {
       "type": "string",
       "default": "Vehículo inicial — disponible desde el comienzo",
@@ -73,17 +93,17 @@
     },
     "vehicle02Requirement": {
       "type": "string",
-      "default": "Completa una carrera con el Vehículo 1",
+      "default": "Completa una carrera con KYX3",
       "description": "Texto de requisito de desbloqueo para Vehicle_02."
     },
     "vehicle03Requirement": {
       "type": "string",
-      "default": "Completa una carrera con el Vehículo 2",
+      "default": "Completa una carrera con KYE 5",
       "description": "Texto de requisito de desbloqueo para Vehicle_03."
     },
     "vehicle04Requirement": {
       "type": "string",
-      "default": "Completa una carrera con el Vehículo 3",
+      "default": "Completa una carrera con KYX3 PRO",
       "description": "Texto de requisito de desbloqueo para Vehicle_04."
     }
   }

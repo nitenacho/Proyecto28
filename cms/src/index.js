@@ -101,10 +101,14 @@ const KAIYI_WEB_CONTENT_DEFAULTS = {
   registrationEmailLabel: 'Tu correo electrónico (privado, no se muestra)',
   registrationConsentLabel: 'Acepto los términos y el tratamiento de mis datos personales según la Ley 19.628.',
   registrationSuccessMessage: '¡Listo! Vuelve al juego, ya está desbloqueado.',
+  vehicle01Name: 'KYX3',
+  vehicle02Name: 'KYE 5',
+  vehicle03Name: 'KYX3 PRO',
+  vehicle04Name: 'KYX7',
   vehicle01Requirement: 'Vehículo inicial — disponible desde el comienzo',
-  vehicle02Requirement: 'Completa una carrera con el Vehículo 1',
-  vehicle03Requirement: 'Completa una carrera con el Vehículo 2',
-  vehicle04Requirement: 'Completa una carrera con el Vehículo 3',
+  vehicle02Requirement: 'Completa una carrera con KYX3',
+  vehicle03Requirement: 'Completa una carrera con KYE 5',
+  vehicle04Requirement: 'Completa una carrera con KYX3 PRO',
 };
 
 const ADMIN_WHITELIST_SEED = [

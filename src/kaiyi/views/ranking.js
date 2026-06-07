@@ -46,11 +46,20 @@ function formatDate(dateStr) {
 }
 
 const VEHICLE_NAMES = {
-  Vehicle_01: 'Vehículo 1',
-  Vehicle_02: 'Vehículo 2',
-  Vehicle_03: 'Vehículo 3',
-  Vehicle_04: 'Vehículo 4',
+  Vehicle_01: 'KYX3',
+  Vehicle_02: 'KYE 5',
+  Vehicle_03: 'KYX3 PRO',
+  Vehicle_04: 'KYX7',
 };
+
+function getVehicleNames(content = {}) {
+  return {
+    Vehicle_01: content.vehicle01Name || VEHICLE_NAMES.Vehicle_01,
+    Vehicle_02: content.vehicle02Name || VEHICLE_NAMES.Vehicle_02,
+    Vehicle_03: content.vehicle03Name || VEHICLE_NAMES.Vehicle_03,
+    Vehicle_04: content.vehicle04Name || VEHICLE_NAMES.Vehicle_04,
+  };
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -106,8 +115,9 @@ export async function renderRanking(root) {
       footer.removeAttribute('hidden');
     }
 
-    main.innerHTML = renderShell(records.length);
-    setupTable(main, records);
+    const vehicleNames = getVehicleNames(c || {});
+    main.innerHTML = renderShell(records.length, vehicleNames);
+    setupTable(main, records, vehicleNames);
 
   } catch (err) {
     console.error('[kaiyi:ranking]', err);
@@ -118,7 +128,7 @@ export async function renderRanking(root) {
   }
 }
 
-function renderShell(total) {
+function renderShell(total, vehicleNames = VEHICLE_NAMES) {
   if (!total) {
     return `
       <div class="kaiyi-empty">
@@ -133,10 +143,10 @@ function renderShell(total) {
         placeholder="Buscar jugador…" aria-label="Buscar en el ranking" />
       <select id="kaiyi-vehicle-filter" class="kaiyi-select" aria-label="Filtrar por vehículo">
         <option value="">Todos los vehículos</option>
-        <option value="Vehicle_01">Vehículo 1</option>
-        <option value="Vehicle_02">Vehículo 2</option>
-        <option value="Vehicle_03">Vehículo 3</option>
-        <option value="Vehicle_04">Vehículo 4</option>
+        <option value="Vehicle_01">${escapeHtml(vehicleNames.Vehicle_01)}</option>
+        <option value="Vehicle_02">${escapeHtml(vehicleNames.Vehicle_02)}</option>
+        <option value="Vehicle_03">${escapeHtml(vehicleNames.Vehicle_03)}</option>
+        <option value="Vehicle_04">${escapeHtml(vehicleNames.Vehicle_04)}</option>
       </select>
       <label class="kaiyi-letters-filter">
         <input type="checkbox" id="kaiyi-letters-check" />
@@ -170,7 +180,7 @@ function renderShell(total) {
     <p class="kaiyi-count" id="kaiyi-count"></p>`;
 }
 
-function setupTable(container, allRecords) {
+function setupTable(container, allRecords, vehicleNames = VEHICLE_NAMES) {
   const tbody    = container.querySelector('#kaiyi-tbody');
   if (!tbody) return; // empty state
 
@@ -205,7 +215,7 @@ function setupTable(container, allRecords) {
 
     tbody.innerHTML = slice.map((r, i) => {
       const vid   = r.vehicleId || '';
-      const vName = VEHICLE_NAMES[vid] || vid || '—';
+      const vName = vehicleNames[vid] || vid || '—';
       const count = r.collectedLettersCount;
       const all   = (count ?? 0) >= 5;
       const alias = (r.playerAlias && String(r.playerAlias).trim()) || 'Anónimo';
@@ -215,7 +225,7 @@ function setupTable(container, allRecords) {
           <td class="kaiyi-player">${escapeHtml(alias)}</td>
           <td class="kaiyi-score">${formatScore(r.score)}</td>
           <td class="kaiyi-time">${formatTime(r.completionTimeSeconds)}</td>
-          <td class="kaiyi-vehicle">${vName}</td>
+          <td class="kaiyi-vehicle">${escapeHtml(vName)}</td>
           <td class="kaiyi-letters${all ? ' kaiyi-letters--full' : ''}">${formatLetters(count)}</td>
           <td class="kaiyi-date">${formatDate(r.completionDate)}</td>
         </tr>`;
