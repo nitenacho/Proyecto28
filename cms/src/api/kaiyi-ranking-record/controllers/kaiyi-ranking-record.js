@@ -117,14 +117,22 @@ module.exports = createCoreController(
 
     /**
      * GET /api/kaiyi/records/export
-     * Descarga CSV de todos los récords ordenados por tiempo. Requiere X-Kaiyi-Token.
+     * Descarga CSV de todos los récords ordenados por puntaje.
+     *
+     * SEGURIDAD (F10): el CSV incluye EMAILS (dato personal, Ley 19.628). NO se
+     * protege con el token del juego (KAIYI_GAME_TOKEN va embebido en el .exe y es
+     * extraíble), sino con un token de ADMINISTRACIÓN aparte (KAIYI_ADMIN_TOKEN) que
+     * solo conoce el operador y nunca viaja en el cliente. Header: X-Kaiyi-Admin-Token.
+     * Falla cerrado: sin KAIYI_ADMIN_TOKEN configurado, el export queda deshabilitado.
      */
     async exportCsv(ctx) {
-      const token = ctx.request.headers['x-kaiyi-token'];
-      const expectedToken = process.env.KAIYI_GAME_TOKEN;
-
-      if (!expectedToken || token !== expectedToken) {
-        return ctx.unauthorized('Token inválido.');
+      const adminToken = process.env.KAIYI_ADMIN_TOKEN;
+      const provided = ctx.request.headers['x-kaiyi-admin-token'];
+      if (!adminToken) {
+        return ctx.forbidden('Export deshabilitado: falta configurar KAIYI_ADMIN_TOKEN.');
+      }
+      if (provided !== adminToken) {
+        return ctx.unauthorized('Token de administración inválido.');
       }
 
       const records = await strapi.entityService.findMany(

@@ -6,6 +6,7 @@
  * POST /api/kaiyi/sessions              — juego crea sesión + QR (requiere X-Kaiyi-Token)
  * GET  /api/kaiyi/sessions/:token       — juego hace polling de estado (público)
  * POST /api/kaiyi/sessions/:token/claim — web reclama sesión al registrarse (público)
+ * GET  /api/kaiyi/registrations/export  — CSV emails+consentimientos (requiere X-Kaiyi-Admin-Token; F10)
  *
  * auth: false en todos; la validación del token del juego se hace en el controlador.
  */
