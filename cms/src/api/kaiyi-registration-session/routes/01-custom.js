@@ -19,7 +19,7 @@ module.exports = {
       config: {
         auth: false,
         policies: [],
-        middlewares: [],
+        middlewares: ['global::kaiyi-rate-limit'], // F10: anti-flood de creación de sesiones
       },
     },
     {
@@ -39,7 +39,7 @@ module.exports = {
       config: {
         auth: false,
         policies: [],
-        middlewares: [],
+        middlewares: ['global::kaiyi-rate-limit'], // F10: anti-brute-force del claim
       },
     },
     {
