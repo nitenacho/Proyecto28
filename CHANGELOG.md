@@ -50,6 +50,30 @@ o a un fix puntual entre etapas.
     `stairTriggerRadius=0.95`, escalera en borde y `nextFloorTileCount=10`;
   - `window.p28FloorDebug.shoot(5)` genera `projectileActive=15`,
     `projectileMax=260`, `projectileFired=15`.
+- GitHub Actions:
+  - Pages run `27459237692` OK;
+  - Auto tag run `27459237693` OK;
+  - tag `v0.34.0` creado para `d1319ff`.
+- Produccion `https://proyecto28.com/?floor-test=prod-v034-20260613`, mobile
+  `390x844` por CDP:
+  - build `v0.34.0-20260613-rigid-stairs-light-shots`;
+  - `contentSource="cms"`, `stairWidth=1.35`,
+    `stairTriggerRadius=0.95`;
+  - `revealStaircase()` crea escalera en borde `row=0,col=1` con
+    `nextFloorTileCount=6`;
+  - `shoot(5)` genera `projectileActive=15`, `projectileMax=260`,
+    `projectileFired=15`.
+- Strapi Cloud:
+  - `/api/projects?populate=*` => `200`;
+  - `/api/site-setting?populate=*` => `200`;
+  - `gameStairWidth=1.35`, `gameStairTriggerRadius=0.95`,
+    `gameProjectileMax=260`, `gameProjectileBurst=3`,
+    `gameProjectileSpeed=8.5`, `gameProjectileLifetime=1.15`,
+    `gameProjectileCooldown=0.06`;
+  - `/api/admin-whitelists` => `403`.
+- Google Doc `NOTAS_Proyecto28`, tab `t.7lpfc5ado1h`, actualizado con bloque
+  25 y revision
+  `AFwiY1_-7DkYnduKAtJCKvn2QGLWmezcwTS6jjJOlWnT6mgnPMhiN2ckEc2z5X7owthhQpOiPGv9BBdsbuDlORzr7ph0GVMxWAkbLeGJ8cM`.
 
 ## [0.27.0] — 2026-06-02 — Etapa 23: escalera fisica en borde y loop de pisos
 

@@ -6,7 +6,7 @@
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
-> **Google Doc revision cierre:** `AFwiY19BboSpgMqnFJhu9FFaZNtdXZAOSA0NvjaVo2hEKD44ZDT2Q8sZN6ZayGQz-IsPgtx4eC2yL8xPLscjVJH1N06bSdIs_TRe5_EJ_Mo`
+> **Google Doc revision cierre:** `AFwiY1_-7DkYnduKAtJCKvn2QGLWmezcwTS6jjJOlWnT6mgnPMhiN2ckEc2z5X7owthhQpOiPGv9BBdsbuDlORzr7ph0GVMxWAkbLeGJ8cM`
 
 Etapas 1-24 cerradas y `v0.34.0` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
@@ -51,7 +51,11 @@ Estado vigente esperado tras cierre:
   `stairWidth=1.35`, `stairTriggerRadius=0.95`, escalera en borde y
   `p28FloorDebug.shoot(5)` generando `projectileActive=15` sobre
   `projectileMax=260`. Build id:
-  `v0.34.0-20260613-rigid-stairs-light-shots`.
+  `v0.34.0-20260613-rigid-stairs-light-shots`. Produccion verificada: Pages
+  run `27459237692`, Auto-tag run `27459237693`, commit `d1319ff`, tag
+  `v0.34.0`, Strapi expone los campos `gameStairWidth`,
+  `gameStairTriggerRadius` y `gameProjectile*`, y Google Doc actualizado en
+  tab `t.7lpfc5ado1h`.
 - `v0.27.0`: la escalera aparece en un cubo de borde, se muestra preview del
   siguiente piso y el ascenso solo ocurre al llegar a la escalera. Los pisos
   sparse tienen menos cubos, al menos un brillante y un normal con esfera; el
@@ -169,6 +173,23 @@ Lectura obligatoria:
   renderiza `Holograma · v0.34.0`; CDP confirma `contentSource="cms"`,
   `stairWidth=1.35`, `stairTriggerRadius=0.95`, escalera en borde,
   `projectileActive=15` y `projectileMax=260` tras `shoot(5)`.
+- Produccion:
+  `https://proyecto28.com/?floor-test=prod-v034-20260613` mobile `390x844`
+  por CDP sirve build `v0.34.0-20260613-rigid-stairs-light-shots`,
+  `contentSource="cms"`, escalera en borde `row=0,col=1`,
+  `nextFloorTileCount=6` y `shoot(5)` deja `projectileActive=15` sobre
+  `projectileMax=260`.
+- GitHub Actions: Pages run `27459237692` OK, Auto-tag run `27459237693` OK,
+  tag `v0.34.0` en commit `d1319ff`.
+- Strapi Cloud sano: `/api/projects?populate=*` 200,
+  `/api/site-setting?populate=*` 200 con `gameStairWidth=1.35`,
+  `gameStairTriggerRadius=0.95`, `gameProjectileMax=260`,
+  `gameProjectileBurst=3`, `gameProjectileSpeed=8.5`,
+  `gameProjectileLifetime=1.15`, `gameProjectileCooldown=0.06`, y
+  `/api/admin-whitelists` 403 esperado.
+- Google Doc `NOTAS_Proyecto28`, tab `t.7lpfc5ado1h`, actualizado con bloque
+  25 y revision
+  `AFwiY1_-7DkYnduKAtJCKvn2QGLWmezcwTS6jjJOlWnT6mgnPMhiN2ckEc2z5X7owthhQpOiPGv9BBdsbuDlORzr7ph0GVMxWAkbLeGJ8cM`.
 
 ### Archivos tocados
 

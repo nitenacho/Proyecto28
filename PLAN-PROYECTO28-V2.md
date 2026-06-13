@@ -45,7 +45,7 @@
 | 21 hotfix 4 — Magnetic popup capture radius | ✅ Cerrada | `v0.25.6` | `abd6d93` |
 | 22 — Floor ascension game loop | ✅ Cerrada | `v0.26.0` | `5752efe` |
 | 23 — Edge stair + active floor loop | ✅ Cerrada | `v0.27.0` | `349d728` |
-| 24 — Rigid stairs + light shots | ✅ Cerrada | `v0.34.0` | TBD |
+| 24 — Rigid stairs + light shots | ✅ Cerrada | `v0.34.0` | `d1319ff` |
 
 ## Decisiones tomadas durante la ejecución (resoluciones al §1)
 

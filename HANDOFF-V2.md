@@ -5,7 +5,7 @@
 > Tag activo esperado tras cierre: `v0.34.0`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
-> Google Doc revision cierre: `AFwiY19BboSpgMqnFJhu9FFaZNtdXZAOSA0NvjaVo2hEKD44ZDT2Q8sZN6ZayGQz-IsPgtx4eC2yL8xPLscjVJH1N06bSdIs_TRe5_EJ_Mo`
+> Google Doc revision cierre: `AFwiY1_-7DkYnduKAtJCKvn2QGLWmezcwTS6jjJOlWnT6mgnPMhiN2ckEc2z5X7owthhQpOiPGv9BBdsbuDlORzr7ph0GVMxWAkbLeGJ8cM`
 
 Este handoff es el punto de entrada compacto para un nuevo agente. Para
 operacion detallada, leer `RUNBOOK.md`.
@@ -78,6 +78,11 @@ Ultimo codigo funcional esperado:
 Tags/commits recientes:
 
 - `v0.34.0` - Escalera rigida/ancha configurable y disparos de microesferas.
+- Produccion verificada para `v0.34.0`: Pages run `27459237692`, Auto-tag
+  run `27459237693`, commit `d1319ff`, tag `v0.34.0`, mobile `390x844` con
+  `source="cms"`, escalera en borde `row=0,col=1`, `shoot(5)` generando
+  `projectileActive=15/projectileMax=260`, Strapi expone `gameStairWidth`,
+  `gameStairTriggerRadius` y `gameProjectile*`.
 - `v0.27.0` - Escalera en borde, preview de siguiente piso y loop full/sparse.
 - Produccion verificada para `v0.27.0`: Pages run `26827419187`, Auto-tag
   run `26827419119`, commit `349d728`, tag `v0.27.0`, mobile
@@ -163,6 +168,26 @@ Validado local `v0.34.0`:
     `nextFloorTileCount=10`;
   - `window.p28FloorDebug.shoot(5)` genera `projectileActive=15`,
     `projectileMax=260`, `projectileFired=15`.
+
+Validado postdeploy `v0.34.0`:
+
+- GitHub Pages run `27459237692` OK.
+- Auto-tag run `27459237693` OK; tag `v0.34.0` creado para `d1319ff`.
+- Produccion `https://proyecto28.com/?floor-test=prod-v034-20260613`,
+  viewport mobile `390x844` por CDP: build
+  `v0.34.0-20260613-rigid-stairs-light-shots`, `contentSource="cms"`,
+  `stairWidth=1.35`, `stairTriggerRadius=0.95`, escalera en borde
+  `row=0,col=1`, `nextFloorTileCount=6`, `shoot(5)` =>
+  `projectileActive=15`, `projectileMax=260`, `projectileFired=15`.
+- Strapi Cloud: `/api/projects?populate=*` `200`,
+  `/api/site-setting?populate=*` `200` con `gameStairWidth=1.35`,
+  `gameStairTriggerRadius=0.95`, `gameProjectileMax=260`,
+  `gameProjectileBurst=3`, `gameProjectileSpeed=8.5`,
+  `gameProjectileLifetime=1.15`, `gameProjectileCooldown=0.06`;
+  `/api/admin-whitelists` `403`.
+- Google Doc `NOTAS_Proyecto28`, tab `t.7lpfc5ado1h`, actualizado con bloque
+  25 y revision
+  `AFwiY1_-7DkYnduKAtJCKvn2QGLWmezcwTS6jjJOlWnT6mgnPMhiN2ckEc2z5X7owthhQpOiPGv9BBdsbuDlORzr7ph0GVMxWAkbLeGJ8cM`.
 
 Validado local `v0.25.1`:
 
