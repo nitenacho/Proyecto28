@@ -3,6 +3,8 @@
 Proyecto28 v0.26.0 convierte el mini-juego de luz en una experiencia por
 pisos: la luz/personaje come esferas, genera una escalera y la camara simula
 subir a un nivel superior mientras el piso anterior queda visible como fondo.
+Desde v0.34.0 la escalera es una superficie rigida mas ancha/configurable y la
+luz puede disparar microesferas instanciadas con A/Space/F.
 
 ## Flujo jugable
 
@@ -41,6 +43,11 @@ Al completar la meta de esferas, el sistema elige un cubo activo de borde
 (`row=0`, `col=0`, ultima fila o ultima columna), posiciona la escalera hacia
 afuera de la grilla y agrega la escalera a los objetos de colision de la luz.
 
+Desde v0.34.0 los peldanos usan matrices instanciadas con ancho configurable
+(`gameStairWidth`) y la luz aterriza usando el punto real del raycast, no el
+origen del objeto. Esto hace que la escalera sea rigida y usable como apoyo,
+incluida la geometria `InstancedMesh`.
+
 El piso activo es la unica grilla interactiva. Los cubos ocultos quedan fuera
 de colision, sombra, hover, click/tap, accesibilidad por teclado y esferas.
 Esto permite alternar entre:
@@ -52,6 +59,20 @@ Esto permite alternar entre:
 Los pisos sparse venden la idea de subir a un lugar nuevo sin tener que crear
 un mundo completo. El siguiente ascenso vuelve a un piso full, generando un
 loop simple: full -> sparse -> full -> sparse.
+
+## Disparos de microesferas
+
+La luz dispara microesferas con:
+
+- gamepad A;
+- teclado Space, que mantiene el salto cuando hay fisica activa;
+- teclado F como disparo dedicado para no romper WASD.
+
+`src/game/projectiles.js` usa un `THREE.InstancedMesh` con pool fijo de 720
+slots y un limite logico configurable (`gameProjectileMax`). Cada disparo
+libera `gameProjectileBurst` microesferas; no se crean luces dinamicas por
+proyectil. Si el pool logico esta lleno, los slots activos mas antiguos se
+reutilizan en vez de crecer memoria/objetos.
 
 ## Matematica visual
 
@@ -72,6 +93,13 @@ profundidad adicional, escala menor y opacidad mas baja para simular niebla.
 - `gameAscendSphereGoal`: entero `1..18`, recomendado `6`.
 - `gameFloorHeight`: decimal `2.8..7.5`, recomendado `4.2`.
 - `gameGhostFloors`: entero `1..4`, recomendado `3`.
+- `gameStairWidth`: decimal `0.8..2.4`, recomendado `1.35`.
+- `gameStairTriggerRadius`: decimal `0.45..1.8`, recomendado `0.95`.
+- `gameProjectileMax`: entero `40..720`, recomendado `260`.
+- `gameProjectileBurst`: entero `1..8`, recomendado `3`.
+- `gameProjectileSpeed`: decimal `3..18`, recomendado `8.5`.
+- `gameProjectileLifetime`: decimal `0.4..2.4`, recomendado `1.15`.
+- `gameProjectileCooldown`: decimal `0.02..0.25`, recomendado `0.055`.
 
 En el frontend viven en `Admin -> Tweaks -> Juego` y son publicables igual que
 los otros ajustes del juego. El fallback local usa los mismos defaults.
@@ -83,6 +111,7 @@ Con `?floor-test=...` o en dev se expone `window.p28FloorDebug`:
 ```js
 window.p28FloorDebug.state()
 window.p28FloorDebug.triggerAscension()
+window.p28FloorDebug.shoot(5)
 ```
 
 Senales esperadas:
@@ -101,11 +130,19 @@ Tambien quedan datasets en `document.documentElement.dataset`:
 - `p28FloorLevelNext`
 - `p28FloorSphereGoal`
 - `p28StairVisible`
+- `p28StairWidth`
+- `p28StairTriggerRadius`
 - `p28AscensionState`
+- `p28ProjectileActive`
+- `p28ProjectileMax`
+- `p28ProjectileFired`
 
 ## Recomendaciones de performance
 
 - Mantener `gameGhostFloors` en `3` para produccion.
+- Mantener `gameProjectileMax` cerca de `260` y `gameProjectileLifetime` cerca
+  de `1.15` para mobile. Subir `gameProjectileBurst` antes que subir demasiado
+  el maximo activo.
 - No renderizar contenido CMS/popup/streaming en pisos anteriores.
 - Usar solo wireframe transparente para profundidad, sin sombras.
 - Conservar el ascenso como transicion corta: mas claridad que simulacion

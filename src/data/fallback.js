@@ -37,10 +37,17 @@ export const FALLBACK_SITE = {
     fallDuration: 1.0,
     shadowSize: 0.3,           // v0.9.2: ajuste fino del owner (antes 0.45)
     tileCaptureRadius: 1.15,   // v0.25.6: radio magnetico para seleccionar cubos con popup
-    ascendSphereGoal: 6,       // v0.26.0: esferas necesarias para generar escalera/subir piso
-    floorHeight: 4.2,          // v0.26.0: separacion visual entre piso actual y fondos
-    ghostFloors: 3,            // v0.26.0: pisos anteriores visibles como grid instanciado
-  },
+      ascendSphereGoal: 6,       // v0.26.0: esferas necesarias para generar escalera/subir piso
+      floorHeight: 4.2,          // v0.26.0: separacion visual entre piso actual y fondos
+      ghostFloors: 3,            // v0.26.0: pisos anteriores visibles como grid instanciado
+      stairWidth: 1.35,          // v0.34.0: ancho fisico de escalera rigida
+      stairTriggerRadius: 0.95,  // v0.34.0: radio de llegada al final de escalera
+      projectileMax: 260,        // v0.34.0: limite logico del pool de microesferas
+      projectileBurst: 3,        // v0.34.0: microesferas liberadas por disparo
+      projectileSpeed: 8.5,
+      projectileLifetime: 1.15,
+      projectileCooldown: 0.055,
+    },
   admin: {
     buttonVisible: true,        // v0.12.0: botón admin visible por default (Etapa 8)
   },

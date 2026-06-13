@@ -64,6 +64,13 @@ const FETCH_TIMEOUT_MS = 8000;
  * @property {number} game.ascendSphereGoal      Esferas necesarias para generar escalera/subir piso
  * @property {number} game.floorHeight           Separacion visual entre pisos
  * @property {number} game.ghostFloors           Pisos anteriores visibles en fondo
+ * @property {number} game.stairWidth            Ancho fisico de la escalera
+ * @property {number} game.stairTriggerRadius    Radio X/Z para completar llegada a la escalera
+ * @property {number} game.projectileMax         Maximo de microesferas activas del pool
+ * @property {number} game.projectileBurst       Microesferas disparadas por input
+ * @property {number} game.projectileSpeed       Velocidad horizontal de disparo
+ * @property {number} game.projectileLifetime    Segundos de vida de cada microesfera
+ * @property {number} game.projectileCooldown    Segundos minimos entre disparos
  *
  * @property {Object} admin                      Toggles admin (Etapas 7-9)
  * @property {boolean} admin.buttonVisible       Botón secreto bajo el logo
@@ -202,6 +209,13 @@ function normalizeSite(s) {
       ascendSphereGoal: num(a.gameAscendSphereGoal, fb.game.ascendSphereGoal),
       floorHeight: num(parseFloat(a.gameFloorHeight), fb.game.floorHeight),
       ghostFloors: num(a.gameGhostFloors, fb.game.ghostFloors),
+      stairWidth: num(parseFloat(a.gameStairWidth), fb.game.stairWidth),
+      stairTriggerRadius: num(parseFloat(a.gameStairTriggerRadius), fb.game.stairTriggerRadius),
+      projectileMax: num(a.gameProjectileMax, fb.game.projectileMax),
+      projectileBurst: num(a.gameProjectileBurst, fb.game.projectileBurst),
+      projectileSpeed: num(parseFloat(a.gameProjectileSpeed), fb.game.projectileSpeed),
+      projectileLifetime: num(parseFloat(a.gameProjectileLifetime), fb.game.projectileLifetime),
+      projectileCooldown: num(parseFloat(a.gameProjectileCooldown), fb.game.projectileCooldown),
     },
     admin: {
       buttonVisible: a.adminButtonVisible ?? fb.admin.buttonVisible,

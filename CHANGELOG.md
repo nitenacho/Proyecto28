@@ -10,6 +10,47 @@ o a un fix puntual entre etapas.
 
 ## [Unreleased]
 
+## [0.34.0] — 2026-06-13 — Etapa 24: escaleras rigidas y disparos de luz
+
+### Added
+- Nuevos disparos de microesferas de luz desde gamepad A, teclado Space y
+  teclado F. Space conserva el salto cuando la fisica esta activa; F queda
+  como disparo dedicado para no interferir con WASD.
+- `src/game/projectiles.js` usa `THREE.InstancedMesh` con pool fijo de 720
+  slots, limite logico configurable y reutilizacion de slots para evitar
+  crecimiento de objetos/memoria.
+- Las microesferas pueden recolectar esferas pequenas del mini-juego con un
+  radio 3D reducido, sin afectar la recoleccion normal de la luz.
+- Nuevos campos Strapi/SiteSetting publicables desde Tweaks:
+  `gameStairWidth`, `gameStairTriggerRadius`, `gameProjectileMax`,
+  `gameProjectileBurst`, `gameProjectileSpeed`, `gameProjectileLifetime` y
+  `gameProjectileCooldown`.
+- QA ampliado en `window.p28FloorDebug`: `shoot(count)`, `stairWidth`,
+  `stairTriggerRadius`, `projectileActive`, `projectileMax` y
+  `projectileFired`.
+
+### Changed
+- La escalera ahora es rigida: se elimina el bobbing vertical del grupo y la
+  luz aterriza usando el punto real del raycast sobre la superficie.
+- Los peldanos son mas anchos por defecto (`1.35`) y ajustables desde Strapi
+  hasta `2.4` para hacer mas facil llegar/apoyarse, especialmente en mobile.
+- El radio de llegada de la escalera sube a `0.95` por defecto y tambien es
+  configurable desde Strapi.
+- Build id y Service Worker suben a
+  `v0.34.0-20260613-rigid-stairs-light-shots`.
+
+### Verified
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- `cd cms; npm run build` OK. Warning heredado de Strapi/Node:
+  `DEP0187 fs.existsSync`.
+- Preview local `http://127.0.0.1:4173/?floor-test=...`:
+  - HTML contiene `v0.34.0-20260613-rigid-stairs-light-shots`;
+  - captura mobile `390x844` renderiza HUD/canvas con `Holograma · v0.34.0`;
+  - CDP confirma `contentSource="cms"`, `stairWidth=1.35`,
+    `stairTriggerRadius=0.95`, escalera en borde y `nextFloorTileCount=10`;
+  - `window.p28FloorDebug.shoot(5)` genera `projectileActive=15`,
+    `projectileMax=260`, `projectileFired=15`.
+
 ## [0.27.0] — 2026-06-02 — Etapa 23: escalera fisica en borde y loop de pisos
 
 ### Added

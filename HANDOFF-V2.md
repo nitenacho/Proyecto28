@@ -1,8 +1,8 @@
 # HANDOFF V2 - Proyecto 28
 
-> Ultima actualizacion: 2026-06-02 (Etapa 23 edge stair floor loop - `v0.27.0`)
+> Ultima actualizacion: 2026-06-13 (Etapa 24 rigid stairs + light shots - `v0.34.0`)
 > Branch esperado: `main`
-> Tag activo esperado tras cierre: `v0.27.0`
+> Tag activo esperado tras cierre: `v0.34.0`
 > Repo: https://github.com/nitenacho/Proyecto28
 > Produccion canonica: https://proyecto28.com
 > Google Doc revision cierre: `AFwiY19BboSpgMqnFJhu9FFaZNtdXZAOSA0NvjaVo2hEKD44ZDT2Q8sZN6ZayGQz-IsPgtx4eC2yL8xPLscjVJH1N06bSdIs_TRe5_EJ_Mo`
@@ -14,7 +14,7 @@ operacion detallada, leer `RUNBOOK.md`.
 
 ## 1. Estado ejecutivo
 
-Etapas 1-23 cerradas y `v0.27.0` aplicado. Proyecto28 queda como web 3D interactiva con:
+Etapas 1-24 cerradas y `v0.34.0` aplicado. Proyecto28 queda como web 3D interactiva con:
 
 - Vite + Three.js + GSAP.
 - Strapi Cloud como CMS.
@@ -62,15 +62,22 @@ Etapas 1-23 cerradas y `v0.27.0` aplicado. Proyecto28 queda como web 3D interact
   orilla, el ascenso se gatilla al llegar a ella, y los pisos alternan entre
   layout completo y layout sparse con al menos un cubo brillante y uno normal
   con esfera.
+- Escalera rigida y mas ancha: `gameStairWidth` y
+  `gameStairTriggerRadius` viven en Strapi/Tweaks; la luz usa el punto real de
+  colision para apoyarse en peldaños instanciados.
+- Disparos de microesferas: gamepad A, Space y F liberan proyectiles de luz
+  sobre un pool `InstancedMesh` configurable (`gameProjectile*`) para recolectar
+  esferas sin crecer objetos ni luces dinamicas.
 - Logo del header configurable desde Strapi `SiteSetting.brandLogoImage`;
   `Project.popupImage` es la imagen prioritaria del popup.
 
 Ultimo codigo funcional esperado:
 
-- `v0.27.0` - Edge stair + active floor loop.
+- `v0.34.0` - Rigid stairs + light shots.
 
 Tags/commits recientes:
 
+- `v0.34.0` - Escalera rigida/ancha configurable y disparos de microesferas.
 - `v0.27.0` - Escalera en borde, preview de siguiente piso y loop full/sparse.
 - Produccion verificada para `v0.27.0`: Pages run `26827419187`, Auto-tag
   run `26827419119`, commit `349d728`, tag `v0.27.0`, mobile
@@ -113,6 +120,7 @@ Esperado despues del cierre:
 - branch `main`
 - working tree clean
 - tag `v0.27.0`
+- tag `v0.34.0`
 - build Vite OK
 - build Strapi OK
 
@@ -141,6 +149,20 @@ Esperado:
 - admin-whitelists `403`
 - inconcha owner permitido
 - yk8arts editor permitido
+
+Validado local `v0.34.0`:
+
+- `npm run build` OK. Warning existente: chunk `three` >500 kB.
+- `cd cms; npm run build` OK. Warning heredado de Strapi/Node:
+  `DEP0187 fs.existsSync`.
+- Preview `http://127.0.0.1:4173/?floor-test=...`, mobile `390x844`:
+  - HTML contiene `v0.34.0-20260613-rigid-stairs-light-shots`;
+  - captura Chrome headless renderiza HUD/canvas con `Holograma · v0.34.0`;
+  - CDP: `contentSource="cms"`, `stairWidth=1.35`,
+    `stairTriggerRadius=0.95`, escalera en borde y
+    `nextFloorTileCount=10`;
+  - `window.p28FloorDebug.shoot(5)` genera `projectileActive=15`,
+    `projectileMax=260`, `projectileFired=15`.
 
 Validado local `v0.25.1`:
 

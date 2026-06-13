@@ -11,6 +11,7 @@ import { createScene } from './scene/scene.js';
 import { createControllableLight } from './game/light.js';
 import { createCollectibleSpheres } from './game/collectibles.js';
 import { createFloorSystem } from './game/floors.js';
+import { createLightProjectiles } from './game/projectiles.js';
 import { createLazyStreamOverlay } from './streaming/lazyStreamOverlay.js';
 import { createPopup } from './ui/popup.js';
 import { mountCubeA11y } from './ui/cubeA11y.js';
@@ -97,6 +98,7 @@ async function boot() {
   });
   let sphereRun = null;
   let controlLight = null;
+  let lightProjectiles = null;
   let activeFloorTiles = [...sceneCtx.tiles];
   let activeCollisionObjects = [...sceneCtx.tiles];
   function chooseRespawnTile(tiles) {
@@ -191,6 +193,7 @@ async function boot() {
     floorSystem.cancelStaircase();
     collectibles.setActive(false);
     collectibles.reset();
+    if (lightProjectiles) lightProjectiles.clear();
     hud.setCollectibles(0, sphereRun.goal);
     hud.setTimer(0, false);
   }
@@ -237,6 +240,18 @@ async function boot() {
     else resetSphereRun();
   }
 
+  function collectFromProjectile(point, radius) {
+    if (!sphereRun?.active || sphereRun.awaitingStair || sphereRun.ascending) return 0;
+    const picked = collectibles.collectNearPoint(point, radius);
+    if (picked > 0) {
+      sphereRun.collected = Math.min(sphereRun.goal, sphereRun.collected + picked);
+      hud.setCollectibles(sphereRun.collected, sphereRun.goal);
+      interactionAudio.playInteraction('collect');
+      if (sphereRun.collected >= sphereRun.goal) revealStaircase();
+    }
+    return picked;
+  }
+
   function updateSphereRun(nowMs, timeSeconds) {
     collectibles.update(timeSeconds);
     if (sphereRun.awaitingStair) {
@@ -261,6 +276,12 @@ async function boot() {
     sphereRun.elapsedMs = Math.max(0, nowMs - sphereRun.startAt);
     hud.setTimer(sphereRun.elapsedMs, true);
   }
+
+  lightProjectiles = createLightProjectiles({
+    scene: sceneCtx.scene,
+    config: site.game,
+    onCollect: collectFromProjectile,
+  });
 
   controlLight = createControllableLight({
     scene: sceneCtx.scene,
@@ -291,6 +312,11 @@ async function boot() {
         setTouchControlsActive(false);
         resetSphereRun();
       }
+    },
+    onShoot({ position, direction, source }) {
+      if (!lightControlled && source !== 'gamepad') return;
+      const fired = lightProjectiles.fire({ position, direction, nowMs: performance.now() });
+      if (fired > 0) interactionAudio.playInteraction('tap');
     },
   });
   syncActiveFloor(floorSystem.activeTiles, floorSystem.collisionObjects);
@@ -339,6 +365,13 @@ async function boot() {
     gameAscendSphereGoal: site.game.ascendSphereGoal ?? 6,
     gameFloorHeight: site.game.floorHeight ?? 4.2,
     gameGhostFloors: site.game.ghostFloors ?? 3,
+    gameStairWidth: site.game.stairWidth ?? 1.35,
+    gameStairTriggerRadius: site.game.stairTriggerRadius ?? 0.95,
+    gameProjectileMax: site.game.projectileMax ?? 260,
+    gameProjectileBurst: site.game.projectileBurst ?? 3,
+    gameProjectileSpeed: site.game.projectileSpeed ?? 8.5,
+    gameProjectileLifetime: site.game.projectileLifetime ?? 1.15,
+    gameProjectileCooldown: site.game.projectileCooldown ?? 0.055,
     streamingEnabled: site.streaming.enabled,
     streamingPreviewEnabled: site.streaming.previewEnabled,
     streamingMode: normalizeStreamingMode(site.streaming.mode),
@@ -399,6 +432,14 @@ async function boot() {
       site.game.ascendSphereGoal = state.gameAscendSphereGoal;
       site.game.floorHeight = state.gameFloorHeight;
       site.game.ghostFloors = state.gameGhostFloors;
+      site.game.stairWidth = state.gameStairWidth;
+      site.game.stairTriggerRadius = state.gameStairTriggerRadius;
+      site.game.projectileMax = state.gameProjectileMax;
+      site.game.projectileBurst = state.gameProjectileBurst;
+      site.game.projectileSpeed = state.gameProjectileSpeed;
+      site.game.projectileLifetime = state.gameProjectileLifetime;
+      site.game.projectileCooldown = state.gameProjectileCooldown;
+      floorSystem.refreshStaircaseConfig();
       refreshSphereGoal();
       controlLight.setLightColor(site.game.lightColor);
       // Streaming — Etapa 11: iframe sobre el cubo activo o fallback local.
@@ -494,6 +535,13 @@ async function boot() {
           { type: 'slider', key: 'gameAscendSphereGoal', label: 'Esferas para subir', min: 1, max: 18, step: 1 },
           { type: 'slider', key: 'gameFloorHeight', label: 'Altura entre pisos', min: 2.8, max: 7.5, step: 0.1 },
           { type: 'slider', key: 'gameGhostFloors', label: 'Pisos visibles', min: 1, max: 4, step: 1 },
+          { type: 'slider', key: 'gameStairWidth', label: 'Ancho escalera', min: 0.8, max: 2.4, step: 0.05 },
+          { type: 'slider', key: 'gameStairTriggerRadius', label: 'Radio llegada escalera', min: 0.45, max: 1.8, step: 0.05 },
+          { type: 'slider', key: 'gameProjectileMax', label: 'Max disparos activos', min: 40, max: 720, step: 20 },
+          { type: 'slider', key: 'gameProjectileBurst', label: 'Esferas por disparo', min: 1, max: 8, step: 1 },
+          { type: 'slider', key: 'gameProjectileSpeed', label: 'Velocidad disparo', min: 3, max: 18, step: 0.5 },
+          { type: 'slider', key: 'gameProjectileLifetime', label: 'Vida disparo', min: 0.4, max: 2.4, step: 0.05, unit: 's' },
+          { type: 'slider', key: 'gameProjectileCooldown', label: 'Cooldown disparo', min: 0.02, max: 0.25, step: 0.005, unit: 's' },
         ],
       },
       {
@@ -604,6 +652,17 @@ async function boot() {
         beginFloorAscension(performance.now());
         return this.state();
       },
+      shoot(count = 1) {
+        const n = Math.max(1, Math.min(20, Number(count) || 1));
+        for (let i = 0; i < n; i += 1) {
+          lightProjectiles.fire({
+            position: controlLight.mesh.position,
+            direction: new THREE.Vector3(0, 0, -1),
+            nowMs: performance.now() + i * 100,
+          });
+        }
+        return this.state();
+      },
       state() {
         return {
           active: sphereRun.active,
@@ -621,6 +680,11 @@ async function boot() {
           nextFloorTileCount: floorSystem.nextFloorTileCount,
           stairVisible: floorSystem.staircase.visible,
           stairReady: floorSystem.isStairReady,
+          stairWidth: floorSystem.stairWidth,
+          stairTriggerRadius: floorSystem.stairTriggerRadius,
+          projectileActive: lightProjectiles.activeCount,
+          projectileMax: lightProjectiles.maxProjectiles,
+          projectileFired: lightProjectiles.firedTotal,
           stairAnchor: floorSystem.stairAnchor ? {
             row: floorSystem.stairAnchor.userData.row,
             col: floorSystem.stairAnchor.userData.col,
@@ -1007,6 +1071,7 @@ async function boot() {
 
     raycaster.setFromCamera(pointer, sceneCtx.camera);
     controlLight.update(dt, now, raycaster);
+    lightProjectiles.update(dt);
     updateSphereRun(now, t);
     if (floorEvent?.type === 'ascended') {
       completeFloorAscension(floorEvent.level, now);

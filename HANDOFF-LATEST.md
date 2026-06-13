@@ -1,14 +1,14 @@
 # HANDOFF - Proyecto 28
 
-> **Ultima actualizacion:** 2026-06-02 (Etapa 23 edge stair floor loop - `v0.27.0`)
-> **Tag activo esperado tras cierre:** `v0.27.0`
+> **Ultima actualizacion:** 2026-06-13 (Etapa 24 rigid stairs + light shots - `v0.34.0`)
+> **Tag activo esperado tras cierre:** `v0.34.0`
 > **Branch esperado:** `main`
 > **Owner:** @nitenacho - cnignacioa@gmail.com / Inconcha@gmail.com
 > **Repo:** https://github.com/nitenacho/Proyecto28
 > **Produccion canonica:** https://proyecto28.com
 > **Google Doc revision cierre:** `AFwiY19BboSpgMqnFJhu9FFaZNtdXZAOSA0NvjaVo2hEKD44ZDT2Q8sZN6ZayGQz-IsPgtx4eC2yL8xPLscjVJH1N06bSdIs_TRe5_EJ_Mo`
 
-Etapas 1-23 cerradas y `v0.27.0` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
+Etapas 1-24 cerradas y `v0.34.0` aplicado. Proyecto28 queda con web 3D interactiva, Strapi Cloud,
 Google OAuth + whitelist, Tweaks publicables, Pixel Streaming iframe/fallback,
 sync Claude Design, hardening performance/a11y, mini-juego Pacman de luz y una
 capa de audio interactivo configurable desde Strapi. La luz ahora se puede
@@ -32,6 +32,12 @@ Desde `v0.27.0`, la escalera aparece junto a un cubo aleatorio de borde, el
 ascenso ocurre al llegar a la escalera y el loop alterna pisos completos con
 pisos sparse temporales que siempre tienen al menos un cubo brillante y uno
 normal con esfera.
+Desde `v0.34.0`, la escalera es rigida, mas ancha y configurable desde
+Strapi/Tweaks con `gameStairWidth` y `gameStairTriggerRadius`. La luz aterriza
+usando el punto real de colision para poder apoyarse sobre peldaños
+instanciados. Gamepad A, Space y F disparan microesferas de luz sobre un pool
+`InstancedMesh` configurable (`gameProjectile*`) que permite muchas esferas
+activas sin crecer objetos ni luces dinamicas.
 
 ---
 
@@ -39,6 +45,13 @@ normal con esfera.
 
 Estado vigente esperado tras cierre:
 
+- `v0.34.0`: escaleras rigidas/ancha configurable y disparos de microesferas
+  de luz. Local verificado con `npm run build`, `cd cms; npm run build`,
+  preview `?floor-test=...` mobile `390x844`, `contentSource="cms"`,
+  `stairWidth=1.35`, `stairTriggerRadius=0.95`, escalera en borde y
+  `p28FloorDebug.shoot(5)` generando `projectileActive=15` sobre
+  `projectileMax=260`. Build id:
+  `v0.34.0-20260613-rigid-stairs-light-shots`.
 - `v0.27.0`: la escalera aparece en un cubo de borde, se muestra preview del
   siguiente piso y el ascenso solo ocurre al llegar a la escalera. Los pisos
   sparse tienen menos cubos, al menos un brillante y un normal con esfera; el
@@ -106,7 +119,7 @@ Esperado despues del cierre:
 
 - branch `main`
 - working tree clean
-- ultimo tag `v0.27.0`
+- ultimo tag `v0.34.0`
 - build Vite OK
 - build Strapi OK
 
@@ -116,14 +129,72 @@ Lectura obligatoria:
 2. `ADMIN-URLS.md` - URLs para administrar todos los servicios.
 3. `RUNBOOK.md` - operacion, incidentes, rollback, secretos.
 4. `DEPLOY.md` - GitHub Pages, Strapi, OAuth, Pixel Streaming, releases.
-5. `CHANGELOG.md` - `[0.27.0]`.
-6. `PLAN-PROYECTO28-V2.md` - Etapa 23 + patches `v0.25.1`/`v0.25.4`/`v0.25.5`/`v0.25.6` cerrados.
+5. `CHANGELOG.md` - `[0.34.0]`.
+6. `PLAN-PROYECTO28-V2.md` - Etapa 24 + patches `v0.25.1`/`v0.25.4`/`v0.25.5`/`v0.25.6` cerrados.
 7. `cms/README.md` - SiteSetting incluye `brandLogoImage`, `gameLightColor`
    y `audio*`.
 
 ---
 
-## 2. Cambios v0.27.0
+## 2. Cambios v0.34.0
+
+### Rigid stairs + light shots
+
+- La escalera se vuelve rigida: se elimina el movimiento vertical del grupo y
+  la luz aterriza sobre el punto real del raycast, incluyendo peldaños
+  `InstancedMesh`.
+- Los peldaños son mas anchos por defecto (`gameStairWidth=1.35`) y el radio
+  de llegada sube a `gameStairTriggerRadius=0.95`. Ambos campos son
+  publicables desde `Admin -> Tweaks -> Juego` y Strapi `SiteSetting`.
+- Gamepad A, Space y F disparan microesferas de luz. Space mantiene salto si
+  la fisica esta activa; F queda como disparo dedicado para no interferir con
+  WASD.
+- `src/game/projectiles.js` usa `THREE.InstancedMesh` con pool fijo de 720
+  slots y limite logico configurable (`gameProjectileMax`) para reutilizar
+  proyectiles sin crear luces/meshes por disparo.
+- Los disparos pueden recolectar esferas pequenas con radio 3D reducido; la
+  recoleccion normal de la luz mantiene radio X/Z para seguir siendo amable.
+- Nuevos campos Strapi/SiteSetting:
+  `gameStairWidth`, `gameStairTriggerRadius`, `gameProjectileMax`,
+  `gameProjectileBurst`, `gameProjectileSpeed`, `gameProjectileLifetime` y
+  `gameProjectileCooldown`.
+- QA con `?floor-test=...`:
+  `window.p28FloorDebug.revealStaircase()`,
+  `window.p28FloorDebug.shoot(5)` y
+  `window.p28FloorDebug.state()`.
+- Build id y Service Worker:
+  `v0.34.0-20260613-rigid-stairs-light-shots`.
+- QA local:
+  `npm run build` OK; `cd cms; npm run build` OK; preview mobile `390x844`
+  renderiza `Holograma · v0.34.0`; CDP confirma `contentSource="cms"`,
+  `stairWidth=1.35`, `stairTriggerRadius=0.95`, escalera en borde,
+  `projectileActive=15` y `projectileMax=260` tras `shoot(5)`.
+
+### Archivos tocados
+
+- `index.html`
+- `public/p28-sw.js`
+- `src/main.js`
+- `src/game/light.js`
+- `src/game/floors.js`
+- `src/game/collectibles.js`
+- `src/game/projectiles.js`
+- `src/data/cms.js`
+- `src/data/fallback.js`
+- `src/admin/publish.js`
+- `cms/src/index.js`
+- `cms/src/api/site-setting/controllers/site-setting.js`
+- `cms/src/api/site-setting/content-types/site-setting/schema.json`
+- `docs/floor-system.md`
+- `README.md`
+- `cms/README.md`
+- `RUNBOOK.md`
+- `CHANGELOG.md`
+- `PLAN-PROYECTO28-V2.md`
+- `HANDOFF-LATEST.md`
+- `HANDOFF-V2.md`
+
+## 3. Cambios v0.27.0
 
 ### Edge stair + active floor loop
 

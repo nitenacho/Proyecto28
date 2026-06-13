@@ -156,6 +156,55 @@
       "max": 4,
       "description": "Cantidad de pisos anteriores visibles como InstancedMesh/Grid Ventana simple, con niebla visual por opacidad y escala. Recomendado: 3."
     },
+    "gameStairWidth": {
+      "type": "decimal",
+      "default": 1.35,
+      "min": 0.8,
+      "max": 2.4,
+      "description": "Ancho fisico de los peldanos de la escalera rigida. Recomendado: 1.35; subir hacia 1.8 la hace mucho mas facil en mobile."
+    },
+    "gameStairTriggerRadius": {
+      "type": "decimal",
+      "default": 0.95,
+      "min": 0.45,
+      "max": 1.8,
+      "description": "Radio X/Z para considerar que la luz llego al final de la escalera. Recomendado: 0.95 para que no sea dificil completar el ascenso."
+    },
+    "gameProjectileMax": {
+      "type": "integer",
+      "default": 260,
+      "min": 40,
+      "max": 720,
+      "description": "Maximo de microesferas de luz activas en el pool InstancedMesh. Recomendado: 260; subir con cuidado en mobile."
+    },
+    "gameProjectileBurst": {
+      "type": "integer",
+      "default": 3,
+      "min": 1,
+      "max": 8,
+      "description": "Cantidad de microesferas liberadas por disparo con A/Space/F. Recomendado: 3."
+    },
+    "gameProjectileSpeed": {
+      "type": "decimal",
+      "default": 8.5,
+      "min": 3,
+      "max": 18,
+      "description": "Velocidad horizontal de las microesferas de disparo. Recomendado: 8.5."
+    },
+    "gameProjectileLifetime": {
+      "type": "decimal",
+      "default": 1.15,
+      "min": 0.4,
+      "max": 2.4,
+      "description": "Segundos de vida de cada microesfera antes de volver al pool. Recomendado: 1.15 para mantener rendimiento."
+    },
+    "gameProjectileCooldown": {
+      "type": "decimal",
+      "default": 0.055,
+      "min": 0.02,
+      "max": 0.25,
+      "description": "Segundos minimos entre disparos. Recomendado: 0.055; 0.02 es muy permisivo y depende del dispositivo."
+    },
     "audioEnabled": {
       "type": "boolean",
       "default": true,

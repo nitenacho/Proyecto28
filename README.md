@@ -156,6 +156,16 @@ Etapa 23 hace fisico el loop de escalera/pisos:
 - la luz, el respawn, las esferas, hover/click y teclado trabajan solo con el
   piso activo.
 
+Etapa 24 mejora la jugabilidad del ascenso:
+
+- la escalera es rigida, mas ancha y configurable desde Strapi/Tweaks con
+  `gameStairWidth` y `gameStairTriggerRadius`;
+- la luz se apoya en el punto real de colision de los peldaños instanciados;
+- gamepad A, Space y F disparan microesferas de luz que pueden recolectar
+  esferas pequenas;
+- los disparos usan un pool `InstancedMesh` configurable con `gameProjectile*`
+  para permitir muchas esferas activas sin degradar mobile.
+
 ### Performance y accesibilidad
 
 Etapa 15 endurece el boot final antes de v1:

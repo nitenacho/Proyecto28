@@ -2,7 +2,7 @@
    Keeps proyecto28.com navigations network-first even when the edge/browser
    applies the default GitHub Pages max-age header. */
 
-const P28_SW_VERSION = 'v0.27.0-20260602-edge-stair-floor-loop';
+const P28_SW_VERSION = 'v0.34.0-20260613-rigid-stairs-light-shots';
 
 self.addEventListener('install', () => {
   self.skipWaiting();

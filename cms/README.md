@@ -36,6 +36,14 @@ Headless CMS that owns the content shown in the frontend:
     - `gameGhostFloors` — cantidad de pisos anteriores visibles como
       InstancedMesh/Grid Ventana simplificado. Default recomendado `3`;
       limites `1..4`
+    - `gameStairWidth` — ancho fisico de la escalera rigida. Default
+      recomendado `1.35`; limites `0.8..2.4`
+    - `gameStairTriggerRadius` — radio X/Z para completar llegada a escalera.
+      Default recomendado `0.95`; limites `0.45..1.8`
+    - `gameProjectileMax`, `gameProjectileBurst`, `gameProjectileSpeed`,
+      `gameProjectileLifetime`, `gameProjectileCooldown` — economia de
+      disparos de microesferas con pool `InstancedMesh`. Defaults recomendados:
+      `260`, `3`, `8.5`, `1.15`, `0.055`
     - `gameLightColor` — color publicable de la luz controlable (`cyan`,
       `red`, `green`) usado por el mini-juego de recoleccion (Etapa 17)
     - `brandLogoImage` — logo/icono del header desde Strapi. Recomendado:

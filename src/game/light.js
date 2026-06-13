@@ -71,6 +71,7 @@ function arrowToWASD(key) {
  * @param {(fallCount:number)=>void} [opts.onRespawn]
  * @param {()=>void} [opts.onRespawnComplete]
  * @param {(controlled:boolean, mode:string)=>void} [opts.onControlModeChange]
+ * @param {({position:THREE.Vector3,direction:THREE.Vector3,source:string})=>void} [opts.onShoot]
  */
 export function createControllableLight({
   scene, config, tiles,
@@ -79,6 +80,7 @@ export function createControllableLight({
   onRespawn = null,
   onRespawnComplete = null,
   onControlModeChange = null,
+  onShoot = null,
 }) {
   let paletteKey = LIGHT_PALETTES[config.lightColor] ? config.lightColor : 'cyan';
   let victoryFlashTimer = 0;
@@ -137,6 +139,7 @@ export function createControllableLight({
   const velocity = new THREE.Vector3();
   const keysActive = new Set();
   const externalMove = { x: 0, z: 0, active: false };
+  const lastAim = new THREE.Vector3(0, 0, -1);
   let lastMoveInput = -Infinity;
   let prevJumpButton = false;
   let gamepadActiveThisFrame = false;
@@ -286,6 +289,21 @@ export function createControllableLight({
     externalMove.active = !!active && (externalMove.x !== 0 || externalMove.z !== 0);
   }
 
+  function updateAimFromMove(x = 0, z = 0) {
+    if (x === 0 && z === 0) return;
+    lastAim.set(x, 0, z).normalize();
+  }
+
+  function shoot(source = 'keyboard') {
+    if (!onShoot || respawnPhase !== 'none') return false;
+    onShoot({
+      position: mesh.position.clone(),
+      direction: lastAim.clone(),
+      source,
+    });
+    return true;
+  }
+
   function handleMoveKey(k) {
     if (pinnedTile) return;
     keysActive.add(k);
@@ -297,10 +315,16 @@ export function createControllableLight({
 
   function onKeyDown(e) {
     if (e.code === 'Space') {
-      if (mode === 'physics' && respawnPhase === 'none' && !e.repeat) {
+      if (respawnPhase === 'none' && !e.repeat) {
         e.preventDefault();
-        tryJump();
+        if (mode === 'physics') tryJump();
+        shoot('keyboard');
       }
+      return;
+    }
+    if (e.code === 'KeyF' && !e.repeat) {
+      e.preventDefault();
+      shoot('keyboard');
       return;
     }
     const arrow = arrowToWASD(e.key);
@@ -426,9 +450,11 @@ export function createControllableLight({
 
     const move = getMoveVector(padInput);
     const anyMove = (move.x !== 0 || move.z !== 0);
+    updateAimFromMove(move.x, move.z);
     if (anyMove) lastMoveInput = nowMs;
     if (gamepadActiveThisFrame && gravityFlag) {
       enterPhysics();
+      if (padInput.jumpEdge) shoot('gamepad');
       return;
     }
 
@@ -456,11 +482,15 @@ export function createControllableLight({
 
     if (inputAllowed) {
       const move = getMoveVector(padInput);
+      updateAimFromMove(move.x, move.z);
       velocity.set(move.x, 0, move.z).multiplyScalar(config.lightSpeed);
       mesh.position.x += velocity.x * dt;
       mesh.position.z += velocity.z * dt;
 
-      if (padInput.jumpEdge) tryJump();
+      if (padInput.jumpEdge) {
+        tryJump();
+        shoot('gamepad');
+      }
     }
 
     if (!grounded) {
@@ -486,8 +516,10 @@ export function createControllableLight({
       const hits = downRay.intersectObjects(collisionObjects, false);
       if (hits.length > 0) {
         const tile = hits[0].object;
-        const tileTopY = tile.position.y + TILE_TOP_Y;
-        mesh.position.y = tileTopY + SPHERE_RADIUS;
+        const surfaceY = Number.isFinite(hits[0].point?.y)
+          ? hits[0].point.y
+          : tile.position.y + TILE_TOP_Y;
+        mesh.position.y = surfaceY + SPHERE_RADIUS;
         vy = 0;
         landed = true;
         landedTile = tile;

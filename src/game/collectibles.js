@@ -5,7 +5,6 @@ const FLOAT_HEIGHT = 0.36;
 const FLOAT_AMPLITUDE = 0.055;
 const SPHERE_RADIUS = 0.065;
 const PICKUP_RADIUS = 0.34;
-const PICKUP_RADIUS_SQ = PICKUP_RADIUS * PICKUP_RADIUS;
 
 export function createCollectibleSpheres({ scene, tiles }) {
   const group = new THREE.Group();
@@ -88,7 +87,24 @@ export function createCollectibleSpheres({ scene, tiles }) {
       if (sphere.userData.collected || !sphere.visible) continue;
       const dx = sphere.position.x - lightMesh.position.x;
       const dz = sphere.position.z - lightMesh.position.z;
-      if ((dx * dx + dz * dz) > PICKUP_RADIUS_SQ) continue;
+      if ((dx * dx + dz * dz) > PICKUP_RADIUS * PICKUP_RADIUS) continue;
+      sphere.userData.collected = true;
+      sphere.visible = false;
+      picked++;
+    }
+    return picked;
+  }
+
+  function collectNearPoint(point, radius = PICKUP_RADIUS) {
+    if (!group.visible || !point) return 0;
+    const radiusSq = radius * radius;
+    let picked = 0;
+    for (const sphere of activeSpheres()) {
+      if (sphere.userData.collected || !sphere.visible) continue;
+      const dx = sphere.position.x - point.x;
+      const dy = sphere.position.y - point.y;
+      const dz = sphere.position.z - point.z;
+      if ((dx * dx + dy * dy + dz * dz) > radiusSq) continue;
       sphere.userData.collected = true;
       sphere.visible = false;
       picked++;
@@ -117,6 +133,7 @@ export function createCollectibleSpheres({ scene, tiles }) {
     setActive,
     reset,
     collectNear,
+    collectNearPoint,
     update,
   };
 }

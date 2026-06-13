@@ -158,6 +158,7 @@ Desde `v0.27.0`, el ascenso requiere llegar a la escalera. QA recomendado:
 ```js
 window.p28FloorDebug.revealStaircase()
 window.p28FloorDebug.state().stairAnchor // debe estar en borde
+window.p28FloorDebug.shoot(5)
 window.p28FloorDebug.stepOnStair()
 window.p28FloorDebug.state()
 ```
@@ -167,7 +168,10 @@ Senal sana:
 - piso 0 full: `activeTileCount=24`, `activeProjectCount=6`,
   `activeNormalCount=18`;
 - al revelar escalera: `ascensionState="stair-ready"`, `stairVisible=true`,
-  `nextFloorTileCount` menor que 24;
+  `nextFloorTileCount` menor que 24, `stairWidth>=1.35` y
+  `stairTriggerRadius>=0.95`;
+- al disparar: `projectileFired` sube, `projectileActive` queda bajo
+  `projectileMax` y no se crean luces/meshes por proyectil;
 - despues de subir: `layoutMode="sparse"`, `activeProjectCount>=1`,
   `activeNormalCount>=1`;
 - la siguiente escalera debe preparar `nextFloorTileCount=24` para volver al

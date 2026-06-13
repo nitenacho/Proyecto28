@@ -5,9 +5,17 @@ const GHOST_TILE_HEIGHT = 0.12;
 const DEFAULT_SPHERE_GOAL = 6;
 const DEFAULT_FLOOR_HEIGHT = 4.2;
 const DEFAULT_GHOST_FLOORS = 3;
+const DEFAULT_STAIR_WIDTH = 1.35;
+const DEFAULT_STAIR_TRIGGER_RADIUS = 0.95;
 const ASCEND_DELAY = 0.42;
 const ASCEND_DURATION = 1.72;
-const STAIR_TRIGGER_RADIUS = 0.54;
+const STAIR_STEP_COUNT = 7;
+const STAIR_STEP_HEIGHT = 0.16;
+const STAIR_STEP_DEPTH = 0.52;
+const STAIR_STEP_RISE = 0.16;
+const STAIR_STEP_RUN = 0.38;
+const STAIR_STEP_START_Y = 0.18;
+const STAIR_STEP_START_Z = 0.34;
 
 function easeInOut(t) {
   const x = THREE.MathUtils.clamp(t, 0, 1);
@@ -16,6 +24,12 @@ function easeInOut(t) {
 
 function clampInt(value, fallback, min, max) {
   const n = Math.round(Number(value));
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
+}
+
+function clampNumber(value, fallback, min, max) {
+  const n = Number(value);
   if (!Number.isFinite(n)) return fallback;
   return Math.max(min, Math.min(max, n));
 }
@@ -34,8 +48,8 @@ function createStaircase() {
   group.name = 'p28-floor-staircase';
   group.visible = false;
 
-  const stepCount = 7;
-  const geometry = new THREE.BoxGeometry(0.74, 0.14, 0.42);
+  const stepCount = STAIR_STEP_COUNT;
+  const geometry = new THREE.BoxGeometry(1, STAIR_STEP_HEIGHT, STAIR_STEP_DEPTH);
   const material = new THREE.MeshStandardMaterial({
     color: 0xffc857,
     emissive: 0xffd166,
@@ -54,12 +68,16 @@ function createStaircase() {
   const position = new THREE.Vector3();
   const quaternion = new THREE.Quaternion();
   const scale = new THREE.Vector3(1, 1, 1);
-  for (let i = 0; i < stepCount; i += 1) {
-    position.set(0, 0.18 + i * 0.15, 0.32 + i * 0.34);
-    matrix.compose(position, quaternion, scale);
-    steps.setMatrixAt(i, matrix);
+  function setWidth(width = DEFAULT_STAIR_WIDTH) {
+    scale.set(width, 1, 1);
+    for (let i = 0; i < stepCount; i += 1) {
+      position.set(0, STAIR_STEP_START_Y + i * STAIR_STEP_RISE, STAIR_STEP_START_Z + i * STAIR_STEP_RUN);
+      matrix.compose(position, quaternion, scale);
+      steps.setMatrixAt(i, matrix);
+    }
+    steps.instanceMatrix.needsUpdate = true;
   }
-  steps.instanceMatrix.needsUpdate = true;
+  setWidth(DEFAULT_STAIR_WIDTH);
   group.add(steps);
 
   const railGeometry = new THREE.BoxGeometry(0.045, 0.045, 2.7);
@@ -71,11 +89,22 @@ function createStaircase() {
   });
   const rail = new THREE.Mesh(railGeometry, railMaterial);
   rail.name = 'p28-floor-staircase-guide';
-  rail.position.set(-0.48, 0.74, 1.22);
+  rail.position.set(-0.78, 0.78, 1.38);
   rail.rotation.x = -0.25;
   group.add(rail);
 
-  return { group, steps, material, railMaterial, stepCount };
+  return {
+    group,
+    steps,
+    material,
+    railMaterial,
+    stepCount,
+    stepRun: STAIR_STEP_RUN,
+    stepRise: STAIR_STEP_RISE,
+    stepStartY: STAIR_STEP_START_Y,
+    stepStartZ: STAIR_STEP_START_Z,
+    setWidth,
+  };
 }
 
 function tileColor(tile) {
@@ -182,6 +211,14 @@ export function createFloorSystem({ scene, tiles, config = {}, onActiveTilesChan
 
   function getMaxGhostFloors() {
     return clampInt(config.ghostFloors, DEFAULT_GHOST_FLOORS, 1, 4);
+  }
+
+  function getStairWidth() {
+    return clampNumber(config.stairWidth, DEFAULT_STAIR_WIDTH, 0.8, 2.4);
+  }
+
+  function getStairTriggerRadius() {
+    return clampNumber(config.stairTriggerRadius, DEFAULT_STAIR_TRIGGER_RADIUS, 0.45, 1.8);
   }
 
   function getSphereGoal(total) {
@@ -328,6 +365,7 @@ export function createFloorSystem({ scene, tiles, config = {}, onActiveTilesChan
   function positionStaircase(anchor, dir) {
     stairAnchor = anchor;
     stairDirection.copy(dir);
+    staircase.setWidth(getStairWidth());
     const angle = Math.atan2(dir.x, dir.y);
     staircase.group.position.set(
       anchor.position.x + dir.x * (TILE_SIZE * 0.45),
@@ -336,14 +374,17 @@ export function createFloorSystem({ scene, tiles, config = {}, onActiveTilesChan
     );
     staircase.group.userData.baseY = anchor.position.y;
     staircase.group.rotation.y = angle;
+    const triggerDistance = staircase.stepStartZ + (staircase.stepCount - 1) * staircase.stepRun + TILE_SIZE * 0.45;
     stairTrigger.set(
-      anchor.position.x + dir.x * (0.32 + (staircase.stepCount - 1) * 0.34 + TILE_SIZE * 0.45),
-      anchor.position.y + 0.18 + (staircase.stepCount - 1) * 0.15,
-      anchor.position.z + dir.y * (0.32 + (staircase.stepCount - 1) * 0.34 + TILE_SIZE * 0.45),
+      anchor.position.x + dir.x * triggerDistance,
+      anchor.position.y + staircase.stepStartY + (staircase.stepCount - 1) * staircase.stepRise,
+      anchor.position.z + dir.y * triggerDistance,
     );
     if (typeof document !== 'undefined') {
       document.documentElement.dataset.p28StairAnchor = `${anchor.userData.row},${anchor.userData.col}`;
       document.documentElement.dataset.p28StairDirection = `${dir.x},${dir.y}`;
+      document.documentElement.dataset.p28StairWidth = String(getStairWidth());
+      document.documentElement.dataset.p28StairTriggerRadius = String(getStairTriggerRadius());
     }
   }
 
@@ -372,7 +413,13 @@ export function createFloorSystem({ scene, tiles, config = {}, onActiveTilesChan
     if (transitionState !== 'ready' || !lightMesh) return false;
     const dx = lightMesh.position.x - stairTrigger.x;
     const dz = lightMesh.position.z - stairTrigger.z;
-    return (dx * dx + dz * dz) <= STAIR_TRIGGER_RADIUS * STAIR_TRIGGER_RADIUS;
+    const radius = getStairTriggerRadius();
+    return (dx * dx + dz * dz) <= radius * radius;
+  }
+
+  function refreshStaircaseConfig() {
+    staircase.setWidth(getStairWidth());
+    if (stairAnchor) positionStaircase(stairAnchor, stairDirection);
   }
 
   function cancelStaircase() {
@@ -426,7 +473,7 @@ export function createFloorSystem({ scene, tiles, config = {}, onActiveTilesChan
       const pulse = 0.72 + Math.sin(timeSeconds * 5.2) * 0.18;
       staircase.material.emissiveIntensity = pulse;
       staircase.railMaterial.opacity = 0.44 + Math.sin(timeSeconds * 4.1) * 0.16;
-      staircase.group.position.y = (staircase.group.userData.baseY || 0) + Math.sin(timeSeconds * 2.6) * 0.035;
+      staircase.group.position.y = staircase.group.userData.baseY || 0;
     }
 
     if (nextPreview) {
@@ -490,8 +537,11 @@ export function createFloorSystem({ scene, tiles, config = {}, onActiveTilesChan
     get isStairReady() { return transitionState === 'ready'; },
     get layoutMode() { return activeLayout.length === tiles.length ? 'full' : 'sparse'; },
     get stairAnchor() { return stairAnchor; },
+    get stairWidth() { return getStairWidth(); },
+    get stairTriggerRadius() { return getStairTriggerRadius(); },
     get nextFloorTileCount() { return nextLayout?.length || 0; },
     getSphereGoal,
+    refreshStaircaseConfig,
     prepareStaircase,
     hasReachedStair,
     cancelStaircase,
